@@ -21,7 +21,7 @@
         <geonames.version>1.1.15</geonames.version>
         <jdom.version>1.0</jdom.version>
         <vavr.version>0.10.6</vavr.version>
-        <voyager-api.version>1.0-SNAPSHOT</voyager-api.version>
+        <voyager-commons.version>1.0-SNAPSHOT</voyager-commons.version>
     </properties>
     <dependencies>
         <dependency>
@@ -38,16 +38,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
         </dependency>
 
         <dependency>
@@ -70,8 +60,18 @@
 
         <dependency>
             <groupId>org.voyager</groupId>
-            <artifactId>voyager-api</artifactId>
-            <version>${voyager-api.version}</version>
+            <artifactId>voyager-commons</artifactId>
+            <version>${voyager-commons.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.projectlombok</groupId>
+                    <artifactId>lombok</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

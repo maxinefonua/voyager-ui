@@ -1,9 +1,8 @@
 package org.voyager.controller;
 
 import org.voyager.model.ResultDisplay;
+import org.voyager.model.TownDisplay;
 import org.voyager.model.response.VoyagerResponseAPI;
-import org.voyager.repository.TownRepository;
-import org.voyager.service.RegionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,12 +19,6 @@ import java.util.Map;
 public class MainController {
 
     @Autowired
-    private TownRepository townRepository;
-
-    @Autowired
-    private RegionService regionService;
-
-    @Autowired
     private VoyagerAPI voyagerAPI;
 
     @GetMapping("/hello-world")
@@ -36,7 +29,8 @@ public class MainController {
 
     @GetMapping("/")
     public String homepage(Model model) {
-        model.addAttribute("towns",regionService.convertTownListToTownDisplayList(townRepository.findAll()));
+        VoyagerResponseAPI<TownDisplay> voyagerResponse = voyagerAPI.towns();
+        model.addAttribute("towns",voyagerResponse.getResponseList());
         return "index";
     }
 
@@ -48,9 +42,9 @@ public class MainController {
     @GetMapping("/lookup")
     public Collection<ModelAndView> lookup(Model model, @ModelAttribute("searchText") String searchText)  {
         long beforeSearch = System.currentTimeMillis();
-        VoyagerResponseAPI<ResultDisplay> voyagerResponseAPI = voyagerAPI.lookup(searchText,0);
-        List<ResultDisplay> lookupResults = voyagerResponseAPI.getResponseList();
-        Integer totalResultsCount = voyagerResponseAPI.getTotalResponseCount();
+        VoyagerResponseAPI<ResultDisplay> voyagerResponse = voyagerAPI.lookup(searchText,0);
+        List<ResultDisplay> lookupResults = voyagerResponse.getResponseList();
+        Integer totalResultsCount = voyagerResponse.getTotalResponseCount();
         double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
         System.out.println("duration of search: " + duration + "s");
         System.out.println("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");

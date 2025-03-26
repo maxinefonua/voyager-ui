@@ -1,10 +1,18 @@
 package org.voyager.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.voyager.utls.ConstantsUtil;
+import org.voyager.utls.MessageUtil;
+
+import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "voyager-api")
@@ -17,7 +25,22 @@ public class VoyagerAPIConfig {
     String host;
     Integer port;
     String lookupPath;
-    String auth;
+    String townPath;
+    String authToken;
+    private HttpEntity<String> httpEntityWithHeaders;
+
+    @PostConstruct
+    public void validate() {
+        ConstantsUtil.validateEnvironVars(List.of(ConstantsUtil.VOYAGER_API_KEY));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(ConstantsUtil.AUTH_TOKEN_HEADER_NAME,authToken);
+        httpEntityWithHeaders = new HttpEntity<>(headers);
+    }
+
+    public HttpEntity<String> getHttpEntity() {
+        return httpEntityWithHeaders;
+    }
 
     public String buildLookupURL(String query, int skipRows) {
         String searchURL = UriComponentsBuilder
@@ -29,5 +52,15 @@ public class VoyagerAPIConfig {
                 .queryParam(START_ROW_KEY,skipRows)
                 .toUriString();
         return searchURL;
+    }
+
+    public String buildGetTownsURL() {
+        String getTownsURL = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(townPath)
+                .toUriString();
+        return getTownsURL;
     }
 }

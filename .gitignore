@@ -19,6 +19,3 @@ target/
 
 ##
 *.log
-
-### application yml file ###
-src/main/resources/application.yml

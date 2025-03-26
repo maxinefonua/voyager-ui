@@ -1,0 +1,16 @@
+voyager-api:
+  protocol: http
+  host: localhost
+  port: 3000
+  lookupPath: /search
+  townPath: /towns
+  authToken: ${VOYAGER_API_KEY}
+
+spring:
+  profiles:
+    active: local
+  logging:
+    level:
+      org:
+        springframework:
+          cache: trace
