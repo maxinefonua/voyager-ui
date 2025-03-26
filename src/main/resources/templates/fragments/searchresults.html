@@ -1,0 +1,87 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div
+        class="modal-body"
+        id="searchResultsContainer"
+        th:fragment="searchresults">
+  <div th:if="${lookupResults} != null and not ${lookupResults.empty}">
+    <div
+            class="accordion list-group"
+            id="accordionExample">
+      <div class="accordion item" th:each="resultDisplay,iter : ${lookupResults}">
+        <button
+                id="searchResultButtonHeader-"
+                class="accordion-button list-group-item list-group-item-action list-group-item-light"
+                th:classappend="${iter.index == 0}? null : collapsed"
+                type="button"
+                th:text="${resultDisplay.name} + ', ' + ${resultDisplay.adminName1} + ' | ' + ${resultDisplay.countryCode}"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-"
+                th:attr="aria-expanded=${iter.index == 0}?true:false,data-south=${resultDisplay.southBound},data-west=${resultDisplay.westBound},data-north=${resultDisplay.northBound},data-east=${resultDisplay.eastBound},data-lng=${resultDisplay.longitude},data-lat=${resultDisplay.latitude}";
+                th:onclick="updateLookupMap('searchResultButtonHeader-'+[[${iter.index}]])"
+                th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"
+                aria-controls="collapse-"></button>
+        <div
+                id="collapse-"
+                th:attrappend="id=${iter.index}"
+                class="accordion-collapse collapse"
+                th:classappend="${iter.index == 0}? show : null"
+                data-bs-parent="#accordionExample">
+          <div class="accordion-body">
+              <p
+                      th:text="${resultDisplay.name} +' is a '
+                        + ${resultDisplay.fclName} + ' of '
+                        + ${resultDisplay.adminName1} + ' in '
+                        + ${resultDisplay.countryName} + '.'">
+              </p>
+              <select class="form-select" aria-label="Select Airport">
+                  <option selected>AirportA</option>
+                  <option value="1">AirportB</option>
+                  <option value="2">AirportC</option>
+                  <option value="3">AirportD</option>
+              </select>
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button class="btn btn-primary" type="button">Add</button>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="list-group" th:unless="${lookupResults} != null and not ${lookupResults.empty}">
+    <div class="accordion list-group" id="accordionExample">
+      <div class="accordion item">
+        <div class="list-group-item list-group-item-secondary">No results found.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+        th:fragment="lookupFooterResults"
+        id="lookupFooter"
+        class=""
+        th:classappend="${totalResultsCount}?modal-footer"
+        hx-swap-oob="outerHTML:#lookupFooter">
+    <div
+            th:if="${totalResultsCount} and ${totalResultsCount} > 0"
+            th:text="${totalResultsCount} > 10? 'Displaying 10 of ' + ${totalResultsCount}+ ' total results' : 'Displaying ' + ${totalResultsCount} + ' of ' + ${totalResultsCount}+ ' total results'">
+    </div>
+    <div
+            th:if="${totalResultsCount} and ${totalResultsCount} > 0"
+            class="btn-group"
+            role="group"
+            aria-label="Basic outlined example">
+        <button
+                type="button"
+                class="btn btn-outline-primary disabled">Prev</button>
+        <button
+                type="button"
+                class="btn btn-outline-primary"
+                th:classappend="${totalResultsCount<11}?disabled">Next</button>
+    </div>
+</div>
+
+<div>
+
+</div>
+</html>

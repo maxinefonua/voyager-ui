@@ -1,0 +1,11 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div id="displayTowns" th:fragment="townlist(towns)">
+    <div th:if="${towns} != null and not ${towns.empty}">
+        <ul>
+            <li th:each="townDisplay : ${towns}" th:text="${townDisplay.name}+', '+${townDisplay.country}+', '+${townDisplay.regionName}">
+                <button type="button" class="btn btn-outline-success">Add</button>
+            </li>
+        </ul>
+    </div>
+</div>
+</html>
