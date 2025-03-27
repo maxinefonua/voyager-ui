@@ -5,6 +5,7 @@ voyager-api:
   lookupPath: /search
   townPath: /towns
   authToken: ${VOYAGER_API_KEY}
+  iataPath: /iata
 
 spring:
   profiles:

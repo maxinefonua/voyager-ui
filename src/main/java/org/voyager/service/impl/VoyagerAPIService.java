@@ -1,6 +1,4 @@
 package org.voyager.service.impl;
-
-import io.vavr.Tuple2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class VoyagerAPIService implements VoyagerAPI {
@@ -56,5 +55,19 @@ public class VoyagerAPIService implements VoyagerAPI {
         // TODO: null check
         TownDisplay[] towns = townsResponse.getBody();
         return new VoyagerResponseAPI<>(towns.length, Arrays.asList(towns));
+    }
+
+    @Override
+    public String[][] airportCodesAndNames() {
+        String iataURL = voyagerAPIConfig.buildIataCodesURL();
+        System.out.println("full iata URL: " + iataURL);
+        ResponseEntity<String[][]> iataResponse = restTemplate
+                .exchange(iataURL,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        String[][].class);
+        // TODO: null check
+        String[][] iataCodes = iataResponse.getBody();
+        return iataCodes;
     }
 }

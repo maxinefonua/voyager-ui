@@ -10,8 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.voyager.utls.ConstantsUtil;
-import org.voyager.utls.MessageUtil;
-
 import java.util.List;
 
 @Component
@@ -26,6 +24,7 @@ public class VoyagerAPIConfig {
     Integer port;
     String lookupPath;
     String townPath;
+    String iataPath;
     String authToken;
     private HttpEntity<String> httpEntityWithHeaders;
 
@@ -33,7 +32,6 @@ public class VoyagerAPIConfig {
     public void validate() {
         ConstantsUtil.validateEnvironVars(List.of(ConstantsUtil.VOYAGER_API_KEY));
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set(ConstantsUtil.AUTH_TOKEN_HEADER_NAME,authToken);
         httpEntityWithHeaders = new HttpEntity<>(headers);
     }
@@ -62,5 +60,15 @@ public class VoyagerAPIConfig {
                 .path(townPath)
                 .toUriString();
         return getTownsURL;
+    }
+
+    public String buildIataCodesURL() {
+        String getIataCodes = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(iataPath)
+                .toUriString();
+        return getIataCodes;
     }
 }

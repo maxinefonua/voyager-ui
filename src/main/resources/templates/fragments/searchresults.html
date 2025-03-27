@@ -33,15 +33,11 @@
                         + ${resultDisplay.adminName1} + ' in '
                         + ${resultDisplay.countryName} + '.'">
               </p>
-              <select class="form-select" aria-label="Select Airport">
-                  <option selected>AirportA</option>
-                  <option value="1">AirportB</option>
-                  <option value="2">AirportC</option>
-                  <option value="3">AirportD</option>
-              </select>
-              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                  <button class="btn btn-primary" type="button">Add</button>
-              </div>
+              <input class="form-control me-2"  type="text" placeholder="Select Nearby Airport" aria-label="Airport" name="airportCode" id="airportCode" list="IATA_CODE_LIST" value="">
+              <datalist id="IATA_CODE_LIST">
+                  <option th:each="airport : ${airportCodesAndNames}" th:value="${airport[0]}" th:text="${airport[1]}"></option>
+              </datalist>
+              <button class="btn btn-primary" type="button">Add</button>
           </div>
         </div>
       </div>

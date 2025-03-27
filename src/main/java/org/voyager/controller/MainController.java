@@ -1,5 +1,6 @@
 package org.voyager.controller;
 
+import jakarta.annotation.PostConstruct;
 import org.voyager.model.ResultDisplay;
 import org.voyager.model.TownDisplay;
 import org.voyager.model.response.VoyagerResponseAPI;
@@ -17,9 +18,15 @@ import java.util.Map;
 
 @Controller
 public class MainController {
+    String[][] airportCodesAndNames;
 
     @Autowired
     private VoyagerAPI voyagerAPI;
+
+    @PostConstruct
+    public void fetchAirportCodes() {
+        airportCodesAndNames = voyagerAPI.airportCodesAndNames();
+    }
 
     @GetMapping("/hello-world")
     public String helloWorld(Model model) {
@@ -50,7 +57,7 @@ public class MainController {
         System.out.println("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");
         return List.of(
                 new ModelAndView("fragments/searchresults :: searchresults",
-                        Map.of("lookupResults", lookupResults)),
+                        Map.of("lookupResults", lookupResults, "airportCodesAndNames", airportCodesAndNames)),
                 new ModelAndView("fragments/searchresults :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
     }
