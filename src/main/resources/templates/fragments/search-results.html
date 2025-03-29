@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.w3.org/1999/xhtml" xmlns:hx-get="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+</head>
+<body>
+<div th:fragment="results"
+     id="resultsContainer"
+     class="modal-body">
+    <div th:if="${lookupResults} != null and not ${lookupResults.empty}">
+        <div
+                class="accordion list-group"
+                id="accordionExample">
+            <datalist id="IATA_CODE_LIST"></datalist>
+            <div class="accordion item" th:each="resultDisplay,iter : ${lookupResults}">
+                <button
+                        id="searchResultButtonHeader-"
+                        name="resultDisplay"
+                        th:value="${resultDisplay.toJson()}"
+                        class="accordion-button list-group-item list-group-item-action list-group-item-light"
+                        th:classappend="${iter.index == 0}? null : collapsed"
+                        type="button"
+                        th:text="${resultDisplay.name} + ', ' + ${resultDisplay.adminName1} + ' | ' + ${resultDisplay.countryCode}"
+                        data-bs-toggle="collapse"
+                        hx-get="/nearbyAirports"
+                        hx-target="#IATA_CODE_LIST"
+                        data-bs-target="#collapse-"
+                        th:attr="aria-expanded=${iter.index == 0}?true:false,data-south=${resultDisplay.southBound},data-west=${resultDisplay.westBound},data-north=${resultDisplay.northBound},data-east=${resultDisplay.eastBound},data-lng=${resultDisplay.longitude},data-lat=${resultDisplay.latitude}";
+                        th:onclick="updateLookupMap('searchResultButtonHeader-'+[[${iter.index}]])"
+                        th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"
+                        aria-controls="collapse-"></button>
+                <div
+                        id="collapse-"
+                        th:attrappend="id=${iter.index}"
+                        class="accordion-collapse collapse"
+                        th:classappend="${iter.index == 0}? show : null"
+                        data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <p
+                                th:text="${resultDisplay.name} +' is a '
+                        + ${resultDisplay.fclName} + ' of '
+                        + ${resultDisplay.adminName1} + ' in '
+                        + ${resultDisplay.countryName} + '.'">
+                        </p>
+                        <input class="form-control me-2"  type="text" placeholder="Select Nearby Airport" aria-label="Airport" name="airportCode" id="airportCode" list="IATA_CODE_LIST" value="">
+                        <button class="btn btn-primary" type="button">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="list-group" th:unless="${lookupResults} != null and not ${lookupResults.empty}">
+        <div class="accordion list-group" id="accordionExample">
+            <div class="accordion item">
+                <div class="list-group-item list-group-item-secondary">No results found.</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div
+        th:fragment="lookupFooterResults"
+        id="lookupFooter"
+        class=""
+        th:classappend="${totalResultsCount}?modal-footer"
+        hx-swap-oob="outerHTML:#lookupFooter">
+    <div
+            th:if="${totalResultsCount} and ${totalResultsCount} > 0"
+            th:text="${totalResultsCount} > 10? 'Displaying 10 of ' + ${totalResultsCount}+ ' total results' : 'Displaying ' + ${totalResultsCount} + ' of ' + ${totalResultsCount}+ ' total results'">
+    </div>
+    <div
+            th:if="${totalResultsCount} and ${totalResultsCount} > 0"
+            class="btn-group"
+            role="group"
+            aria-label="Basic outlined example">
+        <button
+                type="button"
+                class="btn btn-outline-primary disabled">Prev</button>
+        <button
+                type="button"
+                class="btn btn-outline-primary"
+                th:classappend="${totalResultsCount<11}?disabled">Next</button>
+    </div>
+</div>
+</body>
+</html>

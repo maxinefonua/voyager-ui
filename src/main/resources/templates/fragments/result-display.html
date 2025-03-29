@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Result Display</title>
+</head>
+<datalist id="IATA_CODE_LIST" th:fragment="iataCodeList">
+    <option th:each="airportDisplay : ${nearbyAirports}" th:value="${airportDisplay.iata}" th:text="${airportDisplay.name}"></option>
+</datalist>
+</html>

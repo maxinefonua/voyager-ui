@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.voyager.utls.ConstantsUtil;
@@ -17,19 +16,25 @@ import java.util.List;
 @Setter
 @Getter
 public class VoyagerAPIConfig {
+    // TODO: move to commons
     private static final String QUERY_KEY = "searchText";
     private static final String START_ROW_KEY = "startRow";
+    private static final String LATITUDE_KEY = "latitude";
+    private static final String LONGITUDE_KEY = "longitude";
+    private static final String LIMIT_KEY = "limit";
     String protocol;
     String host;
     Integer port;
     String lookupPath;
     String townPath;
     String iataPath;
+    String nearbyAirportsPath;
     String authToken;
     private HttpEntity<String> httpEntityWithHeaders;
 
     @PostConstruct
     public void validate() {
+        // TODO: add path validators
         ConstantsUtil.validateEnvironVars(List.of(ConstantsUtil.VOYAGER_API_KEY));
         HttpHeaders headers = new HttpHeaders();
         headers.set(ConstantsUtil.AUTH_TOKEN_HEADER_NAME,authToken);
@@ -70,5 +75,18 @@ public class VoyagerAPIConfig {
                 .path(iataPath)
                 .toUriString();
         return getIataCodes;
+    }
+
+    public String buildNearbyAirportsURL(double latitude,double longitude,int limit) {
+        String getNearbyAiports = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(nearbyAirportsPath)
+                .queryParam(LATITUDE_KEY,latitude)
+                .queryParam(LONGITUDE_KEY,longitude)
+                .queryParam(LIMIT_KEY,limit)
+                .toUriString();
+        return getNearbyAiports;
     }
 }

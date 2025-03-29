@@ -6,6 +6,7 @@ voyager-api:
   townPath: /towns
   authToken: ${VOYAGER_API_KEY}
   iataPath: /iata
+  nearbyAirportsPath: /nearby-airports
 
 spring:
   profiles:

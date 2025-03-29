@@ -1,10 +1,12 @@
 package org.voyager.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.voyager.config.VoyagerAPIConfig;
+import org.voyager.model.AirportDisplay;
 import org.voyager.model.ResultDisplay;
 import org.voyager.model.TownDisplay;
 import org.voyager.model.response.SearchResponseGeoNames;
@@ -21,7 +23,7 @@ import java.util.List;
 public class VoyagerAPIService implements VoyagerAPI {
     @Autowired
     VoyagerAPIConfig voyagerAPIConfig;
-    RestTemplate restTemplate = new RestTemplate();
+    private RestTemplate restTemplate = new RestTemplate();
 
     public VoyagerResponseAPI<ResultDisplay> lookup(String query, int skipRows) {
         try {
@@ -69,5 +71,18 @@ public class VoyagerAPIService implements VoyagerAPI {
         // TODO: null check
         String[][] iataCodes = iataResponse.getBody();
         return iataCodes;
+    }
+
+    @Override
+    public List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit) {
+        String nearbyAirportsURL = voyagerAPIConfig.buildNearbyAirportsURL(latitude,longitude,limit);
+        System.out.println("full nearbyAirports URL: " + nearbyAirportsURL);
+        ResponseEntity<List<AirportDisplay>> nearbyAirportsResponse = restTemplate
+                .exchange(nearbyAirportsURL,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        new ParameterizedTypeReference<List<AirportDisplay>>() {});
+        // TODO: null check
+        return nearbyAirportsResponse.getBody();
     }
 }

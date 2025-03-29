@@ -2,12 +2,14 @@ package org.voyager.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.voyager.model.response.geonames.GeoName;
-
+import org.voyager.utls.MapperUtils;
 import java.util.List;
 
 @AllArgsConstructor
-@Getter
+@Getter @NoArgsConstructor @ToString(includeFieldNames = false)
 public class ResultDisplay {
     String name;
     String adminName1;
@@ -20,6 +22,8 @@ public class ResultDisplay {
     Float longitude;
     Float latitude;
     String fclName;
+
+    private static final MapperUtils<ResultDisplay> mapper = new MapperUtils<>(ResultDisplay.class);
 
     public static List<ResultDisplay> convertGeoNameToResultDisplayList(List<GeoName> geoNameList){
         return geoNameList.stream().map(geoName -> new ResultDisplay(
@@ -35,5 +39,13 @@ public class ResultDisplay {
                 geoName.getLat(),
                 geoName.getFclName()
         )).toList();
+    }
+
+    public String toJson() {
+        return mapper.mapToJson(this);
+    }
+
+    public static ResultDisplay fromJson(String jsonString) {
+        return mapper.mapFromJson(jsonString);
     }
 }

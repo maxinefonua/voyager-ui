@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Modal</title>
+</head>
+<div th:fragment="searchModal"
+     id="lookupLocationModal"
+     class="modal fade"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <input class="form-control me-2"  type="text" placeholder="Lookup Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
+                <datalist id="Recent_Search_List">
+                    <option value="Auckland">timestamp</option>
+                    <option value="Lyon">timestamp</option>
+                    <option value="Kahuku">timestamp</option>
+                    <option value="Itami">timestamp</option>
+                    <option value="Singapore">timestamp</option>
+                </datalist>
+                <button
+                        type="button"
+                        id="searchButton"
+                        class="btn btn-outline-success my-2 my-sm-0"
+                        hx-get="/search"
+                        hx-include="#searchText"
+                        hx-target="#resultsContainer"
+                        hx-swap="outerHTML">Search</button>
+            </div>
+            <div id="map" style="min-height:200px;width:100%;">MAP DIV</div>
+            <div id="geotag" style="margin:12px;">Lookup powered by <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" data-bs-title="Hyperlink to external site">GeoNames</a></div>
+            <div id="resultsContainer"></div>
+            <div id="lookupFooter"></div>
+        </div>
+    </div>
+</div>
+</html>
