@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="en"
-      xmlns:th="http://www.w3.org/1999/xhtml" xmlns:hx-get="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="UTF-8">
-    <title>Search Results</title>
-</head>
-<body>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="results"
      id="resultsContainer"
      class="modal-body">
@@ -13,30 +6,31 @@
         <div
                 class="accordion list-group"
                 id="accordionExample">
-            <datalist id="IATA_CODE_LIST"></datalist>
             <div class="accordion item" th:each="resultDisplay,iter : ${lookupResults}">
                 <button
                         id="searchResultButtonHeader-"
-                        name="resultDisplay"
-                        th:value="${resultDisplay.toJson()}"
+                        name="iterIndex"
                         class="accordion-button list-group-item list-group-item-action list-group-item-light"
-                        th:classappend="${iter.index == 0}? null : collapsed"
                         type="button"
-                        th:text="${resultDisplay.name} + ', ' + ${resultDisplay.adminName1} + ' | ' + ${resultDisplay.countryCode}"
+                        aria-controls="collapse-"
                         data-bs-toggle="collapse"
-                        hx-get="/nearbyAirports"
-                        hx-target="#IATA_CODE_LIST"
                         data-bs-target="#collapse-"
+                        hx-get="/nearbyAirports"
+                        hx-swap="outerHTML"
+                        th:hx-target="'#IATA_CODE_LIST_'+${iter.index}"
+                        th:hx-vals="'{ &quot;latitude&quot;: &quot;'+${resultDisplay.latitude}+'&quot;, &quot;longitude&quot;: &quot;'+${resultDisplay.longitude}+'&quot; }'"
+                        th:value="${iter.index}"
+                        th:classappend="${iter.index == 0}? null : collapsed"
+                        th:text="${resultDisplay.name} + ', ' + ${resultDisplay.adminName1} + ' | ' + ${resultDisplay.countryCode}"
                         th:attr="aria-expanded=${iter.index == 0}?true:false,data-south=${resultDisplay.southBound},data-west=${resultDisplay.westBound},data-north=${resultDisplay.northBound},data-east=${resultDisplay.eastBound},data-lng=${resultDisplay.longitude},data-lat=${resultDisplay.latitude}";
                         th:onclick="updateLookupMap('searchResultButtonHeader-'+[[${iter.index}]])"
-                        th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"
-                        aria-controls="collapse-"></button>
+                        th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"></button>
                 <div
                         id="collapse-"
-                        th:attrappend="id=${iter.index}"
                         class="accordion-collapse collapse"
-                        th:classappend="${iter.index == 0}? show : null"
-                        data-bs-parent="#accordionExample">
+                        data-bs-parent="#accordionExample"
+                        th:attrappend="id=${iter.index}"
+                        th:classappend="${iter.index == 0}? show : null">
                     <div class="accordion-body">
                         <p
                                 th:text="${resultDisplay.name} +' is a '
@@ -44,21 +38,21 @@
                         + ${resultDisplay.adminName1} + ' in '
                         + ${resultDisplay.countryName} + '.'">
                         </p>
-                        <input class="form-control me-2"  type="text" placeholder="Select Nearby Airport" aria-label="Airport" name="airportCode" id="airportCode" list="IATA_CODE_LIST" value="">
-                        <button class="btn btn-primary" type="button">Add</button>
+                        <div id="IATA_CODE_LIST_" th:attrappend="id=${iter.index}"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="list-group" th:unless="${lookupResults} != null and not ${lookupResults.empty}">
-        <div class="accordion list-group" id="accordionExample">
+        <div class="accordion list-group" id="noResultAccordion">
             <div class="accordion item">
                 <div class="list-group-item list-group-item-secondary">No results found.</div>
             </div>
         </div>
     </div>
 </div>
+
 <div
         th:fragment="lookupFooterResults"
         id="lookupFooter"
@@ -83,5 +77,4 @@
                 th:classappend="${totalResultsCount<11}?disabled">Next</button>
     </div>
 </div>
-</body>
 </html>

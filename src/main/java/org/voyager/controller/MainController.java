@@ -49,12 +49,12 @@ public class MainController {
     }
 
     @GetMapping("/nearbyAirports")
-    public String nearbyAirports(Model model, @RequestParam("resultDisplay") String resultDisplayJson) {
+    public String nearbyAirports(Model model, @RequestParam("iterIndex") Integer iterIndex, @RequestParam("latitude") String latitude, @RequestParam("longitude") String longitude) {
         // TODO: update map here
-        ResultDisplay resultDisplay = ResultDisplay.fromJson(resultDisplayJson);
-        System.out.println("GET /nearbyAirports called with resultDisplay: " + resultDisplay.toString());
-        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(resultDisplay.getLatitude(),resultDisplay.getLongitude(),10);
+        System.out.println("GET /nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude);
+        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(Double.parseDouble(latitude),Double.parseDouble(longitude),10);
         model.addAttribute("nearbyAirports",nearbyAirports);
+        model.addAttribute("iterIndex",iterIndex);
         return "fragments/result-display :: iataCodeList";
     }
 
@@ -70,7 +70,7 @@ public class MainController {
         return List.of(
                 new ModelAndView("fragments/search-results :: results",
                         Map.of("lookupResults", lookupResults, "airportCodesAndNames", airportCodesAndNames)),
-                new ModelAndView("fragments/search-results :: lookupFooterResults",
+                new ModelAndView("fragments/searchresults :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
     }
 

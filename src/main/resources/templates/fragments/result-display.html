@@ -1,10 +1,20 @@
-<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="UTF-8">
-    <title>Result Display</title>
-</head>
-<datalist id="IATA_CODE_LIST" th:fragment="iataCodeList">
-    <option th:each="airportDisplay : ${nearbyAirports}" th:value="${airportDisplay.iata}" th:text="${airportDisplay.name}"></option>
-</datalist>
+
+
+<div id="IATA_CODE_LIST_"
+     class="input-group"
+     th:attrappend="id=${iterIndex}" th:fragment="iataCodeList">
+    <span class="input-group-text">Select Airport</span>
+    <input class="form-control me-2"  type="text"
+           th:placeholder="${nearbyAirports[0].iata}" aria-label="Airport" name="airportCode" id="airportCode" list="airportList" th:attrappend="list=${iterIndex}">
+    <datalist id="airportList" th:attrappend="id=${iterIndex}" th:fragment="iataCodeList">
+        <option th:each="airportDisplay : ${nearbyAirports}" th:value="${airportDisplay.iata}" th:attr="selected=${iterIdex == 0}?selected : null" th:text="${airportDisplay.name}"></option>
+    </datalist>
+    <button class="btn btn-primary" type="button">Add</button>
+</div>
+
+
+
+
+
 </html>
