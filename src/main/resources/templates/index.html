@@ -23,43 +23,7 @@
         <div th:replace="~{fragments/footer :: footer}">
         </div>
     </div>
-    <div
-            class="modal fade"
-            id="lookupLocationModal"
-            tabindex="-1"
-            aria-labelledby="exampleModalLabel">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <input class="form-control me-2"  type="text" placeholder="Lookup Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
-                    <datalist id="Recent_Search_List">
-                        <option value="Auckland">timestamp</option>
-                        <option value="Lyon">timestamp</option>
-                        <option value="Kahuku">timestamp</option>
-                        <option value="Itami">timestamp</option>
-                        <option value="Singapore">timestamp</option>
-                    </datalist>
-                    <button
-                            type="button"
-                            id="searchButton"
-                            class="btn btn-outline-success my-2 my-sm-0"
-                            hx-get="/lookup"
-                            hx-include="#searchText"
-                            hx-target="#searchResultsContainer"
-                            hx-on::before-request="resetMapOnSearch()"
-                            hx-on::after-request="setMapToFirstResult()"
-                            hx-swap="outerHTML">Search</button>
-                </div>
-                <div id="map" style="min-height:200px;width:100%;"></div>
-                <div id="geotag" style="margin:12px;">Lookup powered by <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" data-bs-title="Hyperlink to external site">GeoNames</a></div>
-                <div
-                        id="searchResultsContainer"
-                        style="display=none;">
-                </div>
-                <div id="lookupFooter"></div>
-            </div>
-        </div>
-    </div>
+    <div th:replace="~{fragments/search :: searchModal}"></div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
     <script>
@@ -100,15 +64,24 @@
 
         lookupModal.addEventListener('hidden.bs.modal', event => {
           document.getElementById("searchText").value = "";
-          document.getElementById("searchResultsContainer").style.display = "none";
+          document.getElementById("resultsContainer").style.display = "none";
           document.getElementById("lookupFooter").style.display = "none";
           recenterMap();
         })
 
-        function updateLookupMap(clickedButtonHeaderId) {
+        async function updateLookupMap(iterIndex) {
           if (lookupMarker) lookupMarker.remove();
-          const clickedButton = document.getElementById(clickedButtonHeaderId);
+          const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
           if (clickedButton) {
+              const latitude = clickedButton.dataset.lat;
+              const longitude = clickedButton.dataset.lng;
+              var url = '/nearbyAirports?iterIndex=' + iterIndex + '&latitude='+ latitude + '&longitude=' + longitude;
+              var listId = 'IATA_CODE_LIST_' + iterIndex;
+              await fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                document.getElementById(listId).outerHTML = html;
+              });
               const west = clickedButton.dataset.west;
               const south = clickedButton.dataset.south;
               const east = clickedButton.dataset.east;
@@ -133,13 +106,17 @@
           searchButton.innerHTML = 'Searching';
           searchButton.disabled = true;
 
-          document.getElementById("searchResultsContainer").style.display = "none";
+          document.getElementById("resultsContainer").style.display = "none";
           document.getElementById("lookupFooter").style.display = "none";
         }
 
         function setMapToFirstResult() {
           if (lookupMarker) lookupMarker.remove();
-          if (document.getElementById("searchResultButtonHeader-0")) updateLookupMap("searchResultButtonHeader-0");
+          const firstResultButton = document.getElementById("searchResultButtonHeader-0");
+          if (firstResultButton) {
+
+            updateLookupMap(0);
+          }
           searchButton.innerHTML = 'Search';
           searchButton.disabled = false;
         }

@@ -8,20 +8,21 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.voyager.utls.ConstantsUtil;
+import org.voyager.utils.ConstantsUtils;
 import java.util.List;
+
+import static org.voyager.utils.ConstantsUtils.QUERY_PARAM;
+import static org.voyager.utils.ConstantsUtils.SKIP_ROW_PARAM;
+import static org.voyager.utils.ConstantsUtils.LATITUDE_PARAM;
+import static org.voyager.utils.ConstantsUtils.LONGITUDE_PARAM;
+import static org.voyager.utils.ConstantsUtils.LIMIT_PARAM;
 
 @Component
 @ConfigurationProperties(prefix = "voyager-api")
 @Setter
 @Getter
 public class VoyagerAPIConfig {
-    // TODO: move to commons
-    private static final String QUERY_KEY = "searchText";
-    private static final String START_ROW_KEY = "startRow";
-    private static final String LATITUDE_KEY = "latitude";
-    private static final String LONGITUDE_KEY = "longitude";
-    private static final String LIMIT_KEY = "limit";
+
     String protocol;
     String host;
     Integer port;
@@ -35,9 +36,9 @@ public class VoyagerAPIConfig {
     @PostConstruct
     public void validate() {
         // TODO: add path validators
-        ConstantsUtil.validateEnvironVars(List.of(ConstantsUtil.VOYAGER_API_KEY));
+        ConstantsUtils.validateEnvironVars(List.of(ConstantsUtils.VOYAGER_API_KEY));
         HttpHeaders headers = new HttpHeaders();
-        headers.set(ConstantsUtil.AUTH_TOKEN_HEADER_NAME,authToken);
+        headers.set(ConstantsUtils.AUTH_TOKEN_HEADER_NAME,authToken);
         httpEntityWithHeaders = new HttpEntity<>(headers);
     }
 
@@ -46,47 +47,43 @@ public class VoyagerAPIConfig {
     }
 
     public String buildLookupURL(String query, int skipRows) {
-        String searchURL = UriComponentsBuilder
+        return UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)
                 .port(port)
                 .path(lookupPath)
-                .queryParam(QUERY_KEY,query)
-                .queryParam(START_ROW_KEY,skipRows)
+                .queryParam(QUERY_PARAM,query)
+                .queryParam(SKIP_ROW_PARAM,skipRows)
                 .toUriString();
-        return searchURL;
     }
 
     public String buildGetTownsURL() {
-        String getTownsURL = UriComponentsBuilder
+        return UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)
                 .port(port)
                 .path(townPath)
                 .toUriString();
-        return getTownsURL;
     }
 
     public String buildIataCodesURL() {
-        String getIataCodes = UriComponentsBuilder
+        return UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)
                 .port(port)
                 .path(iataPath)
                 .toUriString();
-        return getIataCodes;
     }
 
     public String buildNearbyAirportsURL(double latitude,double longitude,int limit) {
-        String getNearbyAiports = UriComponentsBuilder
+        return UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)
                 .port(port)
                 .path(nearbyAirportsPath)
-                .queryParam(LATITUDE_KEY,latitude)
-                .queryParam(LONGITUDE_KEY,longitude)
-                .queryParam(LIMIT_KEY,limit)
+                .queryParam(LATITUDE_PARAM,latitude)
+                .queryParam(LONGITUDE_PARAM,longitude)
+                .queryParam(LIMIT_PARAM,limit)
                 .toUriString();
-        return getNearbyAiports;
     }
 }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Search Modal</title>
@@ -28,9 +28,11 @@
                         hx-get="/search"
                         hx-include="#searchText"
                         hx-target="#resultsContainer"
-                        hx-swap="outerHTML">Search</button>
+                        hx-swap="outerHTML"
+                        hx-on::before-request="resetMapOnSearch()"
+                        hx-on::after-request="setMapToFirstResult()">Search</button>
             </div>
-            <div id="map" style="min-height:200px;width:100%;">MAP DIV</div>
+            <div id="map" style="min-height:200px;width:100%;"></div>
             <div id="geotag" style="margin:12px;">Lookup powered by <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" data-bs-title="Hyperlink to external site">GeoNames</a></div>
             <div id="resultsContainer"></div>
             <div id="lookupFooter"></div>
