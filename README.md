@@ -2,10 +2,13 @@
 ### Web app for travel plans
 A personal project I took on to relearn full-cycle development, and to better organize my travel wish list. Built entirely on open-sourced data.
 
-#### Backend services built as separate project:
+### Project Repos:
 - Voyager API <a href='https://github.com/maxinefonua/voyager-api' target='_blank' rel='noopener noreferrer nofollow'>GitHub</a>
-- Manages caching, authorization, request limits to external APIs
-
+    - standalone backend services
+    - caching, request limits, auth tokens
+- Voyager Commons <a href='https://github.com/maxinefonua/voyager-commons' target='_blank' rel='noopener noreferrer nofollow'>GitHub</a>
+    - shared models and utils
+    - scripts for data syncing
 #### Frontend built with:
 - Spring Boot
 - Thymeleaf
