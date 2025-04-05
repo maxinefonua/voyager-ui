@@ -33,7 +33,12 @@
                         hx-on::after-request="setMapToFirstResult()">Search</button>
             </div>
             <div id="map" style="min-height:200px;width:100%;"></div>
-            <div id="geotag" style="margin:12px;">Lookup powered by <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" data-bs-title="Hyperlink to external site">GeoNames</a></div>
+            <div id="geotag" style="margin:12px;">Lookup powered by
+                <a
+                   th:href="${lookupAttribution.link}"
+                   th:text="${lookupAttribution.name}"
+                   th:target="_blank" rel="noopener noreferrer nofollow"></a>
+            </div>
             <div id="resultsContainer"></div>
             <div id="lookupFooter"></div>
         </div>

@@ -27,6 +27,7 @@ public class VoyagerAPIConfig {
     String host;
     Integer port;
     String lookupPath;
+    String lookupAttributionPath;
     String townPath;
     String iataPath;
     String nearbyAirportsPath;
@@ -84,6 +85,15 @@ public class VoyagerAPIConfig {
                 .queryParam(LATITUDE_PARAM,latitude)
                 .queryParam(LONGITUDE_PARAM,longitude)
                 .queryParam(LIMIT_PARAM,limit)
+                .toUriString();
+    }
+
+    public String buildLookupAttributionURL() {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(lookupAttributionPath)
                 .toUriString();
     }
 }

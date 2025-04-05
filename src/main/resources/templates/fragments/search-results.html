@@ -6,7 +6,7 @@
         <div
                 class="accordion list-group"
                 id="accordionExample">
-            <div class="accordion item" th:each="resultDisplay,iter : ${lookupResults}">
+            <div class="accordion item" th:each="resultSearch,iter : ${lookupResults}">
                 <button
                         id="searchResultButtonHeader-"
                         class="accordion-button list-group-item list-group-item-action list-group-item-light"
@@ -15,9 +15,9 @@
                         data-bs-toggle="collapse"
                         data-bs-target="#collapse-"
                         th:classappend="${iter.index == 0}? null : collapsed"
-                        th:text="${resultDisplay.name} + ', ' + ${resultDisplay.adminName1} + ' | ' + ${resultDisplay.countryCode}"
-                        th:attr="aria-expanded=${iter.index == 0}?true:false,data-south=${resultDisplay.southBound},data-west=${resultDisplay.westBound},data-north=${resultDisplay.northBound},data-east=${resultDisplay.eastBound},data-lng=${resultDisplay.longitude},data-lat=${resultDisplay.latitude}";
-                        th:onclick="updateLookupMap([[${iter.index}]])"
+                        th:text="${resultSearch.name} + ', ' + ${resultSearch.adminName} + ' | ' + ${resultSearch.countryName}"
+                        th:attr="aria-expanded=${iter.index == 0}?true:false,data-south=${iter.index == 0}?${resultSearch.southBound}:null,data-west=${iter.index == 0}?${resultSearch.westBound}:null,data-north=${iter.index == 0}?${resultSearch.northBound}:null,data-east=${iter.index == 0}?${resultSearch.eastBound}:null,data-lng=${iter.index == 0}?${resultSearch.longitude}:null,data-lat=${iter.index == 0}?${resultSearch.latitude}:null";
+                        th:onclick="updateLookupMap([[${iter.index}]],[[${resultSearch.longitude}]],[[${resultSearch.latitude}]],[[${resultSearch.westBound}]],[[${resultSearch.southBound}]],[[${resultSearch.eastBound}]],[[${resultSearch.northBound}]])"
                         th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"></button>
                 <div
                         id="collapse-"
@@ -27,10 +27,10 @@
                         th:classappend="${iter.index == 0}? show : null">
                     <div class="accordion-body">
                         <p
-                                th:text="${resultDisplay.name} +' is a '
-                        + ${resultDisplay.fclName} + ' of '
-                        + ${resultDisplay.adminName1} + ' in '
-                        + ${resultDisplay.countryName} + '.'">
+                                th:text="${resultSearch.name} +' is a '
+                        + ${resultSearch.type} + ' of '
+                        + ${resultSearch.adminName} + ' in '
+                        + ${resultSearch.countryName} + '.'">
                         </p>
                         <div id="IATA_CODE_LIST_" th:attrappend="id=${iter.index}"></div>
                     </div>

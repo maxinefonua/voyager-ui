@@ -50,7 +50,9 @@
                 },
             attributionControl: false
         }).addControl(new mapboxgl.AttributionControl({
-            customAttribution: '&copy; <a href="https://osm.org/copyright" target=”_blank" rel="noopener noreferrer nofollow">OpenStreetMap</a> contributors',
+            customAttribution: [
+                '&copy; <a href="https://www.mapbox.com/about/maps">Mapbox</a>',
+                '&copy; <a href="https://osm.org/copyright" target=”_blank" rel="noopener noreferrer nofollow">OpenStreetMap</a>'],
             compact: false
         }));
 
@@ -69,27 +71,19 @@
           recenterMap();
         })
 
-        async function updateLookupMap(iterIndex) {
+        function updateLookupMap(iterIndex,longitude,latitude,west,south,east,north) {
           if (lookupMarker) lookupMarker.remove();
           const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
-          if (clickedButton) {
-              const latitude = clickedButton.dataset.lat;
-              const longitude = clickedButton.dataset.lng;
+          if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
               var url = '/nearbyAirports?iterIndex=' + iterIndex + '&latitude='+ latitude + '&longitude=' + longitude;
               var listId = 'IATA_CODE_LIST_' + iterIndex;
-              await fetch(url)
+              fetch(url)
                 .then(response => response.text())
                 .then(html => {
                 document.getElementById(listId).outerHTML = html;
               });
-              const west = clickedButton.dataset.west;
-              const south = clickedButton.dataset.south;
-              const east = clickedButton.dataset.east;
-              const north = clickedButton.dataset.north;
-              const lng = clickedButton.dataset.lng;
-              const lat = clickedButton.dataset.lat;
-              map.fitBounds([west, south, east, north]);
-              lookupMarker = new mapboxgl.Marker().setLngLat([lng,lat]).addTo(map);
+              map.fitBounds([west,south,east,north]);
+              lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }
         };
 
@@ -114,8 +108,13 @@
           if (lookupMarker) lookupMarker.remove();
           const firstResultButton = document.getElementById("searchResultButtonHeader-0");
           if (firstResultButton) {
-
-            updateLookupMap(0);
+            const longitude = firstResultButton.dataset.lng;
+            const latitude = firstResultButton.dataset.lat;
+            const west = firstResultButton.dataset.west;
+            const south = firstResultButton.dataset.south;
+            const east = firstResultButton.dataset.east;
+            const north = firstResultButton.dataset.north;
+            updateLookupMap(0,longitude,latitude,west,south,east,north);
           }
           searchButton.innerHTML = 'Search';
           searchButton.disabled = false;

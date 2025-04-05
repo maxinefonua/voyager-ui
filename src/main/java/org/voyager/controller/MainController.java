@@ -1,10 +1,11 @@
 package org.voyager.controller;
 
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.voyager.model.AirportDisplay;
-import org.voyager.model.ResultDisplay;
 import org.voyager.model.TownDisplay;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
@@ -14,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
+import org.voyager.model.result.ResultSearch;
 import org.voyager.service.VoyagerAPI;
 
 import java.util.Collection;
@@ -26,9 +28,7 @@ public class MainController {
     @Autowired
     private VoyagerAPI voyagerAPI;
 
-    @PostConstruct
-    public void fetchAirportCodes() {
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
     @GetMapping("/hello-world")
     public String helloWorld(Model model) {
@@ -40,6 +40,7 @@ public class MainController {
     public String homepage(Model model) {
         VoyagerResponseAPI<TownDisplay> voyagerResponse = voyagerAPI.towns();
         model.addAttribute("towns",voyagerResponse.getResponseList());
+        model.addAttribute("lookupAttribution", voyagerAPI.lookupAttribution());
         return "index";
     }
 
@@ -53,7 +54,7 @@ public class MainController {
     public String nearbyAirports(Model model, @RequestParam("iterIndex") Integer iterIndex, @RequestParam("latitude") String latitude, @RequestParam("longitude") String longitude) {
         // TODO: update map here
         System.out.println("GET /nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude);
-        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(Double.parseDouble(latitude),Double.parseDouble(longitude),10);
+        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(Double.parseDouble(latitude),Double.parseDouble(longitude),5);
         model.addAttribute("nearbyAirports",nearbyAirports);
         model.addAttribute("iterIndex",iterIndex);
         return "fragments/result-display :: iataCodeList";
@@ -63,8 +64,8 @@ public class MainController {
     @Cacheable("searchCache")
     public Collection<ModelAndView> search(Model model, @ModelAttribute("searchText") String searchText)  {
         long beforeSearch = System.currentTimeMillis();
-        VoyagerListResponse<ResultDisplay> voyagerResponse = voyagerAPI.lookup(searchText,0);
-        List<ResultDisplay> lookupResults = voyagerResponse.getResults();
+        VoyagerListResponse<ResultSearch> voyagerResponse = voyagerAPI.lookup(searchText,0);
+        List<ResultSearch> lookupResults = voyagerResponse.getResults();
         Integer totalResultsCount = voyagerResponse.getResultCount();
         double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
         System.out.println("duration of search: " + duration + "s");
@@ -79,22 +80,5 @@ public class MainController {
     @GetMapping("/test")
     public String testPage() {
         return "test";
-    }
-
-    @GetMapping("/lookup")
-    @Cacheable("lookupCache")
-    public Collection<ModelAndView> lookup(Model model, @ModelAttribute("searchText") String searchText)  {
-        long beforeSearch = System.currentTimeMillis();
-        VoyagerListResponse<ResultDisplay> voyagerResponse = voyagerAPI.lookup(searchText,0);
-        List<ResultDisplay> lookupResults = voyagerResponse.getResults();
-        Integer totalResultsCount = voyagerResponse.getResultCount();
-        double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
-        System.out.println("duration of search: " + duration + "s");
-        System.out.println("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");
-        return List.of(
-                new ModelAndView("fragments/search-results :: results",
-                        Map.of("lookupResults", lookupResults)),
-                new ModelAndView("fragments/searchresults :: lookupFooterResults",
-                        Map.of("totalResultsCount",totalResultsCount)));
     }
 }
