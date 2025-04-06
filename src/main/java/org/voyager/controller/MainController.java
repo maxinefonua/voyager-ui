@@ -1,6 +1,4 @@
 package org.voyager.controller;
-
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -49,6 +47,23 @@ public class MainController {
         return "general";
     }
 
+    @GetMapping("/saved")
+    public Collection<ModelAndView> getSaved() {
+        VoyagerResponseAPI<TownDisplay> voyagerResponse = voyagerAPI.towns();
+        return List.of(
+                new ModelAndView("fragments/tab :: savedTab",
+                        Map.of("towns",voyagerResponse.getResponseList())),
+                new ModelAndView("fragments/tab :: tab1Active"));
+    }
+
+    @GetMapping("/add")
+    public Collection<ModelAndView> getAdd() {
+        return List.of(
+                new ModelAndView( "fragments/tab :: addTab",
+                        Map.of("lookupAttribution", voyagerAPI.lookupAttribution())),
+                new ModelAndView("fragments/tab :: tab2Active"));
+    }
+
     @GetMapping("/nearbyAirports")
     @Cacheable("nearbyAirportsCache")
     public String nearbyAirports(Model model, @RequestParam("iterIndex") Integer iterIndex, @RequestParam("latitude") String latitude, @RequestParam("longitude") String longitude) {
@@ -71,9 +86,9 @@ public class MainController {
         System.out.println("duration of search: " + duration + "s");
         System.out.println("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");
         return List.of(
-                new ModelAndView("fragments/search-results :: results",
+                new ModelAndView("fragments/search :: accordionResults",
                         Map.of("lookupResults", lookupResults)),
-                new ModelAndView("fragments/searchresults :: lookupFooterResults",
+                new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
     }
 
