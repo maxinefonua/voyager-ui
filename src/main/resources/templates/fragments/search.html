@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Search Fragments</title>
 </head>
-<div th:fragment="searchContent">
+<div th:fragment="lookupContainer" class="container">
     <div class="input-group">
         <input class="form-control m-2"
                type="text" placeholder="Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
@@ -68,19 +68,20 @@
             </div>
         </div>
     </div>
+    <div th:unless="${lookupResults.size > 0}"
+         class="list-group-item list-group-item-secondary" th:text="'No results returned for &quot;' + ${searchText} + '&quot'"></div>
 </div>
 <div th:fragment="lookupFooterResults"
-        id="lookupFooter"
-        class=""
-        th:classappend="${totalResultsCount}?modal-footer"
-        hx-swap-oob="outerHTML:#lookupFooter">
-    <div
+     id="lookupFooter"
+     class="float-end"
+     hx-swap-oob="outerHTML:#lookupFooter">
+    <span
             th:if="${totalResultsCount} and ${totalResultsCount} > 0"
             th:text="${totalResultsCount} > 10? 'Displaying 10 of ' + ${totalResultsCount}+ ' total results' : 'Displaying ' + ${totalResultsCount} + ' of ' + ${totalResultsCount}+ ' total results'">
-    </div>
-    <div
+    </span>
+    <span
             th:if="${totalResultsCount} and ${totalResultsCount} > 0"
-            class="btn-group"
+            class="btn-group ms-2"
             role="group"
             aria-label="Basic outlined example">
         <button
@@ -90,6 +91,6 @@
                 type="button"
                 class="btn btn-outline-primary"
                 th:classappend="${totalResultsCount<11}?disabled">Next</button>
-    </div>
+    </span>
 </div>
 </html>
