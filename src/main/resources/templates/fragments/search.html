@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml"
+      xmlns:hx-get="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Search Fragments</title>
@@ -58,13 +59,39 @@
                 th:attrappend="id=${iter.index}"
                 th:classappend="${iter.index == 0}? show : null">
             <div class="accordion-body">
-                <p
-                        th:text="${resultSearch.name} +' is a '
+                <p th:text="${resultSearch.name} +' is a '
                 + ${resultSearch.type} + ' of '
                 + ${resultSearch.adminName} + ' in '
                 + ${resultSearch.countryName} + '.'">
                 </p>
-                <div id="IATA_CODE_LIST_" th:attrappend="id=${iter.index}"></div>
+                <div class="input-group" th:id="'input-group-'+${iter.index}">
+                    <select class="form-select input-group-text"
+                            name="type"
+                            style="min-width:30%,max-width:50%"
+                            th:hx-get="@{/nearbyAirports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}"
+                            th:hx-target="@{#filtered-list-{index}(index=${iter.index})}"
+                            hx-trigger="change"
+                            th:hx-on::after-request="@{setAirportPlaceholder({index})(index=${iter.index})}"
+                            hx-swap="outerHTML">
+                        <option selected value="">All Airports</option>
+                        <option value="CIVIL">Civil</option>
+                        <option value="MILITARY">Military</option>
+                        <hr class="dropdown-divider">
+                        <option value="">Delta</option>
+                    </select>
+                    <datalist id="filtered-list-" th:attrappend="id=${iter.index}"
+                              hx-trigger="load"
+                              hx-swap="outerHTML"
+                              th:hx-get="@{/nearbyAirports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}">
+                    </datalist>
+                    <input th:id="'airport-code-'+${iter.index}"
+                           class="form-control"
+                           type="text" aria-label="Airport"
+                           name="airport-code"
+                           th:list="'filtered-list-'+${iter.index}">
+                    <button class="btn btn-primary"
+                            type="button">Add</button>
+                </div>
             </div>
         </div>
     </div>
@@ -77,7 +104,7 @@
      hx-swap-oob="outerHTML:#lookupFooter">
     <span
             th:if="${totalResultsCount} and ${totalResultsCount} > 0"
-            th:text="${totalResultsCount} > 10? 'Displaying 10 of ' + ${totalResultsCount}+ ' total results' : 'Displaying ' + ${totalResultsCount} + ' of ' + ${totalResultsCount}+ ' total results'">
+            th:text="${totalResultsCount} > 10? '10 of ' + ${totalResultsCount}+ ' total results' : ${totalResultsCount} + ' of ' + ${totalResultsCount}+ ' total results'">
     </span>
     <span
             th:if="${totalResultsCount} and ${totalResultsCount} > 0"

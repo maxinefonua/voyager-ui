@@ -16,11 +16,12 @@
         </div>
         <h1 class="p-4">Oh, the Places to Go!</h1>
         <div id="map" style="min-height:200px;width:100%;"></div>
-        <div class="container">
+        <div class="container" id="tabMenu">
             <ul th:replace="~{fragments/tab :: tab1Active}"></ul>
         </div>
         <div class="container" id="tabContent">
             <div th:replace="~{fragments/tab :: savedTab}"></div>
+        </div>
         </div>
         <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
@@ -62,13 +63,6 @@
           if (lookupMarker) lookupMarker.remove();
           const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
           if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
-              var url = '/nearbyAirports?iterIndex=' + iterIndex + '&latitude='+ latitude + '&longitude=' + longitude;
-              var listId = 'IATA_CODE_LIST_' + iterIndex;
-              fetch(url)
-                .then(response => response.text())
-                .then(html => {
-                document.getElementById(listId).outerHTML = html;
-              });
               map.fitBounds([west,south,east,north]);
               lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }

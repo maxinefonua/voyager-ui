@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.voyager.model.AirportDisplay;
+import org.voyager.model.AirportType;
 import org.voyager.model.TownDisplay;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
@@ -19,6 +20,7 @@ import org.voyager.service.VoyagerAPI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class MainController {
@@ -66,13 +68,24 @@ public class MainController {
 
     @GetMapping("/nearbyAirports")
     @Cacheable("nearbyAirportsCache")
-    public String nearbyAirports(Model model, @RequestParam("iterIndex") Integer iterIndex, @RequestParam("latitude") String latitude, @RequestParam("longitude") String longitude) {
-        // TODO: update map here
-        System.out.println("GET /nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude);
-        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(Double.parseDouble(latitude),Double.parseDouble(longitude),5);
-        model.addAttribute("nearbyAirports",nearbyAirports);
-        model.addAttribute("iterIndex",iterIndex);
-        return "fragments/result-display :: iataCodeList";
+    public Collection<ModelAndView> nearbyAirports(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam Optional<AirportType> type) {
+        LOGGER.info("GET /nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude);
+        List<AirportDisplay> nearbyAirports;
+        if (type.isPresent()) {
+            nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5,type.get());
+        } else {
+            nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5);
+        }
+        return List.of(
+                new ModelAndView("fragments/result-display :: iata-code-list",
+                        Map.of("nearbyAirports", nearbyAirports,
+                                "iterIndex",iterIndex,
+                                "latitude",latitude,
+                                "longitude",longitude)),
+                new ModelAndView("fragments/result-display :: iata-code-input",
+                        Map.of("iterIndex",iterIndex,
+                                "firstAirportCode",nearbyAirports.get(0))));
+
     }
 
     @GetMapping("/search")

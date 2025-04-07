@@ -8,14 +8,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.voyager.model.AirportType;
 import org.voyager.utils.ConstantsUtils;
 import java.util.List;
+import java.util.Optional;
 
-import static org.voyager.utils.ConstantsUtils.QUERY_PARAM;
-import static org.voyager.utils.ConstantsUtils.SKIP_ROW_PARAM;
-import static org.voyager.utils.ConstantsUtils.LATITUDE_PARAM;
-import static org.voyager.utils.ConstantsUtils.LONGITUDE_PARAM;
-import static org.voyager.utils.ConstantsUtils.LIMIT_PARAM;
+import static org.voyager.utils.ConstantsUtils.*;
 
 @Component
 @ConfigurationProperties(prefix = "voyager-api")
@@ -33,6 +31,7 @@ public class VoyagerAPIConfig {
     String nearbyAirportsPath;
     String authToken;
     private HttpEntity<String> httpEntityWithHeaders;
+    private UriComponentsBuilder nearbyAirportsURI;
 
     @PostConstruct
     public void validate() {
@@ -76,7 +75,20 @@ public class VoyagerAPIConfig {
                 .toUriString();
     }
 
-    public String buildNearbyAirportsURL(double latitude,double longitude,int limit) {
+    public String buildNearbyAirportsURL(double latitude, double longitude, int limit, AirportType type) {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(nearbyAirportsPath)
+                .queryParam(LATITUDE_PARAM,latitude)
+                .queryParam(LONGITUDE_PARAM,longitude)
+                .queryParam(LIMIT_PARAM,limit)
+                .queryParam(TYPE_PARAM,type)
+                .toUriString();
+    }
+
+    public String buildNearbyAirportsURL(double latitude, double longitude, int limit) {
         return UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)

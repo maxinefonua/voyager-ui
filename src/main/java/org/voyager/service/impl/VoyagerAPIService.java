@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.voyager.config.VoyagerAPIConfig;
 import org.voyager.model.AirportDisplay;
+import org.voyager.model.AirportType;
 import org.voyager.model.TownDisplay;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
@@ -92,20 +93,20 @@ public class VoyagerAPIService implements VoyagerAPI {
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
                         new ParameterizedTypeReference<List<AirportDisplay>>() {});
-        if (airportsResponse.getStatusCode().value() != 200 || !airportsResponse.hasBody()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Error fetching search results. Status code: ");
-            sb.append(airportsResponse.getStatusCode().value());
-            sb.append(" returned from endpoint: ");
-            sb.append(nearbyAirportsURL);
-            if (airportsResponse.hasBody()) {
-                sb.append("\n");
-                sb.append("Response: ");
-                sb.append(airportsResponse.getBody());
-            }
-            LOGGER.error(sb.toString());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error fetching nearby airports");
-        }
+        validateSearchResponse(airportsResponse,nearbyAirportsURL);
+        return airportsResponse.getBody();
+    }
+
+    @Override
+    public List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, AirportType type) {
+        String nearbyAirportsURL = voyagerAPIConfig.buildNearbyAirportsURL(latitude,longitude,limit,type);
+        LOGGER.info("full nearbyAirports URL: " + nearbyAirportsURL);
+        ResponseEntity<List<AirportDisplay>> airportsResponse = restTemplate
+                .exchange(nearbyAirportsURL,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        new ParameterizedTypeReference<List<AirportDisplay>>() {});
+        validateSearchResponse(airportsResponse,nearbyAirportsURL);
         return airportsResponse.getBody();
     }
 }
