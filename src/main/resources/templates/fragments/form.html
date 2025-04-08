@@ -1,5 +1,6 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
 <form th:fragment="add-location-form"
+      hx-post="/locations"
       class="input-group" th:id="'input-group-'+${iter.index}">
     <select class="form-select input-group-text text-start"
             name="airportFilter"
@@ -24,6 +25,9 @@
            name="airport-code"
            th:list="'filtered-list-'+${iter.index}">
     <button class="btn btn-primary"
-            hx-post="/locations"
-            type="button">Add</button>
+            type="submit">Add</button>
 </form>
+
+<div th:fragment="add-form-success">
+    Successfully pressed location!
+</div>

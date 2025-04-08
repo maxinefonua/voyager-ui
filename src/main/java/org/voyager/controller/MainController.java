@@ -2,6 +2,7 @@ package org.voyager.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.voyager.model.*;
 import org.voyager.model.response.VoyagerListResponse;
@@ -64,6 +65,11 @@ public class MainController {
                 new ModelAndView( "fragments/tab :: addTab",
                         Map.of("lookupAttribution", voyagerAPI.lookupAttribution())),
                 new ModelAndView("fragments/tab :: tab2Active"));
+    }
+
+    @PostMapping("/locations")
+    public String addLocation() {
+        return "fragments/form :: add-form-success";
     }
 
     @GetMapping("/nearby-airports")
