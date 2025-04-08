@@ -1,20 +1,17 @@
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
-
-
-<div id="IATA_CODE_LIST_"
-     class="input-group"
-     th:attrappend="id=${iterIndex}" th:fragment="iataCodeList">
-    <span class="input-group-text">Select Airport</span>
-    <input class="form-control me-2"  type="text"
-           th:placeholder="${nearbyAirports[0].iata}" aria-label="Airport" name="airportCode" id="airportCode" list="airportList" th:attrappend="list=${iterIndex}">
-    <datalist id="airportList" th:attrappend="id=${iterIndex}" th:fragment="iataCodeList">
-        <option th:each="airportDisplay : ${nearbyAirports}" th:value="${airportDisplay.iata}" th:attr="selected=${iterIdex == 0}?selected : null" th:text="${airportDisplay.name}"></option>
-    </datalist>
-    <button class="btn btn-primary" type="button">Add</button>
-</div>
-
-
-
-
-
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<datalist th:fragment="iata-code-list"
+          id="filtered-list-"
+          th:attrappend="id=${iterIndex}">
+    <option th:each="airportDisplay,iter : ${nearbyAirports}"
+            th:value="${airportDisplay.iata}"
+            th:attr="selected=${iter.index == 0}?selected : null" th:text="${airportDisplay.name}"></option>
+</datalist>
+<input th:fragment="iata-code-input"
+       th:id="'airport-code-'+${iterIndex}"
+       class="form-control"
+       type="text" aria-label="Airport"
+       hx-swap-oob="true"
+       name="airport-code"
+       th:placeholder="${firstAirportCode}"
+       th:list="'filtered-list-'+${iterIndex}">
 </html>

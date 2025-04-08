@@ -8,14 +8,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.voyager.model.Airline;
+import org.voyager.model.AirportType;
 import org.voyager.utils.ConstantsUtils;
-import java.util.List;
 
-import static org.voyager.utils.ConstantsUtils.QUERY_PARAM;
-import static org.voyager.utils.ConstantsUtils.SKIP_ROW_PARAM;
-import static org.voyager.utils.ConstantsUtils.LATITUDE_PARAM;
-import static org.voyager.utils.ConstantsUtils.LONGITUDE_PARAM;
-import static org.voyager.utils.ConstantsUtils.LIMIT_PARAM;
+import java.util.List;
+import java.util.Optional;
+
+import static org.voyager.utils.ConstantsUtils.*;
 
 @Component
 @ConfigurationProperties(prefix = "voyager-api")
@@ -27,11 +27,13 @@ public class VoyagerAPIConfig {
     String host;
     Integer port;
     String lookupPath;
+    String lookupAttributionPath;
     String townPath;
     String iataPath;
     String nearbyAirportsPath;
     String authToken;
     private HttpEntity<String> httpEntityWithHeaders;
+    private UriComponentsBuilder nearbyAirportsURI;
 
     @PostConstruct
     public void validate() {
@@ -52,8 +54,8 @@ public class VoyagerAPIConfig {
                 .host(host)
                 .port(port)
                 .path(lookupPath)
-                .queryParam(QUERY_PARAM,query)
-                .queryParam(SKIP_ROW_PARAM,skipRows)
+                .queryParam(QUERY_PARAM_NAME,query)
+                .queryParam(SKIP_ROW_PARAM_NAME,skipRows)
                 .toUriString();
     }
 
@@ -75,15 +77,26 @@ public class VoyagerAPIConfig {
                 .toUriString();
     }
 
-    public String buildNearbyAirportsURL(double latitude,double longitude,int limit) {
-        return UriComponentsBuilder
+    public String buildNearbyAirportsURL(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline) {
+        UriComponentsBuilder nearByURL = UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)
                 .port(port)
                 .path(nearbyAirportsPath)
-                .queryParam(LATITUDE_PARAM,latitude)
-                .queryParam(LONGITUDE_PARAM,longitude)
-                .queryParam(LIMIT_PARAM,limit)
+                .queryParam(LATITUDE_PARAM_NAME,latitude)
+                .queryParam(LONGITUDE_PARAM_NAME,longitude)
+                .queryParam(LIMIT_PARAM_NAME,limit);
+        type.ifPresent(airportType -> nearByURL.queryParam(TYPE_PARAM_NAME, airportType));
+        airline.ifPresent(airportType -> nearByURL.queryParam(AIRLINE_PARAM_NAME, airportType));
+        return nearByURL.toUriString();
+    }
+
+    public String buildLookupAttributionURL() {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(lookupAttributionPath)
                 .toUriString();
     }
 }

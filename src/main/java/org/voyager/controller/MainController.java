@@ -1,11 +1,9 @@
 package org.voyager.controller;
-
-import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.voyager.model.AirportDisplay;
-import org.voyager.model.ResultDisplay;
-import org.voyager.model.TownDisplay;
+import org.voyager.model.*;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +12,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
+import org.voyager.model.result.ResultSearch;
 import org.voyager.service.VoyagerAPI;
+import org.voyager.validate.ValidationUtils;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
+import static org.voyager.utils.ConstantsUtils.AIRLINE_PARAM_NAME;
+import static org.voyager.utils.ConstantsUtils.TYPE_PARAM_NAME;
 
 @Controller
 public class MainController {
@@ -26,9 +31,7 @@ public class MainController {
     @Autowired
     private VoyagerAPI voyagerAPI;
 
-    @PostConstruct
-    public void fetchAirportCodes() {
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
     @GetMapping("/hello-world")
     public String helloWorld(Model model) {
@@ -40,6 +43,7 @@ public class MainController {
     public String homepage(Model model) {
         VoyagerResponseAPI<TownDisplay> voyagerResponse = voyagerAPI.towns();
         model.addAttribute("towns",voyagerResponse.getResponseList());
+        model.addAttribute("lookupAttribution", voyagerAPI.lookupAttribution());
         return "index";
     }
 
@@ -48,53 +52,67 @@ public class MainController {
         return "general";
     }
 
+    @GetMapping("/saved")
+    public Collection<ModelAndView> getSaved() {
+        VoyagerResponseAPI<TownDisplay> voyagerResponse = voyagerAPI.towns();
+        return List.of(
+                new ModelAndView("fragments/tab :: savedTab",
+                        Map.of("towns",voyagerResponse.getResponseList())),
+                new ModelAndView("fragments/tab :: tab1Active"));
+    }
+
+    @GetMapping("/add")
+    public Collection<ModelAndView> getAdd() {
+        return List.of(
+                new ModelAndView( "fragments/tab :: addTab",
+                        Map.of("lookupAttribution", voyagerAPI.lookupAttribution())),
+                new ModelAndView("fragments/tab :: tab2Active"));
+    }
+
     @GetMapping("/nearbyAirports")
     @Cacheable("nearbyAirportsCache")
-    public String nearbyAirports(Model model, @RequestParam("iterIndex") Integer iterIndex, @RequestParam("latitude") String latitude, @RequestParam("longitude") String longitude) {
-        // TODO: update map here
-        System.out.println("GET /nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude);
-        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(Double.parseDouble(latitude),Double.parseDouble(longitude),10);
-        model.addAttribute("nearbyAirports",nearbyAirports);
-        model.addAttribute("iterIndex",iterIndex);
-        return "fragments/result-display :: iataCodeList";
+    public Collection<ModelAndView> nearbyAirports(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
+        AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional);
+        Optional<AirportType> type = Optional.empty();
+        Optional<Airline> airline = Optional.empty();
+        switch (airportFilter) {
+            case DELTA -> airline = Optional.of(Airline.DELTA);
+            case CIVIL -> type = Optional.of(AirportType.CIVIL);
+            case MILITARY -> type = Optional.of(AirportType.MILITARY);
+        }
+        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5,type,airline);
+        return List.of(
+                new ModelAndView("fragments/result-display :: iata-code-list",
+                        Map.of("nearbyAirports", nearbyAirports,
+                                "iterIndex",iterIndex,
+                                "latitude",latitude,
+                                "longitude",longitude)),
+                new ModelAndView("fragments/result-display :: iata-code-input",
+                        Map.of("iterIndex",iterIndex,
+                                "firstAirportCode",nearbyAirports.get(0).getIata())));
+
     }
 
     @GetMapping("/search")
     @Cacheable("searchCache")
     public Collection<ModelAndView> search(Model model, @ModelAttribute("searchText") String searchText)  {
         long beforeSearch = System.currentTimeMillis();
-        VoyagerListResponse<ResultDisplay> voyagerResponse = voyagerAPI.lookup(searchText,0);
-        List<ResultDisplay> lookupResults = voyagerResponse.getResults();
+        VoyagerListResponse<ResultSearch> voyagerResponse = voyagerAPI.lookup(searchText,0);
+        List<ResultSearch> lookupResults = voyagerResponse.getResults();
         Integer totalResultsCount = voyagerResponse.getResultCount();
         double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
-        System.out.println("duration of search: " + duration + "s");
-        System.out.println("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");
+        LOGGER.info("duration of search: " + duration + "s");
+        LOGGER.info("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");
         return List.of(
-                new ModelAndView("fragments/search-results :: results",
-                        Map.of("lookupResults", lookupResults)),
-                new ModelAndView("fragments/searchresults :: lookupFooterResults",
+                new ModelAndView("fragments/search :: accordionResults",
+                        Map.of("lookupResults", lookupResults,
+                                "searchText",searchText)),
+                new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
     }
 
     @GetMapping("/test")
     public String testPage() {
         return "test";
-    }
-
-    @GetMapping("/lookup")
-    @Cacheable("lookupCache")
-    public Collection<ModelAndView> lookup(Model model, @ModelAttribute("searchText") String searchText)  {
-        long beforeSearch = System.currentTimeMillis();
-        VoyagerListResponse<ResultDisplay> voyagerResponse = voyagerAPI.lookup(searchText,0);
-        List<ResultDisplay> lookupResults = voyagerResponse.getResults();
-        Integer totalResultsCount = voyagerResponse.getResultCount();
-        double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
-        System.out.println("duration of search: " + duration + "s");
-        System.out.println("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");
-        return List.of(
-                new ModelAndView("fragments/search-results :: results",
-                        Map.of("lookupResults", lookupResults)),
-                new ModelAndView("fragments/searchresults :: lookupFooterResults",
-                        Map.of("totalResultsCount",totalResultsCount)));
     }
 }

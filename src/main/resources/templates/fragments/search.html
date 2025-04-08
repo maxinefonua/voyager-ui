@@ -1,42 +1,121 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml"
+      xmlns:hx-get="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>Search Modal</title>
+    <title>Search Fragments</title>
 </head>
-<div th:fragment="searchModal"
-     id="lookupLocationModal"
-     class="modal fade"
-     tabindex="-1"
-     aria-labelledby="exampleModalLabel">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <input class="form-control me-2"  type="text" placeholder="Lookup Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
-                <datalist id="Recent_Search_List">
-                    <option value="Auckland">timestamp</option>
-                    <option value="Lyon">timestamp</option>
-                    <option value="Kahuku">timestamp</option>
-                    <option value="Itami">timestamp</option>
-                    <option value="Singapore">timestamp</option>
-                </datalist>
-                <button
-                        type="button"
-                        id="searchButton"
-                        class="btn btn-outline-success my-2 my-sm-0"
-                        hx-get="/search"
-                        hx-include="#searchText"
-                        hx-target="#resultsContainer"
-                        hx-swap="outerHTML"
-                        hx-on::before-request="resetMapOnSearch()"
-                        hx-on::after-request="setMapToFirstResult()">Search</button>
+<div th:fragment="lookupContainer" class="container">
+    <div class="input-group">
+        <input class="form-control m-2 me-0"
+               type="text" placeholder="Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
+        <datalist id="Recent_Search_List">
+            <option value="Auckland">timestamp</option>
+            <option value="Lyon">timestamp</option>
+            <option value="Kahuku">timestamp</option>
+            <option value="Itami">timestamp</option>
+            <option value="Singapore">timestamp</option>
+        </datalist>
+        <button id="searchButton"
+                class="btn btn-outline-success m-2 ms-0"
+                hx-get="/search"
+                hx-include="#searchText"
+                hx-target="#resultContainer"
+                hx-swap="innerHTML"
+                hx-on::before-request="resetMapOnSearch()"
+                hx-on::after-request="setMapToFirstResult()">Search</button>
+    </div>
+    <div id="geotag" class="m-2 fw-lighter">Lookup powered by
+        <a
+                th:href="${lookupAttribution.link}"
+                th:text="${lookupAttribution.name}"
+                th:target="_blank" rel="noopener noreferrer nofollow"></a>
+    </div>
+    <div id="resultContainer"
+         style="max-height:200px" class="overflow-auto m-2"></div>
+    <div id="lookupFooter"></div>
+</div>
+<div th:fragment="accordionResults"
+     id="accordionResults"
+     class="accordion list-group">
+    <div class="accordion item" th:each="resultSearch,iter : ${lookupResults}">
+        <button
+                id="searchResultButtonHeader-"
+                class="accordion-button list-group-item list-group-item-action list-group-item-light"
+                type="button"
+                aria-controls="collapse-"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-"
+                th:classappend="${iter.index == 0}? null : collapsed"
+                th:text="${resultSearch.name} + ', ' + ${resultSearch.adminName} + ' | ' + ${resultSearch.countryName}"
+                th:attr="aria-expanded=${iter.index == 0}?true:false,data-south=${iter.index == 0}?${resultSearch.southBound}:null,data-west=${iter.index == 0}?${resultSearch.westBound}:null,data-north=${iter.index == 0}?${resultSearch.northBound}:null,data-east=${iter.index == 0}?${resultSearch.eastBound}:null,data-lng=${iter.index == 0}?${resultSearch.longitude}:null,data-lat=${iter.index == 0}?${resultSearch.latitude}:null";
+                th:onclick="updateLookupMap([[${iter.index}]],[[${resultSearch.longitude}]],[[${resultSearch.latitude}]],[[${resultSearch.westBound}]],[[${resultSearch.southBound}]],[[${resultSearch.eastBound}]],[[${resultSearch.northBound}]])"
+                th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"></button>
+        <div
+                id="collapse-"
+                class="accordion-collapse collapse"
+                data-bs-parent="#accordionResults"
+                th:attrappend="id=${iter.index}"
+                th:classappend="${iter.index == 0}? show : null">
+            <div class="accordion-body">
+                <p th:text="${resultSearch.name} +' is a '
+                + ${resultSearch.type} + ' of '
+                + ${resultSearch.adminName} + ' in '
+                + ${resultSearch.countryName} + '.'">
+                </p>
+                <div class="input-group" th:id="'input-group-'+${iter.index}">
+                    <select class="form-select input-group-text text-start"
+                            name="airportFilter"
+                            th:hx-get="@{/nearbyAirports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}"
+                            th:hx-target="@{#filtered-list-{index}(index=${iter.index})}"
+                            hx-trigger="change"
+                            hx-swap="outerHTML">
+                        <option selected value="ALL">All Airports</option>
+                        <option value="CIVIL">Civil</option>
+                        <option value="MILITARY">Military</option>
+                        <hr class="dropdown-divider">
+                        <option value="DELTA">Delta</option>
+                    </select>
+                    <datalist id="filtered-list-" th:attrappend="id=${iter.index}"
+                              hx-trigger="load"
+                              hx-swap="outerHTML"
+                              th:hx-get="@{/nearbyAirports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}">
+                    </datalist>
+                    <input th:id="'airport-code-'+${iter.index}"
+                           class="form-control"
+                           type="text" aria-label="Airport"
+                           name="airport-code"
+                           th:list="'filtered-list-'+${iter.index}">
+                    <button class="btn btn-primary"
+                            type="button">Add</button>
+                </div>
             </div>
-            <div id="map" style="min-height:200px;width:100%;"></div>
-            <div id="geotag" style="margin:12px;">Lookup powered by <a href="https://www.geonames.org/" target="_blank" rel="noopener noreferrer" data-bs-toggle="tooltip" data-bs-title="Hyperlink to external site">GeoNames</a></div>
-            <div id="resultsContainer"></div>
-            <div id="lookupFooter"></div>
         </div>
     </div>
+    <div th:unless="${lookupResults.size > 0}"
+         class="list-group-item list-group-item-secondary" th:text="'No results returned for &quot;' + ${searchText} + '&quot'"></div>
+</div>
+<div th:fragment="lookupFooterResults"
+     id="lookupFooter"
+     class="float-end"
+     hx-swap-oob="outerHTML:#lookupFooter">
+    <span
+            th:if="${totalResultsCount} and ${totalResultsCount} > 0"
+            th:text="${totalResultsCount} > 10? '10 of ' + ${totalResultsCount}+ ' total results' : ${totalResultsCount} + ' of ' + ${totalResultsCount}+ ' total results'">
+    </span>
+    <span
+            th:if="${totalResultsCount} and ${totalResultsCount} > 0"
+            class="btn-group ms-2"
+            role="group"
+            aria-label="Basic outlined example">
+        <button
+                type="button"
+                class="btn btn-outline-primary disabled">Prev</button>
+        <button
+                type="button"
+                class="btn btn-outline-primary"
+                th:classappend="${totalResultsCount<11}?disabled">Next</button>
+    </span>
 </div>
 </html>

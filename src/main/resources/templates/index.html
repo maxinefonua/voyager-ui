@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml"
+      xmlns:hx-get="http://www.w3.org/1999/xhtml">
 <head>
     <title>Travel Wishlist</title>
     <meta charset="utf-8">
@@ -10,26 +11,23 @@
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="page-wrapper" style="display:flex;min-height:100vh;flex-direction:column;">
+    <div class="page-wrapper" style="display:flex;flex-direction:column;">
         <div th:replace="~{fragments/topnav :: navbar}">
         </div>
-        <div class="container-xxl bd-gutter mt-3 my-md-4 bd-layout">
-            <div class="bd-content ps-lg-2">
-                <h2>Oh, the Places to Go!</h2>
-                <div th:replace="~{fragments/townlist :: townlist(${towns})}">
-                </div>
-            </div>
+        <h1 class="p-4">Oh, the Places to Go!</h1>
+        <div id="map" style="min-height:200px;width:100%;"></div>
+        <div class="container" id="tabMenu">
+            <ul th:replace="~{fragments/tab :: tab1Active}"></ul>
         </div>
-        <div th:replace="~{fragments/footer :: footer}">
+        <div class="container" id="tabContent">
+            <div th:replace="~{fragments/tab :: savedTab}"></div>
         </div>
+        </div>
+        <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
-    <div th:replace="~{fragments/search :: searchModal}"></div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
     <script>
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-        var lookupModal = document.getElementById("lookupLocationModal");
         var lookupMarker = null;
         var map = new mapboxgl.Map({
             container: 'map',
@@ -50,46 +48,23 @@
                 },
             attributionControl: false
         }).addControl(new mapboxgl.AttributionControl({
-            customAttribution: '&copy; <a href="https://osm.org/copyright" target=”_blank" rel="noopener noreferrer nofollow">OpenStreetMap</a> contributors',
+            customAttribution: [
+                '&copy; <a href="https://www.mapbox.com/about/maps">Mapbox</a>',
+                '&copy; <a href="https://osm.org/copyright" target=”_blank" rel="noopener noreferrer nofollow">OpenStreetMap</a>'],
             compact: false
         }));
-
-        var searchButton = document.getElementById('searchButton');
-
-        lookupModal.addEventListener('show.bs.modal', event=> {
-          const mapCanvas = lookupModal.querySelector("canvas");
-          mapCanvas.style.width = 'auto';
-          mapCanvas.style.height = 'auto';
+        const nav = new mapboxgl.NavigationControl({
+          showCompass: false,
+          visualizePitch: false
         });
+        map.addControl(nav);
 
-        lookupModal.addEventListener('hidden.bs.modal', event => {
-          document.getElementById("searchText").value = "";
-          document.getElementById("resultsContainer").style.display = "none";
-          document.getElementById("lookupFooter").style.display = "none";
-          recenterMap();
-        })
-
-        async function updateLookupMap(iterIndex) {
+        function updateLookupMap(iterIndex,longitude,latitude,west,south,east,north) {
           if (lookupMarker) lookupMarker.remove();
           const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
-          if (clickedButton) {
-              const latitude = clickedButton.dataset.lat;
-              const longitude = clickedButton.dataset.lng;
-              var url = '/nearbyAirports?iterIndex=' + iterIndex + '&latitude='+ latitude + '&longitude=' + longitude;
-              var listId = 'IATA_CODE_LIST_' + iterIndex;
-              await fetch(url)
-                .then(response => response.text())
-                .then(html => {
-                document.getElementById(listId).outerHTML = html;
-              });
-              const west = clickedButton.dataset.west;
-              const south = clickedButton.dataset.south;
-              const east = clickedButton.dataset.east;
-              const north = clickedButton.dataset.north;
-              const lng = clickedButton.dataset.lng;
-              const lat = clickedButton.dataset.lat;
-              map.fitBounds([west, south, east, north]);
-              lookupMarker = new mapboxgl.Marker().setLngLat([lng,lat]).addTo(map);
+          if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
+              map.fitBounds([west,south,east,north]);
+              lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }
         };
 
@@ -103,22 +78,22 @@
 
         function resetMapOnSearch() {
           recenterMap();
-          searchButton.innerHTML = 'Searching';
-          searchButton.disabled = true;
-
-          document.getElementById("resultsContainer").style.display = "none";
-          document.getElementById("lookupFooter").style.display = "none";
+          document.getElementById('searchButton').disabled = true;
         }
 
         function setMapToFirstResult() {
           if (lookupMarker) lookupMarker.remove();
           const firstResultButton = document.getElementById("searchResultButtonHeader-0");
           if (firstResultButton) {
-
-            updateLookupMap(0);
+            const longitude = firstResultButton.dataset.lng;
+            const latitude = firstResultButton.dataset.lat;
+            const west = firstResultButton.dataset.west;
+            const south = firstResultButton.dataset.south;
+            const east = firstResultButton.dataset.east;
+            const north = firstResultButton.dataset.north;
+            updateLookupMap(0,longitude,latitude,west,south,east,north);
           }
-          searchButton.innerHTML = 'Search';
-          searchButton.disabled = false;
+          document.getElementById('searchButton').disabled = false;
         }
     </script>
 </body>
