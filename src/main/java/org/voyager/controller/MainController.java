@@ -3,9 +3,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.voyager.model.AirportDisplay;
-import org.voyager.model.AirportType;
-import org.voyager.model.TownDisplay;
+import org.voyager.model.*;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +14,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.service.VoyagerAPI;
+import org.voyager.validate.ValidationUtils;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
+import static org.voyager.utils.ConstantsUtils.AIRLINE_PARAM_NAME;
+import static org.voyager.utils.ConstantsUtils.TYPE_PARAM_NAME;
 
 @Controller
 public class MainController {
@@ -68,14 +71,16 @@ public class MainController {
 
     @GetMapping("/nearbyAirports")
     @Cacheable("nearbyAirportsCache")
-    public Collection<ModelAndView> nearbyAirports(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam Optional<AirportType> type) {
-        LOGGER.info("GET /nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude);
-        List<AirportDisplay> nearbyAirports;
-        if (type.isPresent()) {
-            nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5,type.get());
-        } else {
-            nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5);
+    public Collection<ModelAndView> nearbyAirports(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
+        AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional);
+        Optional<AirportType> type = Optional.empty();
+        Optional<Airline> airline = Optional.empty();
+        switch (airportFilter) {
+            case DELTA -> airline = Optional.of(Airline.DELTA);
+            case CIVIL -> type = Optional.of(AirportType.CIVIL);
+            case MILITARY -> type = Optional.of(AirportType.MILITARY);
         }
+        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5,type,airline);
         return List.of(
                 new ModelAndView("fragments/result-display :: iata-code-list",
                         Map.of("nearbyAirports", nearbyAirports,
@@ -84,7 +89,7 @@ public class MainController {
                                 "longitude",longitude)),
                 new ModelAndView("fragments/result-display :: iata-code-input",
                         Map.of("iterIndex",iterIndex,
-                                "firstAirportCode",nearbyAirports.get(0))));
+                                "firstAirportCode",nearbyAirports.get(0).getIata())));
 
     }
 

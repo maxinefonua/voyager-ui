@@ -8,7 +8,7 @@
 </head>
 <div th:fragment="lookupContainer" class="container">
     <div class="input-group">
-        <input class="form-control m-2"
+        <input class="form-control m-2 me-0"
                type="text" placeholder="Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
         <datalist id="Recent_Search_List">
             <option value="Auckland">timestamp</option>
@@ -65,19 +65,17 @@
                 + ${resultSearch.countryName} + '.'">
                 </p>
                 <div class="input-group" th:id="'input-group-'+${iter.index}">
-                    <select class="form-select input-group-text"
-                            name="type"
-                            style="min-width:30%,max-width:50%"
+                    <select class="form-select input-group-text text-start"
+                            name="airportFilter"
                             th:hx-get="@{/nearbyAirports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}"
                             th:hx-target="@{#filtered-list-{index}(index=${iter.index})}"
                             hx-trigger="change"
-                            th:hx-on::after-request="@{setAirportPlaceholder({index})(index=${iter.index})}"
                             hx-swap="outerHTML">
-                        <option selected value="">All Airports</option>
+                        <option selected value="ALL">All Airports</option>
                         <option value="CIVIL">Civil</option>
                         <option value="MILITARY">Military</option>
                         <hr class="dropdown-divider">
-                        <option value="">Delta</option>
+                        <option value="DELTA">Delta</option>
                     </select>
                     <datalist id="filtered-list-" th:attrappend="id=${iter.index}"
                               hx-trigger="load"

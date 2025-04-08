@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.voyager.config.VoyagerAPIConfig;
+import org.voyager.model.Airline;
 import org.voyager.model.AirportDisplay;
 import org.voyager.model.AirportType;
 import org.voyager.model.TownDisplay;
@@ -21,6 +22,7 @@ import org.voyager.service.VoyagerAPI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VoyagerAPIService implements VoyagerAPI {
@@ -38,22 +40,7 @@ public class VoyagerAPIService implements VoyagerAPI {
                 HttpMethod.GET,
                 voyagerAPIConfig.getHttpEntity(),
                 new ParameterizedTypeReference<VoyagerListResponse<ResultSearch>>() {});
-        // TODO: update error handling and message
-        if (searchResponse.getStatusCode().value() != 200 || !searchResponse.hasBody()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Error fetching search results. Status code: ");
-            sb.append(searchResponse.getStatusCode().value());
-            sb.append(" returned from endpoint: ");
-            sb.append(lookupURL);
-            if (searchResponse.hasBody()) {
-                sb.append("\n");
-                sb.append("Response: ");
-                sb.append(searchResponse.getBody());
-            }
-            LOGGER.error(sb.toString());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    String.format("Error fetching search results for query '%s'",query));
-        }
+        validateVoyagerResponse(searchResponse,lookupURL);
         return searchResponse.getBody();
     }
 
@@ -61,52 +48,39 @@ public class VoyagerAPIService implements VoyagerAPI {
     public LookupAttribution lookupAttribution() {
         String attributionURL = voyagerAPIConfig.buildLookupAttributionURL();
         LOGGER.info(String.format("Fetching lookup attribution from URL: %s",attributionURL));
-        ResponseEntity<LookupAttribution> searchResponse = restTemplate.exchange(
+        ResponseEntity<LookupAttribution> attributionResponse = restTemplate.exchange(
                 attributionURL,
                 HttpMethod.GET,
                 voyagerAPIConfig.getHttpEntity(),
                 LookupAttribution.class);
-        return searchResponse.getBody();
+        validateVoyagerResponse(attributionResponse,attributionURL);
+        return attributionResponse.getBody();
     }
 
     @Override
     public VoyagerResponseAPI<TownDisplay> towns() {
         String townsURL = voyagerAPIConfig.buildGetTownsURL();
-        System.out.println("full towns URL: " + townsURL);
+        LOGGER.debug("full towns URL: " + townsURL);
         ResponseEntity<List<TownDisplay>> townsResponse = restTemplate
                 .exchange(townsURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
                         new ParameterizedTypeReference<List<TownDisplay>>() {});
-        // TODO: null check
+        validateVoyagerResponse(townsResponse,townsURL);
         List<TownDisplay> towns = townsResponse.getBody();
-        assert towns != null;
         return new VoyagerResponseAPI<>(towns.size(),towns);
     }
 
     @Override
-    public List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit) {
-        String nearbyAirportsURL = voyagerAPIConfig.buildNearbyAirportsURL(latitude,longitude,limit);
-        LOGGER.info("full nearbyAirports URL: " + nearbyAirportsURL);
+    public List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline) {
+        String nearbyAirportsURL = voyagerAPIConfig.buildNearbyAirportsURL(latitude,longitude,limit,type,airline);
+        LOGGER.debug("full nearbyAirports URL: " + nearbyAirportsURL);
         ResponseEntity<List<AirportDisplay>> airportsResponse = restTemplate
                 .exchange(nearbyAirportsURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
                         new ParameterizedTypeReference<List<AirportDisplay>>() {});
-        validateSearchResponse(airportsResponse,nearbyAirportsURL);
-        return airportsResponse.getBody();
-    }
-
-    @Override
-    public List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, AirportType type) {
-        String nearbyAirportsURL = voyagerAPIConfig.buildNearbyAirportsURL(latitude,longitude,limit,type);
-        LOGGER.info("full nearbyAirports URL: " + nearbyAirportsURL);
-        ResponseEntity<List<AirportDisplay>> airportsResponse = restTemplate
-                .exchange(nearbyAirportsURL,
-                        HttpMethod.GET,
-                        voyagerAPIConfig.getHttpEntity(),
-                        new ParameterizedTypeReference<List<AirportDisplay>>() {});
-        validateSearchResponse(airportsResponse,nearbyAirportsURL);
+        validateVoyagerResponse(airportsResponse,nearbyAirportsURL);
         return airportsResponse.getBody();
     }
 }
