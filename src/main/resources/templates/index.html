@@ -59,11 +59,11 @@
         });
         map.addControl(nav);
 
-        function updateLookupMap(iterIndex,longitude,latitude,west,south,east,north) {
+        function updateLookupMap(iterIndex,longitude,latitude,bounds) {
           if (lookupMarker) lookupMarker.remove();
           const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
           if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
-              map.fitBounds([west,south,east,north]);
+              map.fitBounds(bounds);
               lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }
         };
@@ -88,11 +88,8 @@
           if (firstResultButton) {
             const longitude = firstResultButton.dataset.lng;
             const latitude = firstResultButton.dataset.lat;
-            const west = firstResultButton.dataset.west;
-            const south = firstResultButton.dataset.south;
-            const east = firstResultButton.dataset.east;
-            const north = firstResultButton.dataset.north;
-            updateLookupMap(0,longitude,latitude,west,south,east,north);
+            const bounds = [firstResultButton.dataset.boundsWest,firstResultButton.dataset.boundsSouth,firstResultButton.dataset.boundsEast,firstResultButton.dataset.boundsNorth]
+            updateLookupMap(0,longitude,latitude,bounds);
           }
           document.getElementById('searchButton').innerHTML = 'Search';
           document.getElementById('searchButton').disabled = false;

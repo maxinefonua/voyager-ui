@@ -2,6 +2,7 @@ package org.voyager.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.voyager.model.*;
 import org.voyager.model.response.VoyagerListResponse;
@@ -16,10 +17,7 @@ import org.voyager.model.result.ResultSearch;
 import org.voyager.service.VoyagerAPI;
 import org.voyager.validate.ValidationUtils;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
 import static org.voyager.utils.ConstantsUtils.AIRLINE_PARAM_NAME;
