@@ -69,7 +69,7 @@ public class MainController {
                 new ModelAndView("fragments/tab :: tab2Active"));
     }
 
-    @GetMapping("/nearbyAirports")
+    @GetMapping("/nearby-airports")
     @Cacheable("nearbyAirportsCache")
     public Collection<ModelAndView> nearbyAirports(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
         AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional);

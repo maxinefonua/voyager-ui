@@ -79,6 +79,7 @@
         function resetMapOnSearch() {
           recenterMap();
           document.getElementById('searchButton').disabled = true;
+          document.getElementById('searchButton').innerHTML = 'Searching';
         }
 
         function setMapToFirstResult() {
@@ -93,6 +94,7 @@
             const north = firstResultButton.dataset.north;
             updateLookupMap(0,longitude,latitude,west,south,east,north);
           }
+          document.getElementById('searchButton').innerHTML = 'Search';
           document.getElementById('searchButton').disabled = false;
         }
     </script>

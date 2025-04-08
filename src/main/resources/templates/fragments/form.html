@@ -1,0 +1,29 @@
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<form th:fragment="add-location-form"
+      class="input-group" th:id="'input-group-'+${iter.index}">
+    <select class="form-select input-group-text text-start"
+            name="airportFilter"
+            th:hx-get="@{/nearby-airports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}"
+            th:hx-target="@{#filtered-list-{index}(index=${iter.index})}"
+            hx-trigger="change"
+            hx-swap="outerHTML">
+        <option selected value="DELTA">Delta Airports</option>
+        <hr class="dropdown-divider">
+        <option value="CIVIL">Civil</option>
+        <option value="MILITARY">Military</option>
+        <option value="ALL">All</option>
+    </select>
+    <datalist id="filtered-list-" th:attrappend="id=${iter.index}"
+              hx-trigger="load"
+              hx-swap="outerHTML"
+              th:hx-get="@{/nearby-airports?iterIndex={index}&latitude={latitude}&longitude={longitude}&airportFilter=delta(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}">
+    </datalist>
+    <input th:id="'airport-code-'+${iter.index}"
+           class="form-control"
+           type="text" aria-label="Airport"
+           name="airport-code"
+           th:list="'filtered-list-'+${iter.index}">
+    <button class="btn btn-primary"
+            hx-post="/locations"
+            type="button">Add</button>
+</form>

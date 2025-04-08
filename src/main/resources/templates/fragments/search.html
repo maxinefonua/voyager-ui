@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml"
-      xmlns:hx-get="http://www.w3.org/1999/xhtml">
+      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Search Fragments</title>
@@ -33,7 +32,7 @@
                 th:target="_blank" rel="noopener noreferrer nofollow"></a>
     </div>
     <div id="resultContainer"
-         style="max-height:200px" class="overflow-auto m-2"></div>
+         style="max-height:250px" class="overflow-auto m-2"></div>
     <div id="lookupFooter"></div>
 </div>
 <div th:fragment="accordionResults"
@@ -64,32 +63,7 @@
                 + ${resultSearch.adminName} + ' in '
                 + ${resultSearch.countryName} + '.'">
                 </p>
-                <div class="input-group" th:id="'input-group-'+${iter.index}">
-                    <select class="form-select input-group-text text-start"
-                            name="airportFilter"
-                            th:hx-get="@{/nearbyAirports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}"
-                            th:hx-target="@{#filtered-list-{index}(index=${iter.index})}"
-                            hx-trigger="change"
-                            hx-swap="outerHTML">
-                        <option selected value="ALL">All Airports</option>
-                        <option value="CIVIL">Civil</option>
-                        <option value="MILITARY">Military</option>
-                        <hr class="dropdown-divider">
-                        <option value="DELTA">Delta</option>
-                    </select>
-                    <datalist id="filtered-list-" th:attrappend="id=${iter.index}"
-                              hx-trigger="load"
-                              hx-swap="outerHTML"
-                              th:hx-get="@{/nearbyAirports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}">
-                    </datalist>
-                    <input th:id="'airport-code-'+${iter.index}"
-                           class="form-control"
-                           type="text" aria-label="Airport"
-                           name="airport-code"
-                           th:list="'filtered-list-'+${iter.index}">
-                    <button class="btn btn-primary"
-                            type="button">Add</button>
-                </div>
+                <form th:replace="~{fragments/form :: add-location-form}"></form>
             </div>
         </div>
     </div>
