@@ -6,12 +6,12 @@
             th:value="${airportDisplay.iata}"
             th:attr="selected=${iter.index == 0}?selected : null" th:text="${airportDisplay.name}"></option>
 </datalist>
-<input th:fragment="iata-code-input"
+<input th:fragment="iata-code-input" th:object="${locationForm}"
        th:id="'airport-code-'+${iterIndex}"
        class="form-control"
        type="text" aria-label="Airport"
        hx-swap-oob="true"
-       name="airport-code"
+       name="airport-code" th:field="*{airportCode}"
        th:placeholder="${firstAirportCode}"
        th:list="'filtered-list-'+${iterIndex}">
 </html>

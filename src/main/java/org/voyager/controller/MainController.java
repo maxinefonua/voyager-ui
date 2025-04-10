@@ -20,8 +20,6 @@ import org.voyager.validate.ValidationUtils;
 import java.util.*;
 
 import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
-import static org.voyager.utils.ConstantsUtils.AIRLINE_PARAM_NAME;
-import static org.voyager.utils.ConstantsUtils.TYPE_PARAM_NAME;
 
 @Controller
 public class MainController {
@@ -93,6 +91,7 @@ public class MainController {
                                 "longitude",longitude)),
                 new ModelAndView("fragments/result-display :: iata-code-input",
                         Map.of("iterIndex",iterIndex,
+                                "locationForm", new LocationForm(),
                                 "firstAirportCode",nearbyAirports.get(0).getIata())));
 
     }
@@ -103,8 +102,6 @@ public class MainController {
         long beforeSearch = System.currentTimeMillis();
         VoyagerListResponse<ResultSearch> voyagerResponse = voyagerAPI.lookup(searchText,0);
         List<ResultSearch> lookupResults = voyagerResponse.getResults();
-        List<LocationForm> locationForms = lookupResults.stream().map(resultSearch ->
-                LocationForm.builder().resultSearch(resultSearch).build()).toList();
         Integer totalResultsCount = voyagerResponse.getResultCount();
         double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
         LOGGER.info("duration of search: " + duration + "s");
@@ -112,7 +109,6 @@ public class MainController {
         return List.of(
                 new ModelAndView("fragments/search :: accordionResults",
                         Map.of("lookupResults", lookupResults,
-                                "locationForms",locationForms,
                                 "searchText",searchText)),
                 new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
