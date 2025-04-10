@@ -91,7 +91,6 @@ public class MainController {
                                 "longitude",longitude)),
                 new ModelAndView("fragments/result-display :: iata-code-input",
                         Map.of("iterIndex",iterIndex,
-                                "locationForm", new LocationForm(),
                                 "firstAirportCode",nearbyAirports.get(0).getIata())));
 
     }
@@ -109,6 +108,7 @@ public class MainController {
         return List.of(
                 new ModelAndView("fragments/search :: accordionResults",
                         Map.of("lookupResults", lookupResults,
+                                "locationForm",new LocationForm(),
                                 "searchText",searchText)),
                 new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));

@@ -9,6 +9,11 @@ import org.voyager.model.result.ResultSearch;
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 public class LocationForm {
-    ResultSearch resultSearch;
+    String name;
+    String subdivision;
+    String countryCode;
+    Double latitude;
+    Double longitude;
     String airportCode;
+    Double[] bounds;
 }
