@@ -29,5 +29,5 @@
 </form>
 
 <div th:fragment="add-form-success">
-    Successfully pressed location!
+    <p th:text="'Successfully passed airport code: '+${locationForm.airportCode}"></p>
 </div>

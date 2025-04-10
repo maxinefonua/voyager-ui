@@ -68,7 +68,8 @@ public class MainController {
     }
 
     @PostMapping("/locations")
-    public String addLocation() {
+    public String addLocation(@ModelAttribute LocationForm locationForm, Model model) {
+        model.addAttribute("locationForm", locationForm);
         return "fragments/form :: add-form-success";
     }
 
