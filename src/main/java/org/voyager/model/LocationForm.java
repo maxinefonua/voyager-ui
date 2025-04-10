@@ -1,6 +1,7 @@
 package org.voyager.model;
 
 import lombok.*;
+import org.voyager.model.result.ResultSearch;
 
 @Builder
 @Getter @Setter
@@ -8,6 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 public class LocationForm {
-    String name;
+    ResultSearch resultSearch;
     String airportCode;
 }

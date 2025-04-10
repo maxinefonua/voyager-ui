@@ -103,6 +103,8 @@ public class MainController {
         long beforeSearch = System.currentTimeMillis();
         VoyagerListResponse<ResultSearch> voyagerResponse = voyagerAPI.lookup(searchText,0);
         List<ResultSearch> lookupResults = voyagerResponse.getResults();
+        List<LocationForm> locationForms = lookupResults.stream().map(resultSearch ->
+                LocationForm.builder().resultSearch(resultSearch).build()).toList();
         Integer totalResultsCount = voyagerResponse.getResultCount();
         double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
         LOGGER.info("duration of search: " + duration + "s");
@@ -110,6 +112,7 @@ public class MainController {
         return List.of(
                 new ModelAndView("fragments/search :: accordionResults",
                         Map.of("lookupResults", lookupResults,
+                                "locationForms",locationForms,
                                 "searchText",searchText)),
                 new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
