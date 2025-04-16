@@ -15,5 +15,9 @@ public class LocationForm {
     Double latitude;
     Double longitude;
     String airportCode;
-    Double[] bounds;
+    Double west;
+    Double south;
+    Double east;
+    Double north;
+
 }

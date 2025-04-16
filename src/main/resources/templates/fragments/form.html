@@ -3,11 +3,6 @@
 <form th:fragment="add-location-form" th:hx-include="'#airport-code-'+${iter.index}"
       hx-post="/locations" th:object="${locationForm}"
       class="input-group" th:id="'input-group-'+${iter.index}">
-    <input type="hidden" id="name" name="name" th:value="${resultSearch.name}" />
-    <input type="hidden" id="subdivision" name="subdivision" th:value="${resultSearch.subdivision}" />
-    <input type="hidden" id="countryCode" name="countryCode" th:value="${resultSearch.countryCode}" />
-    <input type="hidden" id="latitude" name="latitude" th:value="${resultSearch.latitude}" />
-    <input type="hidden" id="longitude" name="longitude" th:value="${resultSearch.longitude}" />
     <select class="form-select input-group-text text-start"
             name="airportFilter"
             th:hx-get="@{/nearby-airports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}"
@@ -21,6 +16,15 @@
         <option value="MILITARY">Military</option>
         <option value="ALL">All</option>
     </select>
+    <input type="hidden" id="name" name="name" th:value="${resultSearch.name}" />
+    <input type="hidden" id="subdivision" name="subdivision" th:value="${resultSearch.subdivision}" />
+    <input type="hidden" id="countryCode" name="countryCode" th:value="${resultSearch.countryCode}" />
+    <input type="hidden" id="latitude" name="latitude" th:value="${resultSearch.latitude}" />
+    <input type="hidden" id="longitude" name="longitude" th:value="${resultSearch.longitude}" />
+    <input type="hidden" id="west" name="west" th:value="${resultSearch.bounds[0]}" />
+    <input type="hidden" id="south" name="south" th:value="${resultSearch.bounds[1]}" />
+    <input type="hidden" id="east" name="east" th:value="${resultSearch.bounds[2]}" />
+    <input type="hidden" id="north" name="north" th:value="${resultSearch.bounds[3]}" />
     <datalist id="filtered-list-" th:attrappend="id=${iter.index}"></datalist>
     <input th:id="'airport-code-'+${iter.index}"
            class="form-control"
@@ -35,5 +39,5 @@
     <p th:text="'Successfully passed airport code: '+${locationForm.airportCode}"></p>
     <p th:text="'Successfully passed latitude, longitude: ('+${locationForm.latitude} + ','+${locationForm.longitude}+')'"></p>
     <p th:text="'Successfully passed name, subdivision: '+${locationForm.name} + ','+${locationForm.subdivision}"></p>
-    <p th:text="'Successfully passed bounds: '+${locationForm.bounds}"></p>
+    <p th:text="'Successfully passed bounds: ['+${locationForm.west}+','+${locationForm.south}+','+${locationForm.east}+','+${locationForm.north}+']'"></p>
 </div>
