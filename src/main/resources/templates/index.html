@@ -59,6 +59,15 @@
         });
         map.addControl(nav);
 
+        function setAirportPlaceHolder(iterIndex) {
+            console.log('setAirportPlaceHolder called with index: ' + iterIndex);
+            const airportInput = document.getElementById("airport-code-"+iterIndex);
+            if (airportInput) {
+                const airportList = document.getElementById("filtered-list-"+iterIndex);
+                airportInput.placeholder = airportList.options[0].value;
+            }
+        }
+
         function updateLookupMap(iterIndex,longitude,latitude,bounds) {
           if (lookupMarker) lookupMarker.remove();
           const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);

@@ -1,5 +1,6 @@
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
-<form th:fragment="add-location-form"
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html"
+      xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<form th:fragment="add-location-form" th:hx-include="'#airport-code-'+${iter.index}"
       hx-post="/locations" th:object="${locationForm}"
       class="input-group" th:id="'input-group-'+${iter.index}">
     <input type="hidden" id="name" name="name" th:value="${resultSearch.name}" />
@@ -11,7 +12,8 @@
             name="airportFilter"
             th:hx-get="@{/nearby-airports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}"
             th:hx-target="@{#filtered-list-{index}(index=${iter.index})}"
-            hx-trigger="change"
+            th:hx-on::after-request="'setAirportPlaceHolder('+${iter.index}+')'"
+            hx-trigger="change,load"
             hx-swap="outerHTML">
         <option selected value="DELTA">Delta Airports</option>
         <hr class="dropdown-divider">
@@ -19,20 +21,16 @@
         <option value="MILITARY">Military</option>
         <option value="ALL">All</option>
     </select>
-    <datalist id="filtered-list-" th:attrappend="id=${iter.index}"
-              hx-trigger="load"
-              hx-swap="outerHTML"
-              th:hx-get="@{/nearby-airports?iterIndex={index}&latitude={latitude}&longitude={longitude}&airportFilter=delta(index=${iter.index},latitude=${resultSearch.latitude},longitude=${resultSearch.longitude})}">
-    </datalist>
+    <datalist id="filtered-list-" th:attrappend="id=${iter.index}"></datalist>
     <input th:id="'airport-code-'+${iter.index}"
            class="form-control"
            type="text" aria-label="Airport"
+           th:field="*{airportCode}"
            name="airport-code"
            th:list="'filtered-list-'+${iter.index}" />
     <button class="btn btn-primary"
             type="submit">Add</button>
 </form>
-
 <div th:fragment="add-form-success">
     <p th:text="'Successfully passed airport code: '+${locationForm.airportCode}"></p>
     <p th:text="'Successfully passed latitude, longitude: ('+${locationForm.latitude} + ','+${locationForm.longitude}+')'"></p>

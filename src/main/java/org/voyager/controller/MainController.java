@@ -88,10 +88,7 @@ public class MainController {
                         Map.of("nearbyAirports", nearbyAirports,
                                 "iterIndex",iterIndex,
                                 "latitude",latitude,
-                                "longitude",longitude)),
-                new ModelAndView("fragments/result-display :: iata-code-input",
-                        Map.of("iterIndex",iterIndex,
-                                "firstAirportCode",nearbyAirports.get(0).getIata())));
+                                "longitude",longitude)));
 
     }
 
