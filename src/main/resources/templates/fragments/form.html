@@ -41,3 +41,9 @@
     <p th:text="'Successfully passed name, subdivision: '+${locationForm.name} + ','+${locationForm.subdivision}"></p>
     <p th:text="'Successfully passed bounds: ['+${locationForm.west}+','+${locationForm.south}+','+${locationForm.east}+','+${locationForm.north}+']'"></p>
 </div>
+<div th:fragment="invalid-location-form">
+    <p th:text="'Passed airport code: '+${locationForm.airportCode}"></p>
+    <p th:text="'Passed latitude, longitude: ('+${locationForm.latitude} + ','+${locationForm.longitude}+')'"></p>
+    <p th:text="'Passed name, subdivision: '+${locationForm.name} + ','+${locationForm.subdivision}"></p>
+    <p th:text="'Passed bounds: ['+${locationForm.west}+','+${locationForm.south}+','+${locationForm.east}+','+${locationForm.north}+']'"></p>
+</div>

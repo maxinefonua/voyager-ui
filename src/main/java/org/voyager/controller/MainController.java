@@ -1,7 +1,9 @@
 package org.voyager.controller;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.voyager.model.*;
@@ -66,7 +68,11 @@ public class MainController {
     }
 
     @PostMapping("/locations")
-    public String addLocation(@ModelAttribute LocationForm locationForm, Model model) {
+    public String addLocation(Model model, @ModelAttribute @Valid LocationForm locationForm, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("locationForm",locationForm);
+            return "fragments/form :: invalid-location-form";
+        }
         model.addAttribute("locationForm", locationForm);
         return "fragments/form :: add-form-success";
     }
