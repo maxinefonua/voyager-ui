@@ -63,7 +63,7 @@
             console.log('setAirportPlaceHolder called with index: ' + iterIndex);
             const airportInput = document.getElementById("airport-code-"+iterIndex);
             const airportList = document.getElementById("filtered-list-"+iterIndex);
-            if (airportInput && airportList) {
+            if (airportInput && airportList && airportList.options) {
                 airportInput.placeholder = airportList.options[0].value;
             }
         }
