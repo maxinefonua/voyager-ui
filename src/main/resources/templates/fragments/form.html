@@ -34,12 +34,13 @@
         <input id="airport-code-"
                list="filtered-list-"
                th:attrappend="id=${iter}?${iter.index}:${locationForm.index},list=${iter}?${iter.index}:${locationForm.index}"
+               th:classappend="${iter}?null:is-invalid"
                class="form-control"
                type="text" aria-label="Airport"
-               th:field="*{airportCode}"/>
+               th:field="*{airportCode}" required/>
         <button class="btn btn-primary"
                 type="submit">Add</button>
-        <div th:if="${#fields.hasErrors('airportCode')}" th:errors="*{airportCode}">Airport Error</div>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('airportCode')}" th:errors="*{airportCode}">Airport Error</div>
     </div>
 </form>
 <div th:fragment="add-form-success">
