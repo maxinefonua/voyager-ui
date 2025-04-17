@@ -71,7 +71,7 @@ public class MainController {
     public String addLocation(Model model, @ModelAttribute @Valid LocationForm locationForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("locationForm",locationForm);
-            return "fragments/form :: invalid-location-form";
+            return "fragments/form :: add-location-form";
         }
         model.addAttribute("locationForm", locationForm);
         return "fragments/form :: add-form-success";

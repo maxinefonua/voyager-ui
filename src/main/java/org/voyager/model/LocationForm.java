@@ -11,6 +11,7 @@ import org.voyager.model.result.ResultSearch;
 @NoArgsConstructor
 @ToString(includeFieldNames = false)
 public class LocationForm {
+    Integer index;
     String name;
     String subdivision;
     String countryCode;
