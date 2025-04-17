@@ -34,7 +34,7 @@
         <input id="airport-code-"
                list="filtered-list-"
                th:attrappend="id=${iter}?${iter.index}:${locationForm.index},list=${iter}?${iter.index}:${locationForm.index}"
-               th:classappend="${iter}?null:is-invalid"
+               th:classappend="${#fields.hasErrors('airportCode')}?is-invalid"
                class="form-control"
                type="text" aria-label="Airport"
                th:field="*{airportCode}" required/>
