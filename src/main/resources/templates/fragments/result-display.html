@@ -4,6 +4,6 @@
           th:attrappend="id=${iterIndex}">
     <option th:each="airportDisplay,iter : ${nearbyAirports}"
             th:value="${airportDisplay.iata}"
-            th:attr="selected=${iter.index == 0}?selected : null" th:text="${airportDisplay.name}"></option>
+            th:text="${airportDisplay.name}"></option>
 </datalist>
 </html>

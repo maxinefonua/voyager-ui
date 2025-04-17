@@ -39,7 +39,7 @@
      id="accordionResults"
      class="accordion list-group">
     <div class="accordion item" th:each="resultSearch,iter : ${lookupResults}">
-        <button th:if="${iter.index==0}"
+        <button th:if="${iter.first}"
                 id="searchResultButtonHeader-0"
                 class="accordion-button list-group-item list-group-item-action list-group-item-light"
                 type="button"
@@ -56,7 +56,7 @@
                 aria-expanded="true"
                 th:text="${resultSearch.name} + ', ' + ${resultSearch.subdivision} + ' | ' + ${resultSearch.countryName}"
                 th:onclick="updateLookupMap(0,[[${resultSearch.longitude}]],[[${resultSearch.latitude}]],[[${resultSearch.bounds}]])"></button>
-        <button th:unless="${iter.index==0}"
+        <button th:unless="${iter.first}"
                 id="searchResultButtonHeader-"
                 class="accordion-button list-group-item list-group-item-action list-group-item-light collapsed"
                 type="button"
@@ -72,7 +72,7 @@
                 class="accordion-collapse collapse"
                 data-bs-parent="#accordionResults"
                 th:attrappend="id=${iter.index}"
-                th:classappend="${iter.index == 0}? show : null">
+                th:classappend="${iter.first}? show">
             <div class="accordion-body">
                 <p th:text="${resultSearch.name} +' is a '
                 + ${resultSearch.type} + ' of '
