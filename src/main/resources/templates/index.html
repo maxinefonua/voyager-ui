@@ -60,7 +60,6 @@
         map.addControl(nav);
 
         function setAirportPlaceHolder(iterIndex) {
-            console.log('setAirportPlaceHolder called with index: ' + iterIndex);
             const airportInput = document.getElementById("airport-code-"+iterIndex);
             const airportList = document.getElementById("filtered-list-"+iterIndex);
             if (airportInput && airportList && airportList.options && airportList.options[0]) {
@@ -75,6 +74,19 @@
               map.fitBounds(bounds);
               lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }
+        };
+
+        function checkAirportInput(iterIndex) {
+          const airportInput = document.getElementById("airport-code-"+iterIndex);
+          const airportList = document.getElementById("filtered-list-"+iterIndex);
+          if (airportInput && airportInput.value && airportInput.value.length == 3) {
+            console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInput.value.length);
+
+          }
+        }
+
+        function updateWithAirportMap(longitude,latitude) {
+          console.log('updateWithAirportMap called with longitude: ' + longitude + ', latitude: ' + latitude);
         };
 
         function recenterMap() {

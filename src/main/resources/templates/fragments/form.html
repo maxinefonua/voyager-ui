@@ -33,6 +33,7 @@
                   th:attrappend="id=${iter}?${iter.index}:${locationForm.index}"></datalist>
         <input id="airport-code-"
                list="filtered-list-"
+               th:oninput="${iter != null}?'checkAirportInput('+${iter.index}+')':'checkAirportInput('+${locationForm.index}+')'"
                th:attrappend="id=${iter}?${iter.index}:${locationForm.index},list=${iter}?${iter.index}:${locationForm.index}"
                th:classappend="${#fields.hasErrors('airportCode')}?is-invalid"
                class="form-control"
@@ -40,7 +41,7 @@
                th:field="*{airportCode}" required/>
         <button class="btn btn-primary"
                 type="submit">Add</button>
-        <div class="invalid-feedback" th:if="${#fields.hasErrors('airportCode')}" th:errors="*{airportCode}">Airport Error</div>
+        <div id="airport-invalid-feedback" class="invalid-feedback" th:if="${#fields.hasErrors('airportCode')}" th:errors="*{airportCode}">Airport Error</div>
     </div>
 </form>
 <div th:fragment="add-form-success">
