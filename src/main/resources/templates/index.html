@@ -9,6 +9,7 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.css" rel="stylesheet" />
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <link th:href="@{/css/stylesheet.css}" rel="stylesheet" />
 </head>
 <body>
     <div class="page-wrapper" style="display:flex;flex-direction:column;">
@@ -27,8 +28,10 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<!--    TODO: implement loading data into the DOM https://docs.mapbox.com/help/tutorials/custom-markers-gl-js/?step=4 -->
     <script>
         var lookupMarker = null;
+        var airportMarker = null;
         var map = new mapboxgl.Map({
             container: 'map',
             style: {
@@ -68,6 +71,7 @@
         }
 
         function updateLookupMap(iterIndex,longitude,latitude,bounds) {
+          if (airportMarker) airportMarker.remove();
           if (lookupMarker) lookupMarker.remove();
           const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
           if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
@@ -80,17 +84,40 @@
           const airportInput = document.getElementById("airport-code-"+iterIndex);
           const airportList = document.getElementById("filtered-list-"+iterIndex);
           if (airportInput && airportInput.value && airportInput.value.length == 3) {
-            console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInput.value.length);
-
+            if (airportList && airportList.options && airportList.options.namedItem(airportInput.value)) {
+              const airportMatch = airportList.options.namedItem(airportInput.value);
+              updateWithAirportMap(airportMatch.dataset.longitude,airportMatch.dataset.latitude);
+            } else {
+              console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInput.value.length + ', no match. Airport value: ' + airportInput.value);
+            }
           }
-        }
+        };
 
         function updateWithAirportMap(longitude,latitude) {
-          console.log('updateWithAirportMap called with longitude: ' + longitude + ', latitude: ' + latitude);
+          if (airportMarker) airportMarker.remove();
+          if (lookupMarker) {
+            const lngLat = lookupMarker.getLngLat();
+            const south = lngLat.lat < latitude? lngLat.lat : latitude;
+            const north = lngLat.lat > latitude? lngLat.lat : latitude;
+            const west = lngLat.lng < longitude? lngLat.lng : longitude;
+            const east = lngLat.lng > longitude? lngLat.lng : longitude;
+            const bounds = [west,south,east,north];
+            map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 40, right: 40}});
+            airportMarker = new mapboxgl.Marker({color:"#9B1631"})
+                .setLngLat([longitude,latitude])
+                .setPopup(
+                    new mapboxgl.Popup({ offset: 25 }) // add popups
+                      .setHTML(
+                        `<h3>Test Title</h3><p>Test Description</p>`
+                      )
+                  )
+                .addTo(map);
+          }
         };
 
         function recenterMap() {
           if (lookupMarker) lookupMarker.remove();
+          if (airportMarker) airportMarker.remove();
           map.flyTo({
               center: [0, 0],
               zoom: 0

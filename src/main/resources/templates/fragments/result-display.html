@@ -4,6 +4,7 @@
           th:attrappend="id=${iterIndex}">
     <option th:each="airportDisplay,iter : ${nearbyAirports}"
             th:id="'result-'+${iterIndex}+'-airport-'+${iter.index}"
+            th:name="${airportDisplay.iata}"
             th:value="${airportDisplay.iata}"
             th:data-longitude="${airportDisplay.longitude}"
             th:data-latitude="${airportDisplay.latitude}"
