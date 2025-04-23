@@ -83,9 +83,15 @@
         function checkAirportInput(iterIndex) {
           const airportInput = document.getElementById("airport-code-"+iterIndex);
           const airportList = document.getElementById("filtered-list-"+iterIndex);
-          if (airportInput && airportInput.value && airportInput.value.length == 3) {
-            if (airportList && airportList.options && airportList.options.namedItem(airportInput.value)) {
-              const airportMatch = airportList.options.namedItem(airportInput.value);
+          const regex = /^[a-zA-Z]{3}$/;
+          if (airportInput && airportInput.value && regex.test(airportInput.value)) {
+            if (airportList && airportList.options && airportList.options.namedItem(airportInput.value.toUpperCase())) {
+              const airportMatch = airportList.options.namedItem(airportInput.value.toUpperCase());
+              const invalidFeedback = document.getElementById("airport-invalid-feedback");
+              if (invalidFeedback) {
+                invalidFeedback.remove();
+                airportInput.classList.remove('is-invalid');
+              }
               updateWithAirportMap(airportMatch.dataset.longitude,airportMatch.dataset.latitude);
             } else {
               console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInput.value.length + ', no match. Airport value: ' + airportInput.value);
