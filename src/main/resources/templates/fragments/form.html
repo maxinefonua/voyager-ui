@@ -16,7 +16,7 @@
     <input type="hidden" id="east" name="east" th:value="${iter}?${resultSearch.bounds[2]}:${locationForm.east}" />
     <input type="hidden" id="north" name="north" th:value="${iter}?${resultSearch.bounds[3]}:${locationForm.north}" />
     <div class="input-group">
-        <select class="form-select input-group-text text-start"
+        <select class="input-group-text"
                 name="airportFilter"
                 th:hx-get="@{/nearby-airports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter}?${iter.index}:${locationForm.index},latitude=${iter}?${resultSearch.latitude}:${locationForm.latitude},longitude=${iter}?${resultSearch.longitude}:${locationForm.longitude})}"
                 th:hx-target="@{#filtered-list-{index}(index=${iter}?${iter.index}:${locationForm.index})}"
@@ -41,7 +41,9 @@
                th:field="*{airportCode}" required/>
         <button class="btn btn-primary"
                 type="submit">Add</button>
-        <div id="airport-invalid-feedback" class="invalid-feedback" th:if="${#fields.hasErrors('airportCode')}" th:errors="*{airportCode}">Airport Error</div>
+        <div id="airport-invalid-feedback-"
+             th:attrappend="id=${iter}?${iter.index}:${locationForm.index}"
+             class="invalid-feedback" th:if="${#fields.hasErrors('airportCode')}" th:errors="*{airportCode}">Airport Error</div>
     </div>
 </form>
 <div th:fragment="add-form-success">

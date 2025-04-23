@@ -18,10 +18,10 @@
         <h1 class="p-4">Oh, the Places to Go!</h1>
         <div id="map" style="min-height:200px;width:100%;"></div>
         <div class="container" id="tabMenu">
-            <ul th:replace="~{fragments/tab :: tab1Active}"></ul>
+            <ul th:replace="~{fragments/tab :: tab2Active}"></ul>
         </div>
         <div class="container" id="tabContent">
-            <div th:replace="~{fragments/tab :: savedTab}"></div>
+            <div th:replace="~{fragments/tab :: addTab}"></div>
         </div>
         </div>
         <div th:replace="~{fragments/footer :: footer}"></div>
@@ -87,7 +87,7 @@
           if (airportInput && airportInput.value && regex.test(airportInput.value)) {
             if (airportList && airportList.options && airportList.options.namedItem(airportInput.value.toUpperCase())) {
               const airportMatch = airportList.options.namedItem(airportInput.value.toUpperCase());
-              const invalidFeedback = document.getElementById("airport-invalid-feedback");
+              const invalidFeedback = document.getElementById("airport-invalid-feedback-"+iterIndex);
               if (invalidFeedback) {
                 invalidFeedback.remove();
                 airportInput.classList.remove('is-invalid');
