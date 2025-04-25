@@ -137,8 +137,9 @@
           document.getElementById('searchButton').innerHTML = 'Searching';
         }
 
-        function setMapToFirstResult() {
+        function mapToFirst() {
           if (lookupMarker) lookupMarker.remove();
+          if (airportMarker) airportMarker.remove();
           const firstResultButton = document.getElementById("searchResultButtonHeader-0");
           if (firstResultButton) {
             const longitude = firstResultButton.dataset.lng;
@@ -146,6 +147,10 @@
             const bounds = [firstResultButton.dataset.boundsWest,firstResultButton.dataset.boundsSouth,firstResultButton.dataset.boundsEast,firstResultButton.dataset.boundsNorth]
             updateLookupMap(0,longitude,latitude,bounds);
           }
+        }
+
+        function setMapToFirstResult() {
+          mapToFirst();
           document.getElementById('searchButton').innerHTML = 'Search';
           document.getElementById('searchButton').disabled = false;
         }

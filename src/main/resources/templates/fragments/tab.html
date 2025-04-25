@@ -13,7 +13,7 @@
            id="saved-tab-link"
            hx-get="/saved"
            hx-target="#tabContent"
-           hx-on::after-request="activateDeactivate('saved-tab-link','add-tab-link')"
+           hx-on::before-request="activateDeactivate('saved-tab-link','add-tab-link')"
            hx-swap="innerHTML">Saved
         </button>
     </li>
@@ -22,7 +22,8 @@
            id="add-tab-link"
            hx-get="/add"
            hx-target="#tabContent"
-           hx-on::after-request="activateDeactivate('add-tab-link','saved-tab-link')"
+           hx-on::before-request="activateDeactivate('add-tab-link','saved-tab-link')"
+           hx-on::after-request="recenterMap()"
            hx-swap="innerHTML">Add
         </button>
     </li>
