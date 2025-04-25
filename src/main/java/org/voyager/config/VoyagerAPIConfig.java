@@ -1,7 +1,6 @@
 package org.voyager.config;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,7 +82,7 @@ public class VoyagerAPIConfig {
                 .toUriString();
     }
 
-    public String buildGetLocationsURL() {
+    public String buildLocationsURL() {
         return UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)

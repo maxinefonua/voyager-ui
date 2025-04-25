@@ -3,18 +3,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.server.ResponseStatusException;
 import org.voyager.config.VoyagerAPIConfig;
 import org.voyager.model.Airline;
 import org.voyager.model.AirportDisplay;
 import org.voyager.model.AirportType;
 import org.voyager.model.TownDisplay;
 import org.voyager.model.location.LocationDisplay;
+import org.voyager.model.location.LocationForm;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
@@ -87,14 +87,28 @@ public class VoyagerAPIService implements VoyagerAPI {
 
     @Override
     public List<LocationDisplay> getLocations() {
-        String locationsURL = voyagerAPIConfig.buildGetLocationsURL();
+        String locationsURL = voyagerAPIConfig.buildLocationsURL();
         LOGGER.debug("full locations URL: " + locationsURL);
-        ResponseEntity<List<LocationDisplay>> airportsResponse = restTemplate
+        ResponseEntity<List<LocationDisplay>> locationsResponse = restTemplate
                 .exchange(locationsURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
                         new ParameterizedTypeReference<List<LocationDisplay>>() {});
-        validateVoyagerResponse(airportsResponse,locationsURL);
-        return airportsResponse.getBody();
+        validateVoyagerResponse(locationsResponse,locationsURL);
+        return locationsResponse.getBody();
+    }
+
+    @Override
+    public LocationDisplay addLocation(LocationForm locationForm) {
+        String locationsURL = voyagerAPIConfig.buildLocationsURL();
+        LOGGER.debug("full locations URL: " + locationsURL);
+        HttpEntity<LocationForm> requestEntity = new HttpEntity<>(locationForm, voyagerAPIConfig.getHttpEntity().getHeaders());
+        ResponseEntity<LocationDisplay> locationsResponse = restTemplate
+                .exchange(locationsURL,
+                        HttpMethod.POST,
+                        requestEntity,
+                        LocationDisplay.class);
+        validateVoyagerResponse(locationsResponse,locationsURL);
+        return locationsResponse.getBody();
     }
 }

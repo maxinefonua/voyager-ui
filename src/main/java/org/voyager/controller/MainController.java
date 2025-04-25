@@ -55,10 +55,10 @@ public class MainController {
 
     @GetMapping("/saved")
     public Collection<ModelAndView> getSaved() {
-        VoyagerResponseAPI<TownDisplay> voyagerResponse = voyagerAPI.towns();
+        List<LocationDisplay> locations = voyagerAPI.getLocations();
         return List.of(
                 new ModelAndView("fragments/tab :: savedTab",
-                        Map.of("towns",voyagerResponse.getResponseList())),
+                        Map.of("locations",locations)),
                 new ModelAndView("fragments/tab :: tab1Active"));
     }
 
@@ -80,6 +80,8 @@ public class MainController {
             model.addAttribute("locationForm",locationForm);
             return "fragments/form :: add-form-error";
         }
+        LocationDisplay saved = voyagerAPI.addLocation(locationForm);
+        LOGGER.info("saved: " + saved);
         model.addAttribute("locationForm", locationForm);
         return "fragments/form :: add-form-success";
     }
