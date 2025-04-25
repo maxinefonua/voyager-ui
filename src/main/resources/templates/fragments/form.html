@@ -1,5 +1,5 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
-<form th:fragment="add-location-form"
+<form th:fragment="add-location-form-2"
       hx-include="#airport-code-"
       id="input-group-"
       th:attrappend="hx-include=${iter}?${iter.index}:${locationForm.index},id=${iter}?${iter.index}:${locationForm.index}"
@@ -45,11 +45,64 @@
              th:attrappend="id=${iter}?${iter.index}:${locationForm.index}"
              class="invalid-feedback" th:if="${#fields.hasErrors('airportCode')}" th:errors="*{airportCode}">Airport Error</div>
     </div>
+    <div class="container">
+        <div class="row mt-3">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                Build Route
+            </button>
+        </div>
+        <div class="row mt-3 collapse" id="collapseExample">
+            <div class="form-floating p-0">
+                <input type="text" class="form-control" id="delta-start-"
+                       list="starting-airport-"
+                       th:attrappend="id=${iter}?${iter.index}:${locationForm.index},list=${iter}?${iter.index}:${locationForm.index}"
+                       placeholder="SJC">
+                <datalist id="starting-airport-"
+                          th:attrappend="id=${iter}?${iter.index}:${locationForm.index}">
+                    <option value="SJC">timestamp</option>
+                </datalist>
+                <label for="delta-start-">Delta Start Airport</label>
+            </div>
+        </div>
+        <div class="row mt-3 collapse" id="collapseExample">
+            <div class="form-floating p-0">
+                <input id="delta-end-"
+                       placeholder="ARN"
+                       type="text" class="form-control"
+                       list="filtered-list-"
+                       th:attrappend="id=${iter}?${iter.index}:${locationForm.index},list=${iter}?${iter.index}:${locationForm.index}">
+                <label for="delta-end-"
+                       th:attrappend="for=${iter}?${iter.index}:${locationForm.index}">
+                    End Airport
+                </label>
+            </div>
+        </div>
+    </div>
 </form>
-<div th:fragment="add-form-success">
-    <p th:text="'Successfully passed airport code: '+${locationForm.airportCode}"></p>
-    <p th:text="'Successfully passed index: '+${locationForm.index}"></p>
-    <p th:text="'Successfully passed latitude, longitude: ('+${locationForm.latitude} + ','+${locationForm.longitude}+')'"></p>
-    <p th:text="'Successfully passed name, subdivision: '+${locationForm.name} + ','+${locationForm.subdivision}"></p>
-    <p th:text="'Successfully passed bounds: ['+${locationForm.west}+','+${locationForm.south}+','+${locationForm.east}+','+${locationForm.north}+']'"></p>
+<form th:fragment="add-location-form"
+      id="input-group-"
+      th:attrappend="id=${iter.index}"
+      th:object="${locationForm}">
+    <input type="hidden" id="index" name="index" th:value="${iter.index}" />
+    <input type="hidden" id="name" name="name" th:value="${resultSearch.name}" />
+    <input type="hidden" id="subdivision" name="subdivision" th:value="${resultSearch.subdivision}" />
+    <input type="hidden" id="countryCode" name="countryCode" th:value="${resultSearch.countryCode}" />
+    <input type="hidden" id="latitude" name="latitude" th:value="${resultSearch.latitude}" />
+    <input type="hidden" id="longitude" name="longitude" th:value="${resultSearch.longitude}" />
+    <input type="hidden" id="west" name="west" th:value="${resultSearch.bounds[0]}" />
+    <input type="hidden" id="south" name="south" th:value="${resultSearch.bounds[1]}" />
+    <input type="hidden" id="east" name="east" th:value="${resultSearch.bounds[2]}" />
+    <input type="hidden" id="north" name="north" th:value="${resultSearch.bounds[3]}" />
+    <div class="d-grid gap-2">
+        <button class="btn btn-primary"
+                hx-post="/locations"
+                hx-swap="outerHTML transition:true"
+                type="submit">Add</button>
+    </div>
+</form>
+<div>
+
 </div>
+<button th:fragment="add-form-success"
+        class="btn btn-primary" disabled>Added
+</button>

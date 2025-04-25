@@ -10,9 +10,9 @@
         <input class="form-control m-2 me-0"
                type="text" placeholder="Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
         <datalist id="Recent_Search_List">
-            <option value="Helsinki">timestamp</option>
-            <option value="Grenoble">timestamp</option>
             <option value="Kahuku">timestamp</option>
+            <option value="Grenoble">timestamp</option>
+            <option value="Helsinki">timestamp</option>
             <option value="Itami">timestamp</option>
             <option value="Lyon">timestamp</option>
         </datalist>
@@ -32,7 +32,7 @@
                 th:target="_blank" rel="noopener noreferrer nofollow"></a>
     </div>
     <div id="resultContainer"
-         style="max-height:250px" class="overflow-auto m-2"></div>
+         style="max-height:400px" class="overflow-auto m-2"></div>
     <div id="lookupFooter"></div>
 </div>
 <div th:fragment="accordionResults"
