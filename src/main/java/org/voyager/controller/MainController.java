@@ -54,20 +54,16 @@ public class MainController {
     }
 
     @GetMapping("/saved")
-    public Collection<ModelAndView> getSaved() {
+    public String getSaved(Model model) {
         List<LocationDisplay> locations = voyagerAPI.getLocations();
-        return List.of(
-                new ModelAndView("fragments/tab :: savedTab",
-                        Map.of("locations",locations)),
-                new ModelAndView("fragments/tab :: tab1Active"));
+        model.addAttribute("locations",locations);
+        return "fragments/tab :: saved-tab";
     }
 
     @GetMapping("/add")
-    public Collection<ModelAndView> getAdd() {
-        return List.of(
-                new ModelAndView( "fragments/tab :: addTab",
-                        Map.of("lookupAttribution", voyagerAPI.lookupAttribution())),
-                new ModelAndView("fragments/tab :: tab2Active"));
+    public String getAdd(Model model) {
+        model.addAttribute("lookupAttribution",voyagerAPI.lookupAttribution());
+        return "fragments/tab :: add-tab";
     }
 
     @PostMapping("/locations")

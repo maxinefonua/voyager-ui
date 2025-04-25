@@ -5,48 +5,32 @@
     <meta charset="UTF-8">
     <title>Tab Content</title>
 </head>
-<ul th:fragment="tab1Active"
-        id="tabList"
-        hx-swap-oob="outerHTML:#tabList"
-        class="nav nav-underline">
+<ul th:fragment="tab-list"
+    id="tabList"
+    class="nav nav-underline">
     <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#"
+        <button class="nav-link active"
+           id="saved-tab-link"
            hx-get="/saved"
            hx-target="#tabContent"
+           hx-on::after-request="activateDeactivate('saved-tab-link','add-tab-link')"
            hx-swap="innerHTML">Saved
-        </a>
+        </button>
     </li>
     <li class="nav-item">
-        <a class="nav-link" aria-current="page" href="#"
+        <button class="nav-link"
+           id="add-tab-link"
            hx-get="/add"
            hx-target="#tabContent"
+           hx-on::after-request="activateDeactivate('add-tab-link','saved-tab-link')"
            hx-swap="innerHTML">Add
-        </a>
+        </button>
     </li>
 </ul>
-<ul th:fragment="tab2Active"
-        id="tabList"
-        hx-swap-oob="outerHTML:#tabList"
-        class="nav nav-underline">
-    <li class="nav-item">
-        <a class="nav-link" aria-current="page" href="#"
-           hx-get="/saved"
-           hx-target="#tabContent"
-           hx-swap="innerHTML">Saved
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#"
-           hx-get="/add"
-           hx-target="#tabContent"
-           hx-swap="innerHTML">Add
-        </a>
-    </li>
-</ul>
-<div th:fragment="savedTab">
+<div th:fragment="saved-tab">
     <div th:replace="~{fragments/townlist :: locationList}"></div>
 </div>
-<div th:fragment="addTab">
+<div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>
 </div>
 </html>

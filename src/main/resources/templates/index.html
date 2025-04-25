@@ -18,10 +18,10 @@
         <h1 class="p-4">Oh, the Places to Go!</h1>
         <div id="map" style="min-height:200px;width:100%;"></div>
         <div class="container" id="tabMenu">
-            <ul th:replace="~{fragments/tab :: tab2Active}"></ul>
+            <ul th:replace="~{fragments/tab :: tab-list}"></ul>
         </div>
         <div class="container" id="tabContent">
-            <div th:replace="~{fragments/tab :: addTab}"></div>
+            <div th:replace="~{fragments/tab :: saved-tab}"></div>
         </div>
         </div>
         <div th:replace="~{fragments/footer :: footer}"></div>
@@ -148,6 +148,16 @@
           }
           document.getElementById('searchButton').innerHTML = 'Search';
           document.getElementById('searchButton').disabled = false;
+        }
+
+        function activateDeactivate(tab1, tab2) {
+          const btn1 = document.getElementById(tab1);
+          const btn2 = document.getElementById(tab2);
+
+          btn1.classList.add('active');
+          btn1.disabled = true;
+          btn2.disabled = false;
+          btn2.classList.remove('active');
         }
     </script>
 </body>
