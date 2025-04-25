@@ -7,4 +7,12 @@
         </li>
     </ul>
 </div>
+<div th:fragment="locationList"
+     th:if="${locations} != null and not ${locations.empty}">
+    <ul>
+        <li th:each="location : ${locations}" th:text="${location.name}+', '+${location.subdivision}+', '+${location.countryCode}">
+            <button type="button" class="btn btn-outline-success">Add</button>
+        </li>
+    </ul>
+</div>
 </html>

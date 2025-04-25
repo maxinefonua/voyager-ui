@@ -14,6 +14,7 @@ import org.voyager.model.Airline;
 import org.voyager.model.AirportDisplay;
 import org.voyager.model.AirportType;
 import org.voyager.model.TownDisplay;
+import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
@@ -81,6 +82,19 @@ public class VoyagerAPIService implements VoyagerAPI {
                         voyagerAPIConfig.getHttpEntity(),
                         new ParameterizedTypeReference<List<AirportDisplay>>() {});
         validateVoyagerResponse(airportsResponse,nearbyAirportsURL);
+        return airportsResponse.getBody();
+    }
+
+    @Override
+    public List<LocationDisplay> getLocations() {
+        String locationsURL = voyagerAPIConfig.buildGetLocationsURL();
+        LOGGER.debug("full locations URL: " + locationsURL);
+        ResponseEntity<List<LocationDisplay>> airportsResponse = restTemplate
+                .exchange(locationsURL,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        new ParameterizedTypeReference<List<LocationDisplay>>() {});
+        validateVoyagerResponse(airportsResponse,locationsURL);
         return airportsResponse.getBody();
     }
 }

@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.voyager.model.*;
+import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.location.LocationForm;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
@@ -40,8 +42,8 @@ public class MainController {
 
     @GetMapping("/")
     public String homepage(Model model) {
-        VoyagerResponseAPI<TownDisplay> voyagerResponse = voyagerAPI.towns();
-        model.addAttribute("towns",voyagerResponse.getResponseList());
+        List<LocationDisplay> locations = voyagerAPI.getLocations();
+        model.addAttribute("locations",locations);
         model.addAttribute("lookupAttribution", voyagerAPI.lookupAttribution());
         return "index";
     }
@@ -71,8 +73,12 @@ public class MainController {
     @PostMapping("/locations")
     public String addLocation(Model model, @ModelAttribute @Valid LocationForm locationForm, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
+            bindingResult.getAllErrors().forEach(error -> {
+                if (error instanceof FieldError fieldError)LOGGER.error(String.format("'%s' %s",fieldError.getField(),fieldError.getDefaultMessage()));
+                else LOGGER.error(error.getDefaultMessage());
+            });
             model.addAttribute("locationForm",locationForm);
-            return "fragments/form :: add-location-form";
+            return "fragments/form :: add-form-error";
         }
         model.addAttribute("locationForm", locationForm);
         return "fragments/form :: add-form-success";

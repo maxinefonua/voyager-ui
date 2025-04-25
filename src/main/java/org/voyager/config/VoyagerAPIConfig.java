@@ -1,8 +1,10 @@
 package org.voyager.config;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,16 +24,29 @@ import static org.voyager.utils.ConstantsUtils.*;
 @Setter
 @Getter
 public class VoyagerAPIConfig {
-
     String protocol;
     String host;
     Integer port;
-    String lookupPath;
-    String lookupAttributionPath;
-    String townPath;
-    String iataPath;
-    String nearbyAirportsPath;
     String authToken;
+
+    @Value("/search")
+    String lookupPath;
+
+    @Value("/search-attribution")
+    String lookupAttributionPath;
+
+    @Value("/locations")
+    String locationsPath;
+
+    @Value("/towns")
+    String townPath;
+
+    @Value("/iata")
+    String iataPath;
+
+    @Value("/nearby-airports")
+    String nearbyAirportsPath;
+
     private HttpEntity<String> httpEntityWithHeaders;
     private UriComponentsBuilder nearbyAirportsURI;
 
@@ -65,6 +80,15 @@ public class VoyagerAPIConfig {
                 .host(host)
                 .port(port)
                 .path(townPath)
+                .toUriString();
+    }
+
+    public String buildGetLocationsURL() {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(locationsPath)
                 .toUriString();
     }
 

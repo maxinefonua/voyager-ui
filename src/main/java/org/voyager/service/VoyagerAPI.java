@@ -9,6 +9,7 @@ import org.voyager.model.Airline;
 import org.voyager.model.AirportDisplay;
 import org.voyager.model.AirportType;
 import org.voyager.model.TownDisplay;
+import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
@@ -23,6 +24,7 @@ public interface VoyagerAPI {
     public abstract LookupAttribution lookupAttribution();
     public abstract VoyagerResponseAPI<TownDisplay> towns();
     public abstract List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline);
+    public abstract List<LocationDisplay> getLocations();
     public default void validateVoyagerResponse(ResponseEntity responseEntity, String requestURL){
         if (responseEntity.getStatusCode().value() != 200 || responseEntity.getBody() == null) {
             StringBuilder sb = new StringBuilder();

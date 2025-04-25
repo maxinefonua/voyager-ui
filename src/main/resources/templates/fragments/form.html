@@ -83,7 +83,8 @@
       id="input-group-"
       th:attrappend="id=${iter.index}"
       th:object="${locationForm}">
-    <input type="hidden" id="index" name="index" th:value="${iter.index}" />
+    <input type="hidden" id="source" name="source" th:value="${resultSearch.source}" />
+    <input type="hidden" id="sourceId" name="sourceId" th:value="${resultSearch.sourceId}" />
     <input type="hidden" id="name" name="name" th:value="${resultSearch.name}" />
     <input type="hidden" id="subdivision" name="subdivision" th:value="${resultSearch.subdivision}" />
     <input type="hidden" id="countryCode" name="countryCode" th:value="${resultSearch.countryCode}" />
@@ -105,4 +106,7 @@
 </div>
 <button th:fragment="add-form-success"
         class="btn btn-primary" disabled>Added
+</button>
+<button th:fragment="add-form-error"
+        class="btn btn-danger" disabled>Error
 </button>
