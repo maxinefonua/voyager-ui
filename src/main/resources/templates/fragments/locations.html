@@ -1,11 +1,29 @@
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<div th:fragment="townlist"
-     th:if="${towns} != null and not ${towns.empty}">
-    <ul>
-        <li th:each="townDisplay : ${towns}" th:text="${townDisplay.name}+', '+${townDisplay.country}+', '+${townDisplay.regionName}">
-            <button type="button" class="btn btn-outline-success">Add</button>
-        </li>
-    </ul>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hx-get="http://www.w3.org/1999/xhtml"
+      xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<div th:fragment="airport-form">
+    <div class="input-group mb-4">
+        <datalist id="filtered-list-" th:attrappend="id=${iter.index}"></datalist>
+        <select class="input-group-text"
+                name="airportFilter"
+                th:hx-get="@{/nearby-airports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${locationDisplay.latitude},longitude=${locationDisplay.longitude})}"
+                th:hx-target="@{#filtered-list-{index}(index=${iter.index})}"
+                hx-trigger="change,load"
+                th:hx-on::after-request="'setAirportPlaceHolder('+${iter.index}+')'"
+                hx-swap="outerHTML">
+            <option selected value="DELTA">Delta Airports</option>
+            <hr class="dropdown-divider">
+            <option value="CIVIL">Civil</option>
+            <option value="MILITARY">Military</option>
+            <option value="ALL">All</option>
+        </select>
+        <input th:id="'airport-code-'+${iter.index}"
+               class="form-control"
+               type="text" aria-label="Airport"
+               th:oninput="'checkAirportInput('+${iter.index}+')'"
+               name="airport-code"
+               th:list="'filtered-list-'+${iter.index}" required>
+    </div>
+    <div class="d-grid col-4 mx-auto"><button class="btn btn-outline-primary" type="submit">+</button></div>
 </div>
 <div th:fragment="locationList"
      th:if="${locations} != null"
@@ -50,10 +68,30 @@
                 + ${locationDisplay.subdivision} + ' in '
                 + ${locationDisplay.countryCode} + '.'">
                 </p>
+                <div id="airports-container-"
+                     class="container mb-2"
+                     th:attrappend="id=${iter.index}"
+                >
+                    <div th:replace="~{fragments/locations :: airport-form}"></div>
+                </div>
+                <button class="btn btn-outline-success">Save</button>
             </div>
         </div>
     </div>
     <div th:unless="${locations.size > 0}"
          class="list-group-item list-group-item-secondary">No saved locations. Click 'Add' to save locations.</div>
 </div>
+<datalist th:fragment="all-airports"
+          id="all-airports">
+    <option th:each="airportDisplay,iter : ${airportList}"
+            th:name="${airportDisplay.iata}"
+            th:value="${airportDisplay.iata}"
+            th:data-longitude="${airportDisplay.longitude}"
+            th:data-latitude="${airportDisplay.latitude}"
+            th:data-city="${airportDisplay.city}"
+            th:data-subdivision="${airportDisplay.subdivision}"
+            th:data-country="${airportDisplay.countryCode}"
+            th:data-type="${airportDisplay.type.name}"
+            th:text="${airportDisplay.name}"></option>
+</datalist>
 </html>

@@ -84,6 +84,22 @@ public class MainController {
         return "fragments/form :: add-form-success";
     }
 
+    @GetMapping("/airports")
+    @Cacheable("airportsCache")
+    public String getAirports(Model model, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
+        AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional);
+        Optional<AirportType> type = Optional.empty();
+        Optional<Airline> airline = Optional.empty();
+        switch (airportFilter) {
+            case DELTA -> airline = Optional.of(Airline.DELTA);
+            case CIVIL -> type = Optional.of(AirportType.CIVIL);
+            case MILITARY -> type = Optional.of(AirportType.MILITARY);
+        }
+        List<AirportDisplay> airportList = voyagerAPI.airports(type,airline);
+        model.addAttribute("airportList",airportList);
+        return "fragments/locations :: all-airports";
+    }
+
     @GetMapping("/nearby-airports")
     @Cacheable("nearbyAirportsCache")
     public Collection<ModelAndView> nearbyAirports(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {

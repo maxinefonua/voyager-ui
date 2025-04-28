@@ -46,6 +46,9 @@ public class VoyagerAPIConfig {
     @Value("/nearby-airports")
     String nearbyAirportsPath;
 
+    @Value("/airports")
+    String airportsPath;
+
     private HttpEntity<String> httpEntityWithHeaders;
     private UriComponentsBuilder nearbyAirportsURI;
 
@@ -112,6 +115,17 @@ public class VoyagerAPIConfig {
         type.ifPresent(airportType -> nearByURL.queryParam(TYPE_PARAM_NAME, airportType));
         airline.ifPresent(airportType -> nearByURL.queryParam(AIRLINE_PARAM_NAME, airportType));
         return nearByURL.toUriString();
+    }
+
+    public String buildAirportsURL(Optional<AirportType> type, Optional<Airline> airline) {
+        UriComponentsBuilder airportsURL = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(airportsPath);
+        type.ifPresent(airportType -> airportsURL.queryParam(TYPE_PARAM_NAME, airportType));
+        airline.ifPresent(airportType -> airportsURL.queryParam(AIRLINE_PARAM_NAME, airportType));
+        return airportsURL.toUriString();
     }
 
     public String buildLookupAttributionURL() {

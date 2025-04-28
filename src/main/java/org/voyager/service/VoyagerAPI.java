@@ -27,6 +27,8 @@ public interface VoyagerAPI {
     public abstract List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline);
     public abstract List<LocationDisplay> getLocations();
     public abstract LocationDisplay addLocation(LocationForm locationForm);
+    List<AirportDisplay> airports(Optional<AirportType> type, Optional<Airline> airline);
+
     public default void validateVoyagerResponse(ResponseEntity responseEntity, String requestURL){
         if (responseEntity.getStatusCode().value() != 200 || responseEntity.getBody() == null) {
             StringBuilder sb = new StringBuilder();
@@ -38,4 +40,5 @@ public interface VoyagerAPI {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error occurred fetching data.");
         }
     }
+
 }

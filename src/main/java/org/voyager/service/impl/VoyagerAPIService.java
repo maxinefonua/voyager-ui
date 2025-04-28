@@ -111,4 +111,17 @@ public class VoyagerAPIService implements VoyagerAPI {
         validateVoyagerResponse(locationsResponse,locationsURL);
         return locationsResponse.getBody();
     }
+
+    @Override
+    public List<AirportDisplay> airports(Optional<AirportType> type, Optional<Airline> airline) {
+        String airportsURL = voyagerAPIConfig.buildAirportsURL(type,airline);
+        LOGGER.debug("full airports URL: " + airportsURL);
+        ResponseEntity<List<AirportDisplay>> airportsResponse = restTemplate
+                .exchange(airportsURL,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        new ParameterizedTypeReference<List<AirportDisplay>>() {});
+        validateVoyagerResponse(airportsResponse,airportsURL);
+        return airportsResponse.getBody();
+    }
 }
