@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.voyager.model.*;
 import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.location.LocationForm;
+import org.voyager.model.location.Status;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.voyager.service.VoyagerAPI;
 import org.voyager.validate.ValidationUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
 
@@ -104,7 +106,6 @@ public class MainController {
     }
 
     @GetMapping("/search")
-    @Cacheable("searchCache")
     public Collection<ModelAndView> search(Model model, @ModelAttribute("searchText") String searchText)  {
         long beforeSearch = System.currentTimeMillis();
         VoyagerListResponse<ResultSearch> voyagerResponse = voyagerAPI.lookup(searchText,0);
