@@ -8,10 +8,10 @@
     </ul>
 </div>
 <div th:fragment="locationList"
-     th:if="${locations} != null and not ${locations.empty}"
+     th:if="${locations} != null"
      id="savedLocations"
      class="accordion list-group">
-    <div class="accordion item" th:each="locationDisplay,iter : ${locations}">
+    <div th:if="${locations.size > 0}" class="accordion item" th:each="locationDisplay,iter : ${locations}">
         <button th:if="${iter.first}"
                 id="location-display-0"
                 class="accordion-button list-group-item list-group-item-action list-group-item-light"
@@ -54,6 +54,6 @@
         </div>
     </div>
     <div th:unless="${locations.size > 0}"
-         class="list-group-item list-group-item-secondary" th:text="No saved locations. Click 'Add' to save locations."></div>
+         class="list-group-item list-group-item-secondary">No saved locations. Click 'Add' to save locations.</div>
 </div>
 </html>

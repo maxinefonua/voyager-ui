@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
     <link th:href="@{/css/stylesheet.css}" rel="stylesheet" />
 </head>
-<body>
+<body onload="mapToFirst('location-display-0',false)">
     <div class="page-wrapper" style="display:flex;flex-direction:column;">
         <div th:replace="~{fragments/topnav :: navbar}">
         </div>
@@ -147,20 +147,21 @@
           document.getElementById('searchButton').innerHTML = 'Searching';
         }
 
-        function mapToFirst(elementId) {
+        function mapToFirst(elementId,fromSearch) {
           if (lookupMarker) lookupMarker.remove();
           if (airportMarker) airportMarker.remove();
-          const firstResultButton = document.getElementById(elementId);
-          if (firstResultButton) {
-            const longitude = firstResultButton.dataset.lng;
-            const latitude = firstResultButton.dataset.lat;
-            const bounds = [firstResultButton.dataset.boundsWest,firstResultButton.dataset.boundsSouth,firstResultButton.dataset.boundsEast,firstResultButton.dataset.boundsNorth]
-            updateLookupMap(0,longitude,latitude,bounds);
+          const firstElemButton = document.getElementById(elementId);
+          if (firstElemButton) {
+            const longitude = firstElemButton.dataset.lng;
+            const latitude = firstElemButton.dataset.lat;
+            const bounds = [firstElemButton.dataset.boundsWest,firstElemButton.dataset.boundsSouth,firstElemButton.dataset.boundsEast,firstElemButton.dataset.boundsNorth]
+            if (fromSearch) updateLookupMap(0,longitude,latitude,bounds);
+            else zoomToLocationMap(0,longitude,latitude,bounds);
           }
         }
 
-        function setMapToFirstResult() {
-          mapToFirst("searchResultButtonHeader-0");
+        function setMapToFirstSearch() {
+          mapToFirst("searchResultButtonHeader-0",true);
           document.getElementById('searchButton').innerHTML = 'Search';
           document.getElementById('searchButton').disabled = false;
         }

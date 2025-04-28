@@ -14,6 +14,7 @@
            hx-get="/saved"
            hx-target="#tabContent"
            hx-on::before-request="activateDeactivate('saved-tab-link','add-tab-link')"
+           hx-on::after-request="mapToFirst('location-display-0',false)"
            hx-swap="innerHTML">Saved
         </button>
     </li>
