@@ -8,11 +8,52 @@
     </ul>
 </div>
 <div th:fragment="locationList"
-     th:if="${locations} != null and not ${locations.empty}">
-    <ul>
-        <li th:each="location : ${locations}" th:text="${location.name}+', '+${location.subdivision}+', '+${location.countryCode}">
-            <button type="button" class="btn btn-outline-success">Add</button>
-        </li>
-    </ul>
+     th:if="${locations} != null and not ${locations.empty}"
+     id="savedLocations"
+     class="accordion list-group">
+    <div class="accordion item" th:each="locationDisplay,iter : ${locations}">
+        <button th:if="${iter.first}"
+                id="location-display-0"
+                class="accordion-button list-group-item list-group-item-action list-group-item-light"
+                type="button"
+                aria-controls="collapse-location-0"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-location-0"
+                th:data-lat="${locationDisplay.latitude}"
+                th:data-lng="${locationDisplay.longitude}"
+                th:data-bounds-west="${locationDisplay.bbox[0]}"
+                th:data-bounds-south="${locationDisplay.bbox[1]}"
+                th:data-bounds-east="${locationDisplay.bbox[2]}"
+                th:data-bounds-north="${locationDisplay.bbox[3]}"
+                aria-expanded="true"
+                th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
+                th:onclick="zoomToLocationMap(0,[[${locationDisplay.longitude}]],[[${locationDisplay.latitude}]],[[${locationDisplay.bbox}]])"></button>
+        <button th:unless="${iter.first}"
+                id="location-display-"
+                class="accordion-button list-group-item list-group-item-action list-group-item-light collapsed"
+                type="button"
+                aria-controls="collapse-location-"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-location-"
+                aria-expanded="false"
+                th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
+                th:onclick="zoomToLocationMap([[${iter.index}]],[[${locationDisplay.longitude}]],[[${locationDisplay.latitude}]],[[${locationDisplay.bbox}]])"
+                th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"></button>
+        <div
+                id="collapse-location-"
+                class="accordion-collapse collapse"
+                data-bs-parent="#savedLocations"
+                th:attrappend="id=${iter.index}"
+                th:classappend="${iter.first}? show">
+            <div class="accordion-body">
+                <p th:text="${locationDisplay.name} +' is a locality of '
+                + ${locationDisplay.subdivision} + ' in '
+                + ${locationDisplay.countryCode} + '.'">
+                </p>
+            </div>
+        </div>
+    </div>
+    <div th:unless="${locations.size > 0}"
+         class="list-group-item list-group-item-secondary" th:text="No saved locations. Click 'Add' to save locations."></div>
 </div>
 </html>

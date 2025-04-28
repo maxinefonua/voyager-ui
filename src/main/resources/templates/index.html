@@ -81,6 +81,16 @@
           }
         };
 
+        function zoomToLocationMap(iterIndex,longitude,latitude,bounds) {
+          if (airportMarker) airportMarker.remove();
+          if (lookupMarker) lookupMarker.remove();
+          const clickedButton = document.getElementById("location-display-"+iterIndex);
+          if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
+              map.fitBounds(bounds);
+              lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+          }
+        };
+
         function checkAirportInput(iterIndex) {
           const airportInput = document.getElementById("airport-code-"+iterIndex);
           const airportList = document.getElementById("filtered-list-"+iterIndex);
@@ -137,10 +147,10 @@
           document.getElementById('searchButton').innerHTML = 'Searching';
         }
 
-        function mapToFirst() {
+        function mapToFirst(elementId) {
           if (lookupMarker) lookupMarker.remove();
           if (airportMarker) airportMarker.remove();
-          const firstResultButton = document.getElementById("searchResultButtonHeader-0");
+          const firstResultButton = document.getElementById(elementId);
           if (firstResultButton) {
             const longitude = firstResultButton.dataset.lng;
             const latitude = firstResultButton.dataset.lat;
@@ -150,7 +160,7 @@
         }
 
         function setMapToFirstResult() {
-          mapToFirst();
+          mapToFirst("searchResultButtonHeader-0");
           document.getElementById('searchButton').innerHTML = 'Search';
           document.getElementById('searchButton').disabled = false;
         }
