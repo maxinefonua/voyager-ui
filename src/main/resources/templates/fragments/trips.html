@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Trip Content</title>
+</head>
+<div th:fragment="trips" class="container">
+        <datalist id="Location_List">
+            <option th:each="locationDisplay, iter : ${locations}" th:text="${locationDisplay.name}+', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"></option>
+        </datalist>
+        <input class="form-control m-2 me-0"
+               type="text" placeholder="Start Location" aria-label="Start Location" name="startLocation" id="startLocation" list="Location_List" value="">
+        <input class="form-control m-2 me-0"
+               type="text" placeholder="End Location" aria-label="End Location" name="endLocation" id="endLocation" list="Location_List" value="">
+        <button id="add-trip-button"
+                class="btn btn-outline-success m-2 ms-0"
+                hx-get="/trips"
+                hx-on::before-request="resetMapOnSearch()"
+                hx-on::after-request="setMapToFirstSearch()">Search</button>
+</div>
+</html>

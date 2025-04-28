@@ -178,6 +178,18 @@
           btn2.disabled = false;
           btn2.classList.remove('active');
         }
+
+
+        function activate(element) {
+          const tabs = document.getElementsByClassName('tab-btn');
+          for (let i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+            tabs[i].disabled = false;
+          }
+
+          element.classList.add('active');
+          element.disabled = true;
+        }
     </script>
 </body>
 </html>

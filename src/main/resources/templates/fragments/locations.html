@@ -70,8 +70,7 @@
                 </p>
                 <div id="airports-container-"
                      class="container mb-2"
-                     th:attrappend="id=${iter.index}"
-                >
+                     th:attrappend="id=${iter.index}">
                     <div th:replace="~{fragments/locations :: airport-form}"></div>
                 </div>
                 <button class="btn btn-outline-success">Save</button>
@@ -79,7 +78,7 @@
         </div>
     </div>
     <div th:unless="${locations.size > 0}"
-         class="list-group-item list-group-item-secondary">No saved locations. Click 'Add' to save locations.</div>
+         class="list-group-item list-group-item-secondary">No saved trips. Click 'Add Location' to plan new trip.</div>
 </div>
 <datalist th:fragment="all-airports"
           id="all-airports">

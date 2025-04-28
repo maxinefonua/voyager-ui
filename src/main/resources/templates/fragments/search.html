@@ -8,8 +8,9 @@
 <div th:fragment="lookupContainer" class="container">
     <div class="input-group">
         <input class="form-control m-2 me-0"
-               type="text" placeholder="Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
+               type="text" placeholder="Start Location" aria-label="Search" name="searchText" id="searchText" list="Recent_Search_List" value="">
         <datalist id="Recent_Search_List">
+            <option value="San Jose">timestamp</option>
             <option value="Kahuku">timestamp</option>
             <option value="Grenoble">timestamp</option>
             <option value="Helsinki">timestamp</option>
@@ -79,7 +80,7 @@
                 + ${resultSearch.subdivision} + ' in '
                 + ${resultSearch.countryName} + '.'">
                 </p>
-                <form th:replace="~{fragments/form :: add-location-form}"></form>
+                <form th:replace="~{fragments/form :: add-start-form}"></form>
             </div>
         </div>
     </div>

@@ -100,6 +100,14 @@ public class MainController {
         return "fragments/locations :: all-airports";
     }
 
+    @GetMapping("/trips")
+    public String getTrips(Model model) {
+        List<LocationDisplay> locations = voyagerAPI.getLocations();
+        model.addAttribute("trips",List.of());
+        model.addAttribute("locations",List.of());
+        return "fragments/tab :: trips-tab";
+    }
+
     @GetMapping("/nearby-airports")
     @Cacheable("nearbyAirportsCache")
     public Collection<ModelAndView> nearbyAirports(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {

@@ -9,23 +9,36 @@
     id="tabList"
     class="nav nav-underline">
     <li class="nav-item">
-        <button class="nav-link active"
-           id="saved-tab-link"
-           hx-get="/saved"
-           hx-target="#tabContent"
-           hx-on::before-request="activateDeactivate('saved-tab-link','add-tab-link')"
-           hx-on::after-request="mapToFirst('location-display-0',false)"
-           hx-swap="innerHTML">Saved
+        <button class="nav-link active tab-btn"
+                id="saved-tab-link"
+                hx-get="/saved"
+                hx-target="#tabContent"
+                hx-on::before-request="activate(this)"
+                hx-on::after-request="mapToFirst('location-display-0',false)"
+                hx-swap="innerHTML">
+            Saved
         </button>
     </li>
     <li class="nav-item">
-        <button class="nav-link"
-           id="add-tab-link"
-           hx-get="/add"
-           hx-target="#tabContent"
-           hx-on::before-request="activateDeactivate('add-tab-link','saved-tab-link')"
-           hx-on::after-request="recenterMap()"
-           hx-swap="innerHTML">Add
+        <button class="nav-link tab-btn"
+                id="add-tab-link"
+                hx-get="/add"
+                hx-target="#tabContent"
+                hx-on::before-request="activate(this)"
+                hx-on::after-request="recenterMap()"
+                hx-swap="innerHTML">
+            Locations
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link tab-btn"
+                id="trips-tab-link"
+                hx-get="/trips"
+                hx-target="#tabContent"
+                hx-on::before-request="activate(this)"
+                hx-on::after-request="recenterMap()"
+                hx-swap="innerHTML">
+            Trips
         </button>
     </li>
 </ul>
@@ -34,5 +47,8 @@
 </div>
 <div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>
+</div>
+<div th:fragment="trips-tab">
+    <div th:replace="~{fragments/trips :: trips}"></div>
 </div>
 </html>
