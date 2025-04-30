@@ -65,15 +65,16 @@ public class VoyagerAPIConfig {
         return httpEntityWithHeaders;
     }
 
-    public String buildLookupURL(String query, int skipRows) {
-        return UriComponentsBuilder
+    public String buildLookupURL(String query, int skipRows, Optional<Integer> limitOptional) {
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)
                 .port(port)
                 .path(lookupPath)
                 .queryParam(QUERY_PARAM_NAME,query)
-                .queryParam(SKIP_ROW_PARAM_NAME,skipRows)
-                .toUriString();
+                .queryParam(SKIP_ROW_PARAM_NAME,skipRows);
+        limitOptional.ifPresent(limit -> uriComponentsBuilder.queryParam(LIMIT_PARAM_NAME,limit));
+        return uriComponentsBuilder.toUriString();
     }
 
     public String buildGetTownsURL() {

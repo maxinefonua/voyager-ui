@@ -9,7 +9,7 @@
     id="tabList"
     class="nav nav-underline">
     <li class="nav-item">
-        <button class="nav-link active tab-btn"
+        <a class="nav-link tab-btn"
                 id="saved-tab-link"
                 hx-get="/saved"
                 hx-target="#tabContent"
@@ -17,10 +17,10 @@
                 hx-on::after-request="mapToFirst('location-display-0',false)"
                 hx-swap="innerHTML">
             Saved
-        </button>
+        </a>
     </li>
     <li class="nav-item">
-        <button class="nav-link tab-btn"
+        <a class="nav-link tab-btn"
                 id="add-tab-link"
                 hx-get="/add"
                 hx-target="#tabContent"
@@ -28,18 +28,18 @@
                 hx-on::after-request="recenterMap()"
                 hx-swap="innerHTML">
             Locations
-        </button>
+        </a>
     </li>
     <li class="nav-item">
-        <button class="nav-link tab-btn"
+        <a class="nav-link tab-btn active"
                 id="trips-tab-link"
                 hx-get="/trips"
                 hx-target="#tabContent"
                 hx-on::before-request="activate(this)"
-                hx-on::after-request="recenterMap()"
+                hx-on::after-request="reloadTrips('scrollable-content')"
                 hx-swap="innerHTML">
             Trips
-        </button>
+        </a>
     </li>
 </ul>
 <div th:fragment="saved-tab" class="container mt-2">
@@ -48,7 +48,7 @@
 <div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>
 </div>
-<div th:fragment="trips-tab">
+<div th:fragment="trips-tab" class="container m-2">
     <div th:replace="~{fragments/trips :: trips}"></div>
 </div>
 </html>

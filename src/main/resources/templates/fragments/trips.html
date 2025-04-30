@@ -5,18 +5,61 @@
     <meta charset="UTF-8">
     <title>Trip Content</title>
 </head>
+<datalist id="" th:fragment="saved-locations">
+    <option th:each="locationDisplay, iter : ${locations}"
+            th:value="${locationDisplay.name}+', ' + ${locationDisplay.subdivision}"
+            th:data-longitude="${locationDisplay.longitude}"
+            th:data-latitude="${locationDisplay.latitude}"
+            th:data-source="${locationDisplay.source}"
+            th:data-source-id="${locationDisplay.sourceId}"
+            th:data-country="${locationDisplay.countryCode}"
+            th:data-bounds-west="${locationDisplay.bbox[0]}"
+            th:data-bounds-south="${locationDisplay.bbox[1]}"
+            th:data-bounds-east="${locationDisplay.bbox[2]}"
+            th:data-bounds-north="${locationDisplay.bbox[3]}"
+            th:name="${locationDisplay.name}+', ' + ${locationDisplay.subdivision}"
+            th:text="'A locality in ' + ${locationDisplay.countryCode}"></option>
+</datalist>
+<datalist id="" th:fragment="lookup-results">
+    <option th:each="resultSearch, iter : ${lookupResults}"
+            th:value="${resultSearch.name}+', ' + ${resultSearch.subdivision}"
+            th:data-longitude="${resultSearch.longitude}"
+            th:data-latitude="${resultSearch.latitude}"
+            th:data-source="${resultSearch.source}"
+            th:data-source-id="${resultSearch.sourceId}"
+            th:data-country="${resultSearch.countryCode}"
+            th:data-bounds-west="${resultSearch.bounds[0]}"
+            th:data-bounds-south="${resultSearch.bounds[1]}"
+            th:data-bounds-east="${resultSearch.bounds[2]}"
+            th:data-bounds-north="${resultSearch.bounds[3]}"
+            th:name="${resultSearch.name}+', ' + ${resultSearch.subdivision}"
+            th:text="'A ' +  ${resultSearch.type} + ' in ' + ${resultSearch.countryName}"></option>
+</datalist>
 <div th:fragment="trips" class="container">
-        <datalist id="Location_List">
-            <option th:each="locationDisplay, iter : ${locations}" th:text="${locationDisplay.name}+', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"></option>
-        </datalist>
-        <input class="form-control m-2 me-0"
-               type="text" placeholder="Start Location" aria-label="Start Location" name="startLocation" id="startLocation" list="Location_List" value="">
-        <input class="form-control m-2 me-0"
-               type="text" placeholder="End Location" aria-label="End Location" name="endLocation" id="endLocation" list="Location_List" value="">
-        <button id="add-trip-button"
-                class="btn btn-outline-success m-2 ms-0"
-                hx-get="/trips"
-                hx-on::before-request="resetMapOnSearch()"
-                hx-on::after-request="setMapToFirstSearch()">Search</button>
+    <div class="row justify-content-end">
+        <div class="col-2">
+            <div id="trips-scroll-nav" style="width:80px" class="list-group">
+                <a class="list-group-item list-group-item-action" href="#from-city">From</a>
+                <a class="list-group-item list-group-item-action" href="#to-city">To</a>
+            </div>
+        </div>
+        <div class="col-10">
+            <div id="scrollable-content"
+                    data-bs-spy="scroll"
+                    data-bs-target="#trips-scroll-nav"
+                    data-bs-smooth-scroll="true"
+                    class="scrollspy-example overflow-y-scroll p-2"
+                    style="height:250px;"
+                    tabindex="0">
+                <h4 id="from-city">From</h4>
+                <div hx-get="/lookup" hx-swap="outerHTML" hx-trigger="load"></div>
+                <div id="from-result-container"
+                     style="height:250px" class="overflow-auto">
+                </div>
+                <h4 id="to-city">To</h4>
+                <p>This is some placeholder content for the scrollspy page. Note that as you scroll down the page, the appropriate navigation link is highlighted. It's repeated throughout the component example. We keep adding some more example copy here to emphasize the scrolling and highlighting.</p>
+            </div>
+        </div>
+    </div>
 </div>
 </html>

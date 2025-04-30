@@ -32,9 +32,9 @@ public class VoyagerAPIService implements VoyagerAPI {
     private static final RestTemplate restTemplate = new RestTemplate();
     private static final Logger LOGGER = LoggerFactory.getLogger(VoyagerAPIService.class);
 
-    public VoyagerListResponse<ResultSearch> lookup(String query, int skipRows) {
+    public VoyagerListResponse<ResultSearch> lookup(String query, int skipRows,Optional<Integer> limitOptional) {
         String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
-        String lookupURL = voyagerAPIConfig.buildLookupURL(encodedQuery,skipRows);
+        String lookupURL = voyagerAPIConfig.buildLookupURL(encodedQuery,skipRows,limitOptional);
         LOGGER.info(String.format("full lookup URL: %s",lookupURL));
         ResponseEntity<VoyagerListResponse<ResultSearch>> searchResponse = restTemplate.exchange(
                 lookupURL,

@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public interface VoyagerAPI {
     public static final Logger LOGGER = LoggerFactory.getLogger(VoyagerAPI.class);
-    public abstract VoyagerListResponse<ResultSearch> lookup(String query, int skipRows);
+    public abstract VoyagerListResponse<ResultSearch> lookup(String query, int skipRows, Optional<Integer> limitOptional);
     public abstract LookupAttribution lookupAttribution();
     public abstract VoyagerResponseAPI<TownDisplay> towns();
     public abstract List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline);

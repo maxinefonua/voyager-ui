@@ -21,7 +21,7 @@
             <ul th:replace="~{fragments/tab :: tab-list}"></ul>
         </div>
         <div class="container" id="tabContent">
-            <div th:replace="~{fragments/tab :: saved-tab}"></div>
+            <div th:replace="~{fragments/tab :: trips-tab}"></div>
         </div>
         </div>
         <div th:replace="~{fragments/footer :: footer}"></div>
@@ -33,6 +33,8 @@
     <script>
         var lookupMarker = null;
         var airportMarker = null;
+        var startMarker = null;
+        var endMarker = null;
         var map = new mapboxgl.Map({
             container: 'map',
             style: {
@@ -82,6 +84,17 @@
               map.fitBounds(bounds);
               lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }
+        };
+
+        function addStartLocationToMap(optionSelected) {
+          if (optionSelected) {
+            if (startMarker) startMarker.remove();
+            const longitude = optionSelected.dataset.longitude;
+            const latitude = optionSelected.dataset.latitude;
+            const bounds = [optionSelected.dataset.boundsWest,optionSelected.dataset.boundsSouth,optionSelected.dataset.boundsEast,optionSelected.dataset.boundsNorth]
+            map.fitBounds(bounds);
+            startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+         }
         };
 
         function zoomToLocationMap(iterIndex,longitude,latitude,bounds) {
@@ -136,12 +149,18 @@
         };
 
         function recenterMap() {
-          if (lookupMarker) lookupMarker.remove();
-          if (airportMarker) airportMarker.remove();
           map.flyTo({
               center: [0, 0],
               zoom: 0
           });
+        }
+
+        function clearMarkers() {
+          console.log('clearMarkers called')
+          if (lookupMarker) lookupMarker.remove();
+          if (airportMarker) airportMarker.remove();
+          if (startMarker) startMarker.remove();
+          if (endMarker) endMarker.remove();
         }
 
         function resetMapOnSearch() {
@@ -169,18 +188,8 @@
           document.getElementById('searchButton').disabled = false;
         }
 
-        function activateDeactivate(tab1, tab2) {
-          const btn1 = document.getElementById(tab1);
-          const btn2 = document.getElementById(tab2);
-
-          btn1.classList.add('active');
-          btn1.disabled = true;
-          btn2.disabled = false;
-          btn2.classList.remove('active');
-        }
-
-
         function activate(element) {
+          clearMarkers();
           const tabs = document.getElementsByClassName('tab-btn');
           for (let i = 0; i < tabs.length; i++) {
             tabs[i].classList.remove('active');
@@ -189,6 +198,12 @@
 
           element.classList.add('active');
           element.disabled = true;
+        }
+
+        function reloadTrips(scrollingId) {
+          recenterMap();
+          const el = document.getElementById(scrollingId);
+          if (el) bootstrap.ScrollSpy.getOrCreateInstance(el).refresh();
         }
     </script>
 </body>

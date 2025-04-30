@@ -93,4 +93,24 @@
             th:data-type="${airportDisplay.type.name}"
             th:text="${airportDisplay.name}"></option>
 </datalist>
+<select th:fragment="locations-select"
+        class="form-select"
+        onchange="addStartLocationToMap(this.options[this.selectedIndex])"
+>
+    <option selected disabled>Select Start Location</option>
+    <option th:each="locationDisplay,iter : ${locations}"
+            th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
+            th:value="${locationDisplay.id}"
+            th:id="'start-location-'+${locationDisplay.id}"
+            th:data-longitude="${locationDisplay.longitude}"
+            th:data-latitude="${locationDisplay.latitude}"
+            th:data-city="${locationDisplay.name}"
+            th:data-subdivision="${locationDisplay.subdivision}"
+            th:data-country="${locationDisplay.countryCode}"
+            th:data-bounds-west="${locationDisplay.bbox[0]}"
+            th:data-bounds-south="${locationDisplay.bbox[1]}"
+            th:data-bounds-east="${locationDisplay.bbox[2]}"
+            th:data-bounds-north="${locationDisplay.bbox[3]}"
+    ></option>
+</select>
 </html>

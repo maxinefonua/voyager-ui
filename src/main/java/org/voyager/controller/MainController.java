@@ -103,8 +103,8 @@ public class MainController {
     @GetMapping("/trips")
     public String getTrips(Model model) {
         List<LocationDisplay> locations = voyagerAPI.getLocations();
-        model.addAttribute("trips",List.of());
-        model.addAttribute("locations",List.of());
+        model.addAttribute("locations",locations);
+        model.addAttribute("lookupAttribution", voyagerAPI.lookupAttribution());
         return "fragments/tab :: trips-tab";
     }
 
@@ -132,7 +132,7 @@ public class MainController {
     @GetMapping("/search")
     public Collection<ModelAndView> search(Model model, @ModelAttribute("searchText") String searchText)  {
         long beforeSearch = System.currentTimeMillis();
-        VoyagerListResponse<ResultSearch> voyagerResponse = voyagerAPI.lookup(searchText,0);
+        VoyagerListResponse<ResultSearch> voyagerResponse = voyagerAPI.lookup(searchText,0,Optional.of(5));
         List<ResultSearch> lookupResults = voyagerResponse.getResults();
         Integer totalResultsCount = voyagerResponse.getResultCount();
         double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
@@ -141,10 +141,17 @@ public class MainController {
         return List.of(
                 new ModelAndView("fragments/search :: accordionResults",
                         Map.of("lookupResults", lookupResults,
-                                "locationForm",new LocationForm(),
+                                "totalResultsCount",totalResultsCount,
                                 "searchText",searchText)),
                 new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
+    }
+
+    @GetMapping("/lookup")
+    public String locationsSelect(Model model)  {
+        List<LocationDisplay> locations = voyagerAPI.getLocations();
+        model.addAttribute("locations", locations);
+        return "fragments/locations :: locations-select";
     }
 
     @GetMapping("/test")

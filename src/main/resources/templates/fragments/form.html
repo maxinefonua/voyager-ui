@@ -47,10 +47,12 @@
                 class="btn btn-primary"
                 hx-post="/locations"
                 hx-swap="outerHTML transition:true"
-                type="submit" th:text="${resultSearch.status.display}"></button>
+                type="submit"
+                th:text="${resultSearch.status.display}"></button>
         <button th:unless="${resultSearch.status.name() == 'NEW'}"
-                class="btn btn-primary"
-                type="submit">SELECT</button>
+                class="btn btn-outline-primary"
+                th:text="${resultSearch.status.display}"
+                disabled></button>
     </div>
 </form>
 
