@@ -108,9 +108,9 @@ public class MainController {
         return "fragments/tab :: trips-tab";
     }
 
-    @GetMapping("/nearby-airports")
+    @GetMapping("/nearby-airports-old")
     @Cacheable("nearbyAirportsCache")
-    public Collection<ModelAndView> nearbyAirports(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
+    public Collection<ModelAndView> nearbyAirports2(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
         AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional);
         Optional<AirportType> type = Optional.empty();
         Optional<Airline> airline = Optional.empty();
@@ -127,6 +127,24 @@ public class MainController {
                                 "latitude",latitude,
                                 "longitude",longitude)));
 
+    }
+
+    @GetMapping("/nearby-airports")
+    @Cacheable("nearbyAirportsCache")
+    public String nearbyAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
+        AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional);
+        Optional<AirportType> type = Optional.empty();
+        Optional<Airline> airline = Optional.empty();
+        switch (airportFilter) {
+            case DELTA -> airline = Optional.of(Airline.DELTA);
+            case CIVIL -> type = Optional.of(AirportType.CIVIL);
+            case MILITARY -> type = Optional.of(AirportType.MILITARY);
+        }
+        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5,type,airline);
+        model.addAttribute("nearbyAirports",nearbyAirports);
+        model.addAttribute("latitude",latitude);
+        model.addAttribute("longitude",longitude);
+        return "fragments/result-display :: iata-code-list";
     }
 
     @GetMapping("/search")

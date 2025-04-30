@@ -89,19 +89,37 @@
         function addTripLocationToMap(optionSelected,isStart) {
           const longitude = optionSelected.dataset.longitude;
           const latitude = optionSelected.dataset.latitude;
-          const bounds = [optionSelected.dataset.boundsWest,optionSelected.dataset.boundsSouth,optionSelected.dataset.boundsEast,optionSelected.dataset.boundsNorth]
           if (isStart) {
             if (startMarker) startMarker.remove();
             startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
             if (endMarker) mapFitBothMarkers(startMarker,endMarker);
-            else map.fitBounds(bounds);
+            else fitMapToSelectedOption(optionSelected);
           } else {
             if (endMarker) endMarker.remove();
             endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
             if (startMarker) mapFitBothMarkers(startMarker,endMarker);
-            else map.fitBounds(bounds);
+            else fitMapToSelectedOption(optionSelected);
           }
         };
+
+        function mapFitToTrip() {
+            if (startMarker && endMarker) mapFitBothMarkers(startMarker,endMarker);
+        }
+
+        function fitMapToSelectedOption(optionSelected) {
+         const bounds = [optionSelected.dataset.boundsWest,optionSelected.dataset.boundsSouth,optionSelected.dataset.boundsEast,optionSelected.dataset.boundsNorth];
+         map.fitBounds(bounds);
+        }
+
+        function zoomToTripLocation(isStart) {
+            const startSelect = document.getElementById('select-start-location');
+            const endSelect = document.getElementById('select-end-location');
+            if (isStart && startSelect && startSelect.selectedIndex != 0) {
+                fitMapToSelectedOption(startSelect[startSelect.selectedIndex]);
+            } else if (!isStart && endSelect && endSelect.selectedIndex !=0) {
+                fitMapToSelectedOption(endSelect[endSelect.selectedIndex]);
+            }
+        }
 
         function zoomToLocationMap(iterIndex,longitude,latitude,bounds) {
           if (airportMarker) airportMarker.remove();
@@ -140,7 +158,7 @@
             const west = lngLat1.lng < lngLat2.lng ? lngLat1.lng : lngLat2.lng;
             const east = lngLat1.lng > lngLat2.lng ? lngLat1.lng : lngLat2.lng;
             const bounds = [west,south,east,north];
-            map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 40, right: 40}});
+            map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
         }
 
         function updateWithAirportMap(longitude,latitude) {
