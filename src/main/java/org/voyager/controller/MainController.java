@@ -148,9 +148,10 @@ public class MainController {
     }
 
     @GetMapping("/lookup")
-    public String locationsSelect(Model model)  {
+    public String locationsSelect(Model model, @RequestParam Boolean isStart)  {
         List<LocationDisplay> locations = voyagerAPI.getLocations();
         model.addAttribute("locations", locations);
+        model.addAttribute("isStart",isStart);
         return "fragments/locations :: locations-select";
     }
 

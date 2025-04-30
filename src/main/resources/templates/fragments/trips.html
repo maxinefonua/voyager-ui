@@ -52,12 +52,15 @@
                     style="height:250px;"
                     tabindex="0">
                 <h4 id="from-city">From</h4>
-                <div hx-get="/lookup" hx-swap="outerHTML" hx-trigger="load"></div>
+                <div hx-get="/lookup" hx-swap="outerHTML" hx-trigger="load" hx-vals='"isStart":"true"'></div>
                 <div id="from-result-container"
                      style="height:250px" class="overflow-auto">
                 </div>
                 <h4 id="to-city">To</h4>
-                <p>This is some placeholder content for the scrollspy page. Note that as you scroll down the page, the appropriate navigation link is highlighted. It's repeated throughout the component example. We keep adding some more example copy here to emphasize the scrolling and highlighting.</p>
+                <div hx-get="/lookup" hx-swap="outerHTML" hx-trigger="load" hx-vals='"isStart":"false"'></div>
+                <div id="from-result-container"
+                     style="height:250px" class="overflow-auto">
+                </div>
             </div>
         </div>
     </div>

@@ -86,15 +86,21 @@
           }
         };
 
-        function addStartLocationToMap(optionSelected) {
-          if (optionSelected) {
+        function addTripLocationToMap(optionSelected,isStart) {
+          const longitude = optionSelected.dataset.longitude;
+          const latitude = optionSelected.dataset.latitude;
+          const bounds = [optionSelected.dataset.boundsWest,optionSelected.dataset.boundsSouth,optionSelected.dataset.boundsEast,optionSelected.dataset.boundsNorth]
+          if (isStart) {
             if (startMarker) startMarker.remove();
-            const longitude = optionSelected.dataset.longitude;
-            const latitude = optionSelected.dataset.latitude;
-            const bounds = [optionSelected.dataset.boundsWest,optionSelected.dataset.boundsSouth,optionSelected.dataset.boundsEast,optionSelected.dataset.boundsNorth]
-            map.fitBounds(bounds);
             startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
-         }
+            if (endMarker) mapFitBothMarkers(startMarker,endMarker);
+            else map.fitBounds(bounds);
+          } else {
+            if (endMarker) endMarker.remove();
+            endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+            if (startMarker) mapFitBothMarkers(startMarker,endMarker);
+            else map.fitBounds(bounds);
+          }
         };
 
         function zoomToLocationMap(iterIndex,longitude,latitude,bounds) {
@@ -125,6 +131,17 @@
             }
           }
         };
+
+        function mapFitBothMarkers(marker1,marker2) {
+            const lngLat1 = marker1.getLngLat();
+            const lngLat2 = marker2.getLngLat();
+            const south = lngLat1.lat < lngLat2.lat ? lngLat1.lat : lngLat2.lat;
+            const north = lngLat1.lat > lngLat2.lat ? lngLat1.lat : lngLat2.lat;
+            const west = lngLat1.lng < lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+            const east = lngLat1.lng > lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+            const bounds = [west,south,east,north];
+            map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 40, right: 40}});
+        }
 
         function updateWithAirportMap(longitude,latitude) {
           if (airportMarker) airportMarker.remove();

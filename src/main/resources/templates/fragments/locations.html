@@ -95,9 +95,9 @@
 </datalist>
 <select th:fragment="locations-select"
         class="form-select"
-        onchange="addStartLocationToMap(this.options[this.selectedIndex])"
+        th:onchange="'addTripLocationToMap(this.options[this.selectedIndex],'+${isStart}+')'"
 >
-    <option selected disabled>Select Start Location</option>
+    <option selected disabled th:text="${isStart}?'Select Start Location':'Select Start Location'"></option>
     <option th:each="locationDisplay,iter : ${locations}"
             th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
             th:value="${locationDisplay.id}"
