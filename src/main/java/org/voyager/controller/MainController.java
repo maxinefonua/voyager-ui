@@ -154,10 +154,10 @@ public class MainController {
         List<ResultSearch> lookupResults = voyagerResponse.getResults();
         Integer totalResultsCount = voyagerResponse.getResultCount();
         double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
-        LOGGER.info("duration of search: " + duration + "s");
-        LOGGER.info("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");
+        LOGGER.debug("duration of search: " + duration + "s");
+        LOGGER.debug("retrieved [" + lookupResults.size() + "] of [" + totalResultsCount + "] lookup results");
         return List.of(
-                new ModelAndView("fragments/search :: accordionResults",
+                new ModelAndView("fragments/search :: search-location-results",
                         Map.of("lookupResults", lookupResults,
                                 "totalResultsCount",totalResultsCount,
                                 "searchText",searchText)),

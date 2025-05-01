@@ -35,7 +35,7 @@ public class VoyagerAPIService implements VoyagerAPI {
     public VoyagerListResponse<ResultSearch> lookup(String query, int skipRows,Optional<Integer> limitOptional) {
         String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
         String lookupURL = voyagerAPIConfig.buildLookupURL(encodedQuery,skipRows,limitOptional);
-        LOGGER.info(String.format("full lookup URL: %s",lookupURL));
+        LOGGER.debug(String.format("full lookup URL: %s",lookupURL));
         ResponseEntity<VoyagerListResponse<ResultSearch>> searchResponse = restTemplate.exchange(
                 lookupURL,
                 HttpMethod.GET,
@@ -48,7 +48,7 @@ public class VoyagerAPIService implements VoyagerAPI {
     @Override
     public LookupAttribution lookupAttribution() {
         String attributionURL = voyagerAPIConfig.buildLookupAttributionURL();
-        LOGGER.info(String.format("Fetching lookup attribution from URL: %s",attributionURL));
+        LOGGER.debug(String.format("Fetching lookup attribution from URL: %s",attributionURL));
         ResponseEntity<LookupAttribution> attributionResponse = restTemplate.exchange(
                 attributionURL,
                 HttpMethod.GET,

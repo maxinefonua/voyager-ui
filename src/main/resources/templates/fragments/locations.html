@@ -97,7 +97,7 @@
         th:each="locationDisplay,iter : ${locations}"
         th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
         th:value="${locationDisplay.id}"
-        th:id="'start-location-'+${locationDisplay.id}"
+        th:id="${isStart}?'start-location-'+${locationDisplay.id}:'end-location-'+${locationDisplay.id}"
         th:data-longitude="${locationDisplay.longitude}"
         th:data-latitude="${locationDisplay.latitude}"
         th:data-city="${locationDisplay.name}"

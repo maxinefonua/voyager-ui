@@ -9,6 +9,17 @@
     id="tabList"
     class="nav nav-underline">
     <li class="nav-item">
+        <a class="nav-link tab-btn active"
+           id="trips-tab-link"
+           hx-get="/trips"
+           hx-target="#tabContent"
+           hx-on::before-request="activate(this)"
+           hx-on::after-request="reloadTrips('scrollable-content')"
+           hx-swap="innerHTML">
+            Trips
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link tab-btn"
                 id="saved-tab-link"
                 hx-get="/saved"
@@ -28,17 +39,6 @@
                 hx-on::after-request="recenterMap()"
                 hx-swap="innerHTML">
             Locations
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link tab-btn active"
-                id="trips-tab-link"
-                hx-get="/trips"
-                hx-target="#tabContent"
-                hx-on::before-request="activate(this)"
-                hx-on::after-request="reloadTrips('scrollable-content')"
-                hx-swap="innerHTML">
-            Trips
         </a>
     </li>
 </ul>
