@@ -53,15 +53,32 @@
                     style="height:250px;"
                     tabindex="0">
                 <h4 id="from-city">From</h4>
-                <select class="form-select" hx-get="/lookup" hx-swap="outerHTML transition:true" hx-trigger="load" hx-vals='"isStart":"true"'></select>
                 <div id="from-result-container"
                      style="height:250px" class="overflow-auto">
-                    <div th:replace="~{fragments/form :: airport-start-form-disabled}"></div>
+                    <select class="form-select"
+                            hx-get="/lookup"
+                            id="select-start-location"
+                            hx-swap="beforeend transition:true"
+                            hx-trigger="load"
+                            th:onchange="'addTripLocationToMap(this.options[this.selectedIndex],true)'"
+                            hx-vals='"isStart":"true"'>
+                        <option selected disabled>Start Location</option>
+                    </select>
+                    <div th:replace="~{fragments/form :: airport-form-initial(true)}"></div>
                 </div>
                 <h4 id="to-city">To</h4>
-                <div hx-get="/lookup" hx-swap="outerHTML" hx-trigger="load" hx-vals='"isStart":"false"'></div>
                 <div id="from-result-container"
                      style="height:250px" class="overflow-auto">
+                    <select class="form-select"
+                            hx-get="/lookup"
+                            id="select-end-location"
+                            hx-swap="beforeend transition:true"
+                            hx-trigger="load"
+                            th:onchange="'addTripLocationToMap(this.options[this.selectedIndex],false)'"
+                            hx-vals='"isStart":"false"'>
+                        <option selected disabled>End Location</option>
+                    </select>
+                    <div th:replace="~{fragments/form :: airport-form-initial(false)}"></div>
                 </div>
                 <h4 id="review">Review</h4>
                 <div id="from-result-container"

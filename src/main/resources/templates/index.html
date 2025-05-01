@@ -34,7 +34,9 @@
         var lookupMarker = null;
         var airportMarker = null;
         var startMarker = null;
+        var airportStartMarker = null;
         var endMarker = null;
+        var airportEndMarker = null;
         var map = new mapboxgl.Map({
             container: 'map',
             style: {
@@ -91,16 +93,39 @@
           const latitude = optionSelected.dataset.latitude;
           if (isStart) {
             if (startMarker) startMarker.remove();
+            if (airportStartMarker) {
+                airportStartMarker.remove();
+                airportStartMarker = null;
+            }
             startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+
             if (endMarker) mapFitBothMarkers(startMarker,endMarker);
             else fitMapToSelectedOption(optionSelected);
-            document.getElementById('airport-filter-select').disabled = false;
+
+            const airportSelectElement = document.getElementById('airport-filter-select-start');
+            airportSelectElement.disabled = false;
+            airportSelectElement.dispatchEvent(new Event('change'));
+
             document.getElementById('airport-start-code').disabled = false;
+            const disabledText = document.getElementById('airport-disabled-text-start');
+            if (disabledText) disabledText.remove();
           } else {
             if (endMarker) endMarker.remove();
+            if (airportEndMarker) {
+                airportEndMarker.remove();
+                airportEndMarker = null;
+            }
             endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
             if (startMarker) mapFitBothMarkers(startMarker,endMarker);
             else fitMapToSelectedOption(optionSelected);
+
+            const airportSelectElement = document.getElementById('airport-filter-select-end');
+            airportSelectElement.disabled = false;
+            airportSelectElement.dispatchEvent(new Event('change'));
+
+            document.getElementById('airport-end-code').disabled = false;
+            const disabledText = document.getElementById('airport-disabled-text-end');
+            if (disabledText) disabledText.remove();
           }
         };
 
@@ -133,6 +158,33 @@
           }
         };
 
+        function checkAirportInputWithList(airportInputElem,isStart,airportListId) {
+            const airportList = document.getElementById(airportListId);
+            const regex = /^[a-zA-Z]{3}$/;
+            if (airportInputElem && airportInputElem.value && regex.test(airportInputElem.value)) {
+                if (airportList && airportList.options && airportList.options.namedItem(airportInputElem.value.toUpperCase())) {
+                    const airportMatch = airportList.options.namedItem(airportInputElem.value.toUpperCase());
+                    if (isStart) {
+                        if (airportStartMarker) airportStartMarker.remove();
+                        airportStartMarker = addAirportMarker(airportMatch);
+                        const invalidFeedback = document.getElementById("airport-invalid-feedback-start");
+                        if (invalidFeedback) invalidFeedback.remove();
+                        airportInputElem.classList.remove('is-invalid');
+                        mapFitBothMarkers(startMarker,airportStartMarker);
+                    } else {
+                        if (airportEndMarker) airportEndMarker.remove();
+                        airportEndMarker = addAirportMarker(airportMatch);
+                        const invalidFeedback = document.getElementById("airport-invalid-feedback-end");
+                        if (invalidFeedback) invalidFeedback.remove();
+                        airportInputElem.classList.remove('is-invalid');
+                        mapFitBothMarkers(endMarker,airportEndMarker);
+                    }
+            } else {
+              console.log('checkAirportInput called with input: ' + airportInput.value + ' and isStart: ' + isStart + ', no match.');
+            }
+          }
+        };
+
         function checkAirportInput(iterIndex) {
           const airportInput = document.getElementById("airport-code-"+iterIndex);
           const airportList = document.getElementById("filtered-list-"+iterIndex);
@@ -161,6 +213,16 @@
             const east = lngLat1.lng > lngLat2.lng ? lngLat1.lng : lngLat2.lng;
             const bounds = [west,south,east,north];
             map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
+        }
+
+        function addAirportMarker(airportOptionElem) {
+            var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
+                      .setHTML(airportOptionElem.dataset.value);
+            var airportMarker = new mapboxgl.Marker({color:"#9B1631"})
+                .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
+                .setPopup(airportPopup)
+                .addTo(map);
+            return airportMarker;
         }
 
         function updateWithAirportMap(longitude,latitude) {
@@ -197,19 +259,42 @@
           if (lookupMarker) lookupMarker.remove();
           if (airportMarker) airportMarker.remove();
           if (startMarker) startMarker.remove();
+          if (airportStartMarker) airportStartMarker.remove();
           if (endMarker) endMarker.remove();
+          if (airportEndMarker) airportEndMarker.remove();
           lookupMarker = null;
           airportMarker = null;
           startMarker = null;
+          airportStartMarker = null;
+          airportEndMarker = null;
           endMarker = null;
         }
 
+        function clearAirportMarkerMapFitToLocation(isStart) {
+            if (isStart && airportStartMarker) {
+                airportStartMarker.remove();
+                airportStartMarker = null;
+                const startSelect = document.getElementById('select-start-location');
+                if (startSelect && startSelect.options && startSelect.options[startSelect.selectedIndex]) {
+                    fitMapToSelectedOption(startSelect.options[startSelect.selectedIndex]);
+                }
+            } else if (!isStart && airportEndMarker) {
+                airportEndMarker.remove();
+                airportEndMarker = null;
+                const endSelect = document.getElementById('select-end-location');
+                if (endSelect && endSelect.options && endSelect.options[endSelect.selectedIndex]) {
+                    fitMapToSelectedOption(endSelect.options[endSelect.selectedIndex]);
+                }
+            }
+        }
+
         function setAirportPlaceHolderFromList(airportInputId,airportListId){
-            console.log('setAirportPlaceHolderFromList called with ' + airportInputId + ' and ' + airportListId);
+            console.log('setAirportPlaceHolderFromList called with airportInputId: ' + airportInputId)
             const airportInput = document.getElementById(airportInputId);
             const airportList = document.getElementById(airportListId);
             if (airportInput && airportList && airportList.options && airportList.options[0]) {
                 airportInput.placeholder = 'Click to Select ' + airportList.options[0].value;
+                airportInput.value = '';
             }
         }
 

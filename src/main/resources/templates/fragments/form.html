@@ -1,21 +1,20 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html"
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
-<div th:fragment="airport-start-form-disabled" class="container mt-4">
-    <div id="airport-disabled-text" class="form-text">
-        Select start location to enable airport selection
-    </div>
-    <datalist id="filtered-airports-start"></datalist>
+<div th:fragment="airport-form-initial(isStart)" class="container mt-4">
+    <datalist th:id="${isStart}?'filtered-airports-start':'filtered-airports-end'"></datalist>
     <div class="input-group">
         <select
-                id="airport-filter-select"
+                id="airport-filter-select-"
+                th:attrappend="id=${isStart}?'start':'end'"
                 class="form-select"
                 style="max-width:150px"
                 name="airportFilter"
                 hx-get="/nearby-airports"
-                hx-vals='js:{latitude:startMarker.getLngLat().lat,longitude:startMarker.getLngLat().lng}'
-                hx-target="#filtered-airports-start"
+                th:hx-vals="${isStart}?'js:{latitude:startMarker.getLngLat().lat,longitude:startMarker.getLngLat().lng}':'js:{latitude:endMarker.getLngLat().lat,longitude:endMarker.getLngLat().lng}'"
+                th:hx-target="${isStart}?'#filtered-airports-start':'#filtered-airports-end'"
                 hx-trigger="change"
-                hx-on::after-request="setAirportPlaceHolderFromList('airport-start-code','filtered-airports-start')"
+                th:hx-on::after-request="${isStart}?'setAirportPlaceHolderFromList(\'airport-start-code\',\'filtered-airports-start\')':'setAirportPlaceHolderFromList(\'airport-end-code\',\'filtered-airports-end\')'"
+                th:hx-on::before-request="'clearAirportMarkerMapFitToLocation('+${isStart}+')'"
                 hx-swap="innerHTML"
                 disabled
         >
@@ -25,41 +24,20 @@
             <option value="MILITARY">Military</option>
             <option value="ALL">All</option>
         </select>
-        <input id="airport-start-code"
+        <input th:id="${isStart}?'airport-start-code':'airport-end-code'"
                class="form-control"
                placeholder="Start Airport" disabled
                type="text" aria-label="Airport"
-               oninput="checkAirportInputWithList(this,'filtered-airports-start')"
+               th:oninput="${isStart}?'checkAirportInputWithList(this,' + ${isStart} + ',\'filtered-airports-start\')':'checkAirportInputWithList(this,' + ${isStart} + ',\'filtered-airports-end\')'"
                name="airport-start-code"
-               list="filtered-airports-start" required
+               th:list="${isStart}?'filtered-airports-start':'filtered-airports-end'" required
         >
     </div>
-</div>
-<div th:fragment="airport-start-form">
-    <div class="input-group mb-4">
-        <datalist id="filtered-airports-start"></datalist>
-        <select class="input-group-text"
-                name="airportFilter"
-                th:hx-get="@{/nearby-airports?latitude={latitude}&longitude={longitude}(latitude=${locationDisplay.latitude},longitude=${locationDisplay.longitude})}"
-                hx-target="@{#filtered-airports-start}"
-                hx-trigger="change"
-                hx-on::after-request="setAirportPlaceHolderFromList('airport-start-code','filtered-airports-start')"
-                hx-swap="outerHTML">
-            <option selected value="DELTA">Delta Airports</option>
-            <hr class="dropdown-divider">
-            <option value="CIVIL">Civil</option>
-            <option value="MILITARY">Military</option>
-            <option value="ALL">All</option>
-        </select>
-        <input id="airport-start-code"
-               class="form-control"
-               type="text" aria-label="Airport"
-               oninput="checkAirportInputWithList(this,'filtered-airports-start')"
-               name="airport-start-code"
-               list="filtered-airports-start" required>
+    <div id="airport-disabled-text-"
+         th:attrappend="id=${isStart}?'start':'end'"
+         th:text="${isStart}?'Select start location to enable airport selection':'Select end location to enable airport selection'">
     </div>
 </div>
-
 <form th:fragment="add-location-form"
       id="input-group-"
       th:attrappend="id=${iter.index}"
