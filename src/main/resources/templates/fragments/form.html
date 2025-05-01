@@ -1,5 +1,40 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html"
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<div th:fragment="airport-start-form-disabled" class="container mt-4">
+    <div id="airport-disabled-text" class="form-text">
+        Select start location to enable airport selection
+    </div>
+    <datalist id="filtered-airports-start"></datalist>
+    <div class="input-group">
+        <select
+                id="airport-filter-select"
+                class="form-select"
+                style="max-width:150px"
+                name="airportFilter"
+                hx-get="/nearby-airports"
+                hx-vals='js:{latitude:startMarker.getLngLat().lat,longitude:startMarker.getLngLat().lng}'
+                hx-target="#filtered-airports-start"
+                hx-trigger="change"
+                hx-on::after-request="setAirportPlaceHolderFromList('airport-start-code','filtered-airports-start')"
+                hx-swap="innerHTML"
+                disabled
+        >
+            <option selected value="DELTA">Delta Airports</option>
+            <hr class="dropdown-divider">
+            <option value="CIVIL">Civil</option>
+            <option value="MILITARY">Military</option>
+            <option value="ALL">All</option>
+        </select>
+        <input id="airport-start-code"
+               class="form-control"
+               placeholder="Start Airport" disabled
+               type="text" aria-label="Airport"
+               oninput="checkAirportInputWithList(this,'filtered-airports-start')"
+               name="airport-start-code"
+               list="filtered-airports-start" required
+        >
+    </div>
+</div>
 <div th:fragment="airport-start-form">
     <div class="input-group mb-4">
         <datalist id="filtered-airports-start"></datalist>
@@ -7,8 +42,8 @@
                 name="airportFilter"
                 th:hx-get="@{/nearby-airports?latitude={latitude}&longitude={longitude}(latitude=${locationDisplay.latitude},longitude=${locationDisplay.longitude})}"
                 hx-target="@{#filtered-airports-start}"
-                hx-trigger="change,load"
-                hx-on::after-request="setAirportPlaceHolder()"
+                hx-trigger="change"
+                hx-on::after-request="setAirportPlaceHolderFromList('airport-start-code','filtered-airports-start')"
                 hx-swap="outerHTML">
             <option selected value="DELTA">Delta Airports</option>
             <hr class="dropdown-divider">
@@ -16,11 +51,11 @@
             <option value="MILITARY">Military</option>
             <option value="ALL">All</option>
         </select>
-        <input id="airport-code"
+        <input id="airport-start-code"
                class="form-control"
                type="text" aria-label="Airport"
-               oninput="checkAirportInput(this)"
-               name="airport-code"
+               oninput="checkAirportInputWithList(this,'filtered-airports-start')"
+               name="airport-start-code"
                list="filtered-airports-start" required>
     </div>
 </div>

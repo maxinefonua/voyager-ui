@@ -94,6 +94,8 @@
             startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
             if (endMarker) mapFitBothMarkers(startMarker,endMarker);
             else fitMapToSelectedOption(optionSelected);
+            document.getElementById('airport-filter-select').disabled = false;
+            document.getElementById('airport-start-code').disabled = false;
           } else {
             if (endMarker) endMarker.remove();
             endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
@@ -200,6 +202,15 @@
           airportMarker = null;
           startMarker = null;
           endMarker = null;
+        }
+
+        function setAirportPlaceHolderFromList(airportInputId,airportListId){
+            console.log('setAirportPlaceHolderFromList called with ' + airportInputId + ' and ' + airportListId);
+            const airportInput = document.getElementById(airportInputId);
+            const airportList = document.getElementById(airportListId);
+            if (airportInput && airportList && airportList.options && airportList.options[0]) {
+                airportInput.placeholder = 'Click to Select ' + airportList.options[0].value;
+            }
         }
 
         function resetMapOnSearch() {
