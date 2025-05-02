@@ -100,7 +100,7 @@
             startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
 
             if (endMarker) mapFitBothMarkers(startMarker,endMarker);
-            else fitMapToSelectedOption(optionSelected);
+            else fitMapToElemWithBounds(optionSelected);
 
             const airportSelectElement = document.getElementById('airport-filter-select-start');
             airportSelectElement.disabled = false;
@@ -117,7 +117,7 @@
             }
             endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
             if (startMarker) mapFitBothMarkers(startMarker,endMarker);
-            else fitMapToSelectedOption(optionSelected);
+            else fitMapToElemWithBounds(optionSelected);
 
             const airportSelectElement = document.getElementById('airport-filter-select-end');
             airportSelectElement.disabled = false;
@@ -133,8 +133,8 @@
             if (startMarker && endMarker) mapFitBothMarkers(startMarker,endMarker);
         }
 
-        function fitMapToSelectedOption(optionSelected) {
-         const bounds = [optionSelected.dataset.boundsWest,optionSelected.dataset.boundsSouth,optionSelected.dataset.boundsEast,optionSelected.dataset.boundsNorth];
+        function fitMapToElemWithBounds(elem) {
+         const bounds = [elem.dataset.boundsWest,elem.dataset.boundsSouth,elem.dataset.boundsEast,elem.dataset.boundsNorth];
          map.fitBounds(bounds);
         }
 
@@ -142,9 +142,9 @@
             const startSelect = document.getElementById('select-start-location');
             const endSelect = document.getElementById('select-end-location');
             if (isStart && startSelect && startSelect.selectedIndex != 0) {
-                fitMapToSelectedOption(startSelect[startSelect.selectedIndex]);
+                fitMapToElemWithBounds(startSelect[startSelect.selectedIndex]);
             } else if (!isStart && endSelect && endSelect.selectedIndex !=0) {
-                fitMapToSelectedOption(endSelect[endSelect.selectedIndex]);
+                fitMapToElemWithBounds(endSelect[endSelect.selectedIndex]);
             }
         }
 
@@ -255,19 +255,39 @@
         }
 
         function clearMarkers() {
-          console.log('clearMarkers called')
-          if (lookupMarker) lookupMarker.remove();
-          if (airportMarker) airportMarker.remove();
-          if (startMarker) startMarker.remove();
-          if (airportStartMarker) airportStartMarker.remove();
-          if (endMarker) endMarker.remove();
-          if (airportEndMarker) airportEndMarker.remove();
-          lookupMarker = null;
-          airportMarker = null;
-          startMarker = null;
-          airportStartMarker = null;
-          airportEndMarker = null;
-          endMarker = null;
+          if (lookupMarker) {
+            lookupMarker.remove();
+            lookupMarker = null;
+          }
+          if (airportMarker) {
+            airportMarker.remove();
+            airportMarker = null;
+          }
+          if (startMarker) {
+            startMarker.remove();
+            startMarker = null;
+          }
+          if (airportStartMarker) {
+            airportStartMarker.remove();
+            airportStartMarker = null;
+          }
+          if (endMarker) {
+            endMarker.remove();
+            endMarker = null;
+          }
+          if (airportEndMarker) {
+            airportEndMarker.remove();
+            airportEndMarker = null;
+          }
+        }
+
+        function clearAirportMarkerFitToElemId(marker,elemIdWithBounds) {
+            if (marker) {
+                marker.remove();
+                marker = null;
+                const elem = document.getElementById(elemIdWithBounds);
+                if (elem) fitMapToElemWithBounds(elem);
+            }
         }
 
         function clearAirportMarkerMapFitToLocation(isStart) {
@@ -276,20 +296,19 @@
                 airportStartMarker = null;
                 const startSelect = document.getElementById('select-start-location');
                 if (startSelect && startSelect.options && startSelect.options[startSelect.selectedIndex]) {
-                    fitMapToSelectedOption(startSelect.options[startSelect.selectedIndex]);
+                    fitMapToElemWithBounds(startSelect.options[startSelect.selectedIndex]);
                 }
             } else if (!isStart && airportEndMarker) {
                 airportEndMarker.remove();
                 airportEndMarker = null;
                 const endSelect = document.getElementById('select-end-location');
                 if (endSelect && endSelect.options && endSelect.options[endSelect.selectedIndex]) {
-                    fitMapToSelectedOption(endSelect.options[endSelect.selectedIndex]);
+                    fitMapToElemWithBounds(endSelect.options[endSelect.selectedIndex]);
                 }
             }
         }
 
         function setAirportPlaceHolderFromList(airportInputId,airportListId){
-            console.log('setAirportPlaceHolderFromList called with airportInputId: ' + airportInputId)
             const airportInput = document.getElementById(airportInputId);
             const airportList = document.getElementById(airportListId);
             if (airportInput && airportList && airportList.options && airportList.options[0]) {

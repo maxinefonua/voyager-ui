@@ -132,6 +132,7 @@ public class MainController {
     @GetMapping("/nearby-airports")
     @Cacheable("nearbyAirportsCache")
     public String nearbyAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
+        LOGGER.debug("nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude + "airportFilterIsPresent: " + filterOptional.isPresent());
         AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional);
         Optional<AirportType> type = Optional.empty();
         Optional<Airline> airline = Optional.empty();
@@ -170,7 +171,7 @@ public class MainController {
         List<LocationDisplay> locations = voyagerAPI.getLocations();
         model.addAttribute("locations", locations);
         model.addAttribute("isStart",isStart);
-        return "fragments/locations :: locations-select";
+        return "fragments/locations :: saved-locations-options";
     }
 
     @GetMapping("/test")

@@ -1,35 +1,36 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hx-get="http://www.w3.org/1999/xhtml"
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
-<div th:fragment="airport-form">
+<div th:fragment="airport-form(iterIndex,longitude,latitude)">
+    <datalist id="filtered-list-" th:attrappend="id=${iterIndex}"></datalist>
     <div class="input-group mb-4">
-        <datalist id="filtered-list-" th:attrappend="id=${iter.index}"></datalist>
-        <select class="input-group-text"
+        <select class="form-select"
                 name="airportFilter"
-                th:hx-get="@{/nearby-airports?iterIndex={index}&latitude={latitude}&longitude={longitude}(index=${iter.index},latitude=${locationDisplay.latitude},longitude=${locationDisplay.longitude})}"
-                th:hx-target="@{#filtered-list-{index}(index=${iter.index})}"
-                hx-trigger="change,load"
-                th:hx-on::after-request="'setAirportPlaceHolder('+${iter.index}+')'"
-                hx-swap="outerHTML">
+                style="max-width:150px"
+                hx-get="/nearby-airports"
+                th:hx-vals="'{&quot;latitude&quot;:'+${latitude}+',&quot;longitude&quot;:'+${longitude}+'}'"
+                th:hx-on::after-request="'setAirportPlaceHolderFromList(\'airport-code-' + ${iterIndex} + '\',\'filtered-list-' + ${iterIndex} + '\')'"
+                th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iterIndex}+'\')'"
+                th:hx-target="'#filtered-list-'+${iterIndex}"
+                hx-trigger="load,change"
+                hx-swap="innerHTML">
             <option selected value="DELTA">Delta Airports</option>
             <hr class="dropdown-divider">
             <option value="CIVIL">Civil</option>
             <option value="MILITARY">Military</option>
             <option value="ALL">All</option>
         </select>
-        <input th:id="'airport-code-'+${iter.index}"
+        <input th:id="'airport-code-'+${iterIndex}"
                class="form-control"
                type="text" aria-label="Airport"
-               th:oninput="'checkAirportInput('+${iter.index}+')'"
+               th:oninput="'checkAirportInput('+${iterIndex}+')'"
                name="airport-code"
-               th:list="'filtered-list-'+${iter.index}" required>
+               th:list="'filtered-list-'+${iterIndex}" required>
     </div>
-    <div class="d-grid col-4 mx-auto"><button class="btn btn-outline-primary" type="submit">+</button></div>
 </div>
-<div th:fragment="locationList"
-     th:if="${locations} != null"
+<div th:fragment="saved-locations"
      id="savedLocations"
      class="accordion list-group">
-    <div th:if="${locations.size > 0}" class="accordion item" th:each="locationDisplay,iter : ${locations}">
+    <div th:if="${locations != null && locations.size > 0}" class="accordion item" th:each="locationDisplay,iter : ${locations}">
         <button th:if="${iter.first}"
                 id="location-display-0"
                 class="accordion-button list-group-item list-group-item-action list-group-item-light"
@@ -71,15 +72,15 @@
                 <div id="airports-container-"
                      class="container mb-2"
                      th:attrappend="id=${iter.index}">
-                    <div th:replace="~{fragments/locations :: airport-form}"></div>
+                    <div th:replace="~{fragments/locations :: airport-form(iterIndex=${iter.index},longitude=${locationDisplay.longitude},latitude=${locationDisplay.latitude})}"></div>
                 </div>
-                <button class="btn btn-outline-success">Save</button>
             </div>
         </div>
     </div>
-    <div th:unless="${locations.size > 0}"
+    <div th:unless="${locations != null && locations.size > 0}"
          class="list-group-item list-group-item-secondary">No saved trips. Click 'Add Location' to plan new trip.</div>
 </div>
+
 <datalist th:fragment="all-airports"
           id="all-airports">
     <option th:each="airportDisplay,iter : ${airportList}"
@@ -93,7 +94,7 @@
             th:data-type="${airportDisplay.type.name}"
             th:text="${airportDisplay.name}"></option>
 </datalist>
-<option th:fragment="locations-select"
+<option th:fragment="saved-locations-options"
         th:each="locationDisplay,iter : ${locations}"
         th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
         th:value="${locationDisplay.id}"
