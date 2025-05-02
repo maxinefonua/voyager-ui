@@ -5,48 +5,50 @@
     <meta charset="UTF-8">
     <title>Tab Content</title>
 </head>
-<ul th:fragment="tab1Active"
-        id="tabList"
-        hx-swap-oob="outerHTML:#tabList"
-        class="nav nav-underline">
+<ul th:fragment="tab-list"
+    id="tabList"
+    class="nav nav-underline">
     <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#"
-           hx-get="/saved"
+        <a class="nav-link tab-btn active"
+           id="trips-tab-link"
+           hx-get="/trips"
            hx-target="#tabContent"
-           hx-swap="innerHTML">Saved
+           hx-on::before-request="activate(this)"
+           hx-on::after-request="reloadTrips('scrollable-content')"
+           hx-swap="innerHTML">
+            Trips
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" aria-current="page" href="#"
-           hx-get="/add"
-           hx-target="#tabContent"
-           hx-swap="innerHTML">Add
+        <a class="nav-link tab-btn"
+                id="saved-tab-link"
+                hx-get="/saved"
+                hx-target="#tabContent"
+                hx-on::before-request="activate(this)"
+                hx-on::after-request="mapToFirst('location-display-0',false)"
+                hx-swap="innerHTML">
+            Saved
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link tab-btn"
+                id="add-tab-link"
+                hx-get="/add"
+                hx-target="#tabContent"
+                hx-on::before-request="activate(this)"
+                hx-on::after-request="recenterMap()"
+                hx-swap="innerHTML">
+            Add
         </a>
     </li>
 </ul>
-<ul th:fragment="tab2Active"
-        id="tabList"
-        hx-swap-oob="outerHTML:#tabList"
-        class="nav nav-underline">
-    <li class="nav-item">
-        <a class="nav-link" aria-current="page" href="#"
-           hx-get="/saved"
-           hx-target="#tabContent"
-           hx-swap="innerHTML">Saved
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#"
-           hx-get="/add"
-           hx-target="#tabContent"
-           hx-swap="innerHTML">Add
-        </a>
-    </li>
-</ul>
-<div th:fragment="savedTab">
-    <div th:replace="~{fragments/townlist :: townlist}"></div>
+<div th:fragment="saved-tab" class="container mt-2">
+    <div th:replace="~{fragments/locations :: saved-locations}"></div>
 </div>
-<div th:fragment="addTab">
+<div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>
+</div>
+<div th:fragment="trips-tab" class="container m-2">
+    <div th:replace="~{fragments/trips :: trips}"></div>
 </div>
 </html>

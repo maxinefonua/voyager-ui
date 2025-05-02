@@ -1,17 +1,13 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
-<datalist th:fragment="iata-code-list"
-          id="filtered-list-"
-          th:attrappend="id=${iterIndex}">
-    <option th:each="airportDisplay,iter : ${nearbyAirports}"
-            th:value="${airportDisplay.iata}"
-            th:attr="selected=${iter.index == 0}?selected : null" th:text="${airportDisplay.name}"></option>
-</datalist>
-<input th:fragment="iata-code-input"
-       th:id="'airport-code-'+${iterIndex}"
-       class="form-control"
-       type="text" aria-label="Airport"
-       hx-swap-oob="true"
-       name="airport-code"
-       th:placeholder="${firstAirportCode}"
-       th:list="'filtered-list-'+${iterIndex}">
+<option th:fragment="iata-code-list"
+        th:each="airportDisplay,iter : ${nearbyAirports}"
+        th:name="${airportDisplay.iata}"
+        th:value="${airportDisplay.iata}"
+        th:data-longitude="${airportDisplay.longitude}"
+        th:data-latitude="${airportDisplay.latitude}"
+        th:data-city="${airportDisplay.city}"
+        th:data-subdivision="${airportDisplay.subdivision}"
+        th:data-country="${airportDisplay.countryCode}"
+        th:data-type="${airportDisplay.type.name}"
+        th:text="${airportDisplay.name}"></option>
 </html>

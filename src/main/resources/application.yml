@@ -2,12 +2,7 @@ voyager-api:
   protocol: http
   host: localhost
   port: 3000
-  lookupPath: /search
-  lookupAttributionPath: /search-attribution
-  townPath: /towns
   authToken: ${VOYAGER_API_KEY}
-  iataPath: /iata
-  nearbyAirportsPath: /nearby-airports
 
 spring:
   profiles:

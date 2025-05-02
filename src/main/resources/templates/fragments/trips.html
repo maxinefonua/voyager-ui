@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Trip Content</title>
+</head>
+<div th:fragment="trips" class="container">
+    <div class="row justify-content-center">
+        <div class="col-2 d-flex justify-content-center">
+          <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
+        </div>
+        <div class="col-8">
+            <div id="scrollable-content"
+                    data-bs-spy="scroll"
+                    data-bs-target="#trips-scroll-nav"
+                    data-bs-smooth-scroll="true"
+                    class="scrollspy-example overflow-y-scroll"
+                    style="height:250px;"
+                    tabindex="0">
+                <h4 id="from-city">From</h4>
+                <div id="from-location-container"
+                     style="height:250px"
+                     class="overflow-auto p-2">
+                    <select class="form-select"
+                            hx-get="/lookup"
+                            id="select-start-location"
+                            hx-swap="beforeend transition:true"
+                            hx-trigger="load"
+                            th:onchange="'addTripLocationToMap(this.options[this.selectedIndex],true)'"
+                            hx-vals='"isStart":"true"'>
+                        <option selected disabled>Start Location</option>
+                    </select>
+                    <div th:replace="~{fragments/form :: airport-form-initial(true)}"></div>
+                </div>
+                <h4 id="to-city">To</h4>
+                <div id="to-location-container"
+                     style="height:250px"
+                     class="overflow-auto p-2">
+                    <select class="form-select"
+                            hx-get="/lookup"
+                            id="select-end-location"
+                            hx-swap="beforeend transition:true"
+                            hx-trigger="load"
+                            th:onchange="'addTripLocationToMap(this.options[this.selectedIndex],false)'"
+                            hx-vals='"isStart":"false"'>
+                        <option selected disabled>End Location</option>
+                    </select>
+                    <div th:replace="~{fragments/form :: airport-form-initial(false)}"></div>
+                </div>
+                <h4 id="review">Review</h4>
+                <div id="from-result-container"
+                     style="height:250px"
+                     class="overflow-auto p-2">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:fragment="trips-scroll-nav"
+     id="trips-scroll-nav" style="width:90px" class="list-group">
+    <a class="list-group-item list-group-item-action" href="#from-city" onclick="zoomToTripLocation(true)">From</a>
+    <a class="list-group-item list-group-item-action" href="#to-city" onclick="zoomToTripLocation(false)">To</a>
+    <a class="list-group-item list-group-item-action" href="#review" onclick="mapFitToTrip()">Review</a>
+</div>
+</html>

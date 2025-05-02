@@ -3,6 +3,7 @@ package org.voyager.config;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,16 +23,32 @@ import static org.voyager.utils.ConstantsUtils.*;
 @Setter
 @Getter
 public class VoyagerAPIConfig {
-
     String protocol;
     String host;
     Integer port;
-    String lookupPath;
-    String lookupAttributionPath;
-    String townPath;
-    String iataPath;
-    String nearbyAirportsPath;
     String authToken;
+
+    @Value("/search")
+    String lookupPath;
+
+    @Value("/search-attribution")
+    String lookupAttributionPath;
+
+    @Value("/locations")
+    String locationsPath;
+
+    @Value("/towns")
+    String townPath;
+
+    @Value("/iata")
+    String iataPath;
+
+    @Value("/nearby-airports")
+    String nearbyAirportsPath;
+
+    @Value("/airports")
+    String airportsPath;
+
     private HttpEntity<String> httpEntityWithHeaders;
     private UriComponentsBuilder nearbyAirportsURI;
 
@@ -48,15 +65,16 @@ public class VoyagerAPIConfig {
         return httpEntityWithHeaders;
     }
 
-    public String buildLookupURL(String query, int skipRows) {
-        return UriComponentsBuilder
+    public String buildLookupURL(String query, int skipRows, Optional<Integer> limitOptional) {
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                 .newInstance().scheme(protocol)
                 .host(host)
                 .port(port)
                 .path(lookupPath)
                 .queryParam(QUERY_PARAM_NAME,query)
-                .queryParam(SKIP_ROW_PARAM_NAME,skipRows)
-                .toUriString();
+                .queryParam(SKIP_ROW_PARAM_NAME,skipRows);
+        limitOptional.ifPresent(limit -> uriComponentsBuilder.queryParam(LIMIT_PARAM_NAME,limit));
+        return uriComponentsBuilder.toUriString();
     }
 
     public String buildGetTownsURL() {
@@ -65,6 +83,15 @@ public class VoyagerAPIConfig {
                 .host(host)
                 .port(port)
                 .path(townPath)
+                .toUriString();
+    }
+
+    public String buildLocationsURL() {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(locationsPath)
                 .toUriString();
     }
 
@@ -89,6 +116,17 @@ public class VoyagerAPIConfig {
         type.ifPresent(airportType -> nearByURL.queryParam(TYPE_PARAM_NAME, airportType));
         airline.ifPresent(airportType -> nearByURL.queryParam(AIRLINE_PARAM_NAME, airportType));
         return nearByURL.toUriString();
+    }
+
+    public String buildAirportsURL(Optional<AirportType> type, Optional<Airline> airline) {
+        UriComponentsBuilder airportsURL = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(airportsPath);
+        type.ifPresent(airportType -> airportsURL.queryParam(TYPE_PARAM_NAME, airportType));
+        airline.ifPresent(airportType -> airportsURL.queryParam(AIRLINE_PARAM_NAME, airportType));
+        return airportsURL.toUriString();
     }
 
     public String buildLookupAttributionURL() {

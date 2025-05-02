@@ -9,26 +9,34 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.css" rel="stylesheet" />
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <link th:href="@{/css/stylesheet.css}" rel="stylesheet" />
 </head>
-<body>
+<body onload="mapToFirst('location-display-0',false)">
     <div class="page-wrapper" style="display:flex;flex-direction:column;">
         <div th:replace="~{fragments/topnav :: navbar}">
         </div>
         <h1 class="p-4">Oh, the Places to Go!</h1>
         <div id="map" style="min-height:200px;width:100%;"></div>
         <div class="container" id="tabMenu">
-            <ul th:replace="~{fragments/tab :: tab1Active}"></ul>
+            <ul th:replace="~{fragments/tab :: tab-list}"></ul>
         </div>
         <div class="container" id="tabContent">
-            <div th:replace="~{fragments/tab :: savedTab}"></div>
+            <div th:replace="~{fragments/tab :: trips-tab}"></div>
         </div>
         </div>
         <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
+    <div hx-get="/airports" hx-trigger="load"></div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<!--    TODO: implement loading data into the DOM https://docs.mapbox.com/help/tutorials/custom-markers-gl-js/?step=4 -->
     <script>
         var lookupMarker = null;
+        var airportMarker = null;
+        var startMarker = null;
+        var airportStartMarker = null;
+        var endMarker = null;
+        var airportEndMarker = null;
         var map = new mapboxgl.Map({
             container: 'map',
             style: {
@@ -46,6 +54,7 @@
                         source: 'osm',
                     }],
                 },
+            projection: 'globe',
             attributionControl: false
         }).addControl(new mapboxgl.AttributionControl({
             customAttribution: [
@@ -59,41 +68,296 @@
         });
         map.addControl(nav);
 
-        function updateLookupMap(iterIndex,longitude,latitude,west,south,east,north) {
+        function setAirportPlaceHolder(iterIndex) {
+            if (airportMarker) airportMarker.remove();
+            const airportInput = document.getElementById("airport-code-"+iterIndex);
+            const airportList = document.getElementById("filtered-list-"+iterIndex);
+            if (airportInput && airportList && airportList.options && airportList.options[0]) {
+                airportInput.placeholder = airportList.options[0].value;
+                airportInput.value = '';
+            }
+        }
+
+        function updateLookupMap(iterIndex,longitude,latitude,bounds) {
+          if (airportMarker) airportMarker.remove();
           if (lookupMarker) lookupMarker.remove();
           const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
           if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
-              map.fitBounds([west,south,east,north]);
+              map.fitBounds(bounds);
               lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }
         };
 
-        function recenterMap() {
+        function addTripLocationToMap(optionSelected,isStart) {
+          const longitude = optionSelected.dataset.longitude;
+          const latitude = optionSelected.dataset.latitude;
+          if (isStart) {
+            if (startMarker) startMarker.remove();
+            if (airportStartMarker) {
+                airportStartMarker.remove();
+                airportStartMarker = null;
+            }
+            startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+
+            if (endMarker) mapFitBothMarkers(startMarker,endMarker);
+            else fitMapToElemWithBounds(optionSelected);
+
+            const airportSelectElement = document.getElementById('airport-filter-select-start');
+            airportSelectElement.disabled = false;
+            airportSelectElement.dispatchEvent(new Event('change'));
+
+            document.getElementById('airport-start-code').disabled = false;
+            const disabledText = document.getElementById('airport-disabled-text-start');
+            if (disabledText) disabledText.remove();
+          } else {
+            if (endMarker) endMarker.remove();
+            if (airportEndMarker) {
+                airportEndMarker.remove();
+                airportEndMarker = null;
+            }
+            endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+            if (startMarker) mapFitBothMarkers(startMarker,endMarker);
+            else fitMapToElemWithBounds(optionSelected);
+
+            const airportSelectElement = document.getElementById('airport-filter-select-end');
+            airportSelectElement.disabled = false;
+            airportSelectElement.dispatchEvent(new Event('change'));
+
+            document.getElementById('airport-end-code').disabled = false;
+            const disabledText = document.getElementById('airport-disabled-text-end');
+            if (disabledText) disabledText.remove();
+          }
+        };
+
+        function mapFitToTrip() {
+            if (startMarker && endMarker) mapFitBothMarkers(startMarker,endMarker);
+        }
+
+        function fitMapToElemWithBounds(elem) {
+         const bounds = [elem.dataset.boundsWest,elem.dataset.boundsSouth,elem.dataset.boundsEast,elem.dataset.boundsNorth];
+         map.fitBounds(bounds);
+        }
+
+        function zoomToTripLocation(isStart) {
+            const startSelect = document.getElementById('select-start-location');
+            const endSelect = document.getElementById('select-end-location');
+            if (isStart && startSelect && startSelect.selectedIndex != 0) {
+                fitMapToElemWithBounds(startSelect[startSelect.selectedIndex]);
+            } else if (!isStart && endSelect && endSelect.selectedIndex !=0) {
+                fitMapToElemWithBounds(endSelect[endSelect.selectedIndex]);
+            }
+        }
+
+        function zoomToLocationMap(iterIndex,longitude,latitude,bounds) {
+          if (airportMarker) airportMarker.remove();
           if (lookupMarker) lookupMarker.remove();
+          const clickedButton = document.getElementById("location-display-"+iterIndex);
+          if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
+              map.fitBounds(bounds);
+              lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+          }
+        };
+
+        function checkAirportInputWithList(airportInputElem,isStart,airportListId) {
+            const airportList = document.getElementById(airportListId);
+            const regex = /^[a-zA-Z]{3}$/;
+            if (airportInputElem && airportInputElem.value && regex.test(airportInputElem.value)) {
+                if (airportList && airportList.options && airportList.options.namedItem(airportInputElem.value.toUpperCase())) {
+                    const airportMatch = airportList.options.namedItem(airportInputElem.value.toUpperCase());
+                    if (isStart) {
+                        if (airportStartMarker) airportStartMarker.remove();
+                        airportStartMarker = addAirportMarker(airportMatch);
+                        const invalidFeedback = document.getElementById("airport-invalid-feedback-start");
+                        if (invalidFeedback) invalidFeedback.remove();
+                        airportInputElem.classList.remove('is-invalid');
+                        mapFitBothMarkers(startMarker,airportStartMarker);
+                    } else {
+                        if (airportEndMarker) airportEndMarker.remove();
+                        airportEndMarker = addAirportMarker(airportMatch);
+                        const invalidFeedback = document.getElementById("airport-invalid-feedback-end");
+                        if (invalidFeedback) invalidFeedback.remove();
+                        airportInputElem.classList.remove('is-invalid');
+                        mapFitBothMarkers(endMarker,airportEndMarker);
+                    }
+            } else {
+              console.log('checkAirportInput called with input: ' + airportInput.value + ' and isStart: ' + isStart + ', no match.');
+            }
+          }
+        };
+
+        function checkAirportInput(iterIndex) {
+          const airportInput = document.getElementById("airport-code-"+iterIndex);
+          const airportList = document.getElementById("filtered-list-"+iterIndex);
+          const regex = /^[a-zA-Z]{3}$/;
+          if (airportInput && airportInput.value && regex.test(airportInput.value)) {
+            if (airportList && airportList.options && airportList.options.namedItem(airportInput.value.toUpperCase())) {
+              const airportMatch = airportList.options.namedItem(airportInput.value.toUpperCase());
+              const invalidFeedback = document.getElementById("airport-invalid-feedback-"+iterIndex);
+              if (invalidFeedback) {
+                invalidFeedback.remove();
+                airportInput.classList.remove('is-invalid');
+              }
+              updateWithAirportMap(airportMatch.dataset.longitude,airportMatch.dataset.latitude);
+            } else {
+              console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInput.value.length + ', no match. Airport value: ' + airportInput.value);
+            }
+          }
+        };
+
+        function mapFitBothMarkers(marker1,marker2) {
+            const lngLat1 = marker1.getLngLat();
+            const lngLat2 = marker2.getLngLat();
+            const south = lngLat1.lat < lngLat2.lat ? lngLat1.lat : lngLat2.lat;
+            const north = lngLat1.lat > lngLat2.lat ? lngLat1.lat : lngLat2.lat;
+            const west = lngLat1.lng < lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+            const east = lngLat1.lng > lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+            const bounds = [west,south,east,north];
+            map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
+        }
+
+        function addAirportMarker(airportOptionElem) {
+            var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
+                      .setHTML(airportOptionElem.dataset.value);
+            var airportMarker = new mapboxgl.Marker({color:"#9B1631"})
+                .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
+                .setPopup(airportPopup)
+                .addTo(map);
+            return airportMarker;
+        }
+
+        function updateWithAirportMap(longitude,latitude) {
+          if (airportMarker) airportMarker.remove();
+          if (lookupMarker) {
+            const lngLat = lookupMarker.getLngLat();
+            const south = lngLat.lat < latitude? lngLat.lat : latitude;
+            const north = lngLat.lat > latitude? lngLat.lat : latitude;
+            const west = lngLat.lng < longitude? lngLat.lng : longitude;
+            const east = lngLat.lng > longitude? lngLat.lng : longitude;
+            const bounds = [west,south,east,north];
+            map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 40, right: 40}});
+            airportMarker = new mapboxgl.Marker({color:"#9B1631"})
+                .setLngLat([longitude,latitude])
+                .setPopup(
+                    new mapboxgl.Popup({ offset: 25 }) // add popups
+                      .setHTML(
+                        `<h3>Test Title</h3><p>Test Description</p>`
+                      )
+                  )
+                .addTo(map);
+          }
+        };
+
+        function recenterMap() {
           map.flyTo({
               center: [0, 0],
               zoom: 0
           });
         }
 
+        function clearMarkers() {
+          if (lookupMarker) {
+            lookupMarker.remove();
+            lookupMarker = null;
+          }
+          if (airportMarker) {
+            airportMarker.remove();
+            airportMarker = null;
+          }
+          if (startMarker) {
+            startMarker.remove();
+            startMarker = null;
+          }
+          if (airportStartMarker) {
+            airportStartMarker.remove();
+            airportStartMarker = null;
+          }
+          if (endMarker) {
+            endMarker.remove();
+            endMarker = null;
+          }
+          if (airportEndMarker) {
+            airportEndMarker.remove();
+            airportEndMarker = null;
+          }
+        }
+
+        function clearAirportMarkerFitToElemId(marker,elemIdWithBounds) {
+            if (marker) {
+                marker.remove();
+                marker = null;
+                const elem = document.getElementById(elemIdWithBounds);
+                if (elem) fitMapToElemWithBounds(elem);
+            }
+        }
+
+        function clearAirportMarkerMapFitToLocation(isStart) {
+            if (isStart && airportStartMarker) {
+                airportStartMarker.remove();
+                airportStartMarker = null;
+                const startSelect = document.getElementById('select-start-location');
+                if (startSelect && startSelect.options && startSelect.options[startSelect.selectedIndex]) {
+                    fitMapToElemWithBounds(startSelect.options[startSelect.selectedIndex]);
+                }
+            } else if (!isStart && airportEndMarker) {
+                airportEndMarker.remove();
+                airportEndMarker = null;
+                const endSelect = document.getElementById('select-end-location');
+                if (endSelect && endSelect.options && endSelect.options[endSelect.selectedIndex]) {
+                    fitMapToElemWithBounds(endSelect.options[endSelect.selectedIndex]);
+                }
+            }
+        }
+
+        function setAirportPlaceHolderFromList(airportInputId,airportListId){
+            const airportInput = document.getElementById(airportInputId);
+            const airportList = document.getElementById(airportListId);
+            if (airportInput && airportList && airportList.options && airportList.options[0]) {
+                airportInput.placeholder = 'Click to Select ' + airportList.options[0].value;
+                airportInput.value = '';
+            }
+        }
+
         function resetMapOnSearch() {
           recenterMap();
           document.getElementById('searchButton').disabled = true;
+          document.getElementById('searchButton').innerHTML = 'Searching';
         }
 
-        function setMapToFirstResult() {
+        function mapToFirst(elementId,fromSearch) {
           if (lookupMarker) lookupMarker.remove();
-          const firstResultButton = document.getElementById("searchResultButtonHeader-0");
-          if (firstResultButton) {
-            const longitude = firstResultButton.dataset.lng;
-            const latitude = firstResultButton.dataset.lat;
-            const west = firstResultButton.dataset.west;
-            const south = firstResultButton.dataset.south;
-            const east = firstResultButton.dataset.east;
-            const north = firstResultButton.dataset.north;
-            updateLookupMap(0,longitude,latitude,west,south,east,north);
+          if (airportMarker) airportMarker.remove();
+          const firstElemButton = document.getElementById(elementId);
+          if (firstElemButton) {
+            const longitude = firstElemButton.dataset.lng;
+            const latitude = firstElemButton.dataset.lat;
+            const bounds = [firstElemButton.dataset.boundsWest,firstElemButton.dataset.boundsSouth,firstElemButton.dataset.boundsEast,firstElemButton.dataset.boundsNorth]
+            if (fromSearch) updateLookupMap(0,longitude,latitude,bounds);
+            else zoomToLocationMap(0,longitude,latitude,bounds);
           }
+        }
+
+        function setMapToFirstSearch() {
+          mapToFirst("searchResultButtonHeader-0",true);
+          document.getElementById('searchButton').innerHTML = 'Search';
           document.getElementById('searchButton').disabled = false;
+        }
+
+        function activate(element) {
+          clearMarkers();
+          const tabs = document.getElementsByClassName('tab-btn');
+          for (let i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+            tabs[i].disabled = false;
+          }
+
+          element.classList.add('active');
+          element.disabled = true;
+        }
+
+        function reloadTrips(scrollingId) {
+          recenterMap();
+          const el = document.getElementById(scrollingId);
+          if (el) bootstrap.ScrollSpy.getOrCreateInstance(el).refresh();
         }
     </script>
 </body>
