@@ -5,28 +5,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.voyager.model.*;
 import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.location.LocationForm;
-import org.voyager.model.location.Status;
 import org.voyager.model.response.VoyagerListResponse;
-import org.voyager.model.response.VoyagerResponseAPI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.servlet.ModelAndView;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.service.VoyagerAPI;
 import org.voyager.validate.ValidationUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
+import static org.voyager.utils.ConstantsUI.*;
 
 @Controller
 public class MainController {
@@ -149,7 +143,7 @@ public class MainController {
     }
 
     @GetMapping("/search")
-    public Collection<ModelAndView> search(Model model, @ModelAttribute("searchText") String searchText)  {
+    public Collection<ModelAndView> search(Model model, @ModelAttribute(SEARCH_TEXT_ATTRIBUTE_NAME) String searchText)  {
         long beforeSearch = System.currentTimeMillis();
         VoyagerListResponse<ResultSearch> voyagerResponse = voyagerAPI.lookup(searchText,0,Optional.of(5));
         List<ResultSearch> lookupResults = voyagerResponse.getResults();
@@ -167,11 +161,24 @@ public class MainController {
     }
 
     @GetMapping("/lookup")
-    public String locationsSelect(Model model, @RequestParam Boolean isStart)  {
+    public String getSavedLocationOptions(Model model, @RequestParam Boolean isStart) {
         List<LocationDisplay> locations = voyagerAPI.getLocations();
         model.addAttribute("locations", locations);
-        model.addAttribute("isStart",isStart);
+        model.addAttribute("isStart", isStart);
         return "fragments/locations :: saved-locations-options";
+    }
+
+    @GetMapping("/review")
+    public String updateTripReview(Model model, @RequestParam Boolean fromOrigin, @RequestParam Integer selectedId, @RequestParam(required = false) String airportCode) {
+        LocationDisplay locationDisplay = voyagerAPI.getLocationById(selectedId);
+        if (fromOrigin) {
+            model.addAttribute("startLocation",locationDisplay.getName());
+            model.addAttribute("origin",airportCode);
+            return "fragments/trips :: review-from";
+        }
+        model.addAttribute("endLocation",locationDisplay.getName());
+        model.addAttribute("destination",airportCode);
+        return "fragments/trips :: review-to";
     }
 
     @GetMapping("/test")

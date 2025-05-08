@@ -99,6 +99,19 @@ public class VoyagerAPIService implements VoyagerAPI {
     }
 
     @Override
+    public LocationDisplay getLocationById(Integer id) {
+        String locationByIdURL = voyagerAPIConfig.buildLocationByIdURL(id);
+        LOGGER.debug("full location by id URL: " + locationByIdURL);
+        ResponseEntity<LocationDisplay> locationsResponse = restTemplate
+                .exchange(locationByIdURL,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        LocationDisplay.class);
+        validateVoyagerResponse(locationsResponse,locationByIdURL);
+        return locationsResponse.getBody();
+    }
+
+    @Override
     public LocationDisplay addLocation(LocationForm locationForm) {
         String locationsURL = voyagerAPIConfig.buildLocationsURL();
         LOGGER.debug("full locations URL: " + locationsURL);

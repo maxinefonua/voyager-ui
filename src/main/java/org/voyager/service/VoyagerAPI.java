@@ -26,6 +26,7 @@ public interface VoyagerAPI {
     public abstract VoyagerResponseAPI<TownDisplay> towns();
     public abstract List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline);
     public abstract List<LocationDisplay> getLocations();
+    LocationDisplay getLocationById(Integer id);
     public abstract LocationDisplay addLocation(LocationForm locationForm);
     List<AirportDisplay> airports(Optional<AirportType> type, Optional<Airline> airline);
 
@@ -40,5 +41,4 @@ public interface VoyagerAPI {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error occurred fetching data.");
         }
     }
-
 }

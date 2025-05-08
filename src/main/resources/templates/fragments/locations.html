@@ -98,6 +98,7 @@
         th:each="locationDisplay,iter : ${locations}"
         th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
         th:value="${locationDisplay.id}"
+        th:disabled="${selectedId != null && selectedId == locationDisplay.id}? true : false"
         th:id="${isStart}?'start-location-'+${locationDisplay.id}:'end-location-'+${locationDisplay.id}"
         th:data-longitude="${locationDisplay.longitude}"
         th:data-latitude="${locationDisplay.latitude}"

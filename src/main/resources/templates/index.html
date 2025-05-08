@@ -89,6 +89,7 @@
         };
 
         function addTripLocationToMap(optionSelected,isStart) {
+          console.log('addTripLocationToMap called');
           const longitude = optionSelected.dataset.longitude;
           const latitude = optionSelected.dataset.latitude;
           if (isStart) {

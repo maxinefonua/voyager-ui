@@ -17,33 +17,49 @@
                     data-bs-smooth-scroll="true"
                     class="scrollspy-example overflow-y-scroll"
                     style="height:250px;"
-                    tabindex="0">
+                    tabind.  ex="0">
                 <h4 id="from-city">From</h4>
                 <div id="from-location-container"
                      style="height:250px"
+                     hx-swap="beforeend transition:true"
+                     hx-get="/lookup"
+                     hx-trigger="load"
+                     hx-target="#select-start-location"
+                     hx-vals='"isStart":"true"'
                      class="overflow-auto p-2">
                     <select class="form-select"
-                            hx-get="/lookup"
                             id="select-start-location"
-                            hx-swap="beforeend transition:true"
-                            hx-trigger="load"
-                            th:onchange="'addTripLocationToMap(this.options[this.selectedIndex],true)'"
-                            hx-vals='"isStart":"true"'>
+                            name="selectedId"
+                            hx-swap="outerHTML transition:true"
+                            hx-get="/review"
+                            hx-trigger="change"
+                            hx-target="#review-from"
+                            hx-vals='"fromOrigin":"true"'
+                            hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],true)"
+                    >
                         <option selected disabled>Start Location</option>
                     </select>
                     <div th:replace="~{fragments/form :: airport-form-initial(true)}"></div>
                 </div>
                 <h4 id="to-city">To</h4>
                 <div id="to-location-container"
+                     hx-get="/lookup"
+                     hx-vals='"isStart":"false"'
+                     hx-swap="beforeend transition:true"
+                     hx-target="#select-end-location"
+                     hx-trigger="load"
                      style="height:250px"
                      class="overflow-auto p-2">
                     <select class="form-select"
-                            hx-get="/lookup"
                             id="select-end-location"
-                            hx-swap="beforeend transition:true"
-                            hx-trigger="load"
-                            th:onchange="'addTripLocationToMap(this.options[this.selectedIndex],false)'"
-                            hx-vals='"isStart":"false"'>
+                            name="selectedId"
+                            hx-swap="outerHTML transition:true"
+                            hx-get="/review"
+                            hx-trigger="change"
+                            hx-target="#review-to"
+                            hx-vals='"fromOrigin":"false"'
+                            hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],false)"
+                    >
                         <option selected disabled>End Location</option>
                     </select>
                     <div th:replace="~{fragments/form :: airport-form-initial(false)}"></div>
@@ -52,6 +68,10 @@
                 <div id="from-result-container"
                      style="height:250px"
                      class="overflow-auto p-2">
+                    <div id="review-summary">
+                        <div id="review-from">Select From Location and Start Airport</div>
+                        <div id="review-to">Select To Location and Start Airport</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,4 +83,13 @@
     <a class="list-group-item list-group-item-action" href="#to-city" onclick="zoomToTripLocation(false)">To</a>
     <a class="list-group-item list-group-item-action" href="#review" onclick="mapFitToTrip()">Review</a>
 </div>
+<div th:fragment="review-from"
+     id="review-from">
+    <div th:text="'From: ' + ${startLocation}"></div>
+    <div th:if=${origin} th:text="'Start Airport: ' + ${origin}"></div>
+</div>
+<div th:fragment="review-to"
+     id="review-to">
+    <div th:text="'To: ' + ${endLocation}"></div>
+    <div th:if=${destination} th:text="'End Airport: ' + ${destination}"></div></div>
 </html>

@@ -37,6 +37,9 @@ public class VoyagerAPIConfig {
     @Value("/locations")
     String locationsPath;
 
+    @Value("/locations/{id}")
+    String locationByIdPath;
+
     @Value("/towns")
     String townPath;
 
@@ -92,6 +95,15 @@ public class VoyagerAPIConfig {
                 .host(host)
                 .port(port)
                 .path(locationsPath)
+                .toUriString();
+    }
+
+    public String buildLocationByIdURL(Integer id) {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(locationByIdPath).buildAndExpand(id)
                 .toUriString();
     }
 
