@@ -52,6 +52,9 @@ public class VoyagerAPIConfig {
     @Value("/airports")
     String airportsPath;
 
+    @Value("/airports/{iata}")
+    String airportByIataPath;
+
     private HttpEntity<String> httpEntityWithHeaders;
     private UriComponentsBuilder nearbyAirportsURI;
 
@@ -139,6 +142,15 @@ public class VoyagerAPIConfig {
         type.ifPresent(airportType -> airportsURL.queryParam(TYPE_PARAM_NAME, airportType));
         airline.ifPresent(airportType -> airportsURL.queryParam(AIRLINE_PARAM_NAME, airportType));
         return airportsURL.toUriString();
+    }
+
+    public String buildAirportByIataURL(String iata) {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(airportByIataPath).buildAndExpand(iata)
+                .toUriString();
     }
 
     public String buildLookupAttributionURL() {

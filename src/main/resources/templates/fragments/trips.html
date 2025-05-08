@@ -86,10 +86,10 @@
 <div th:fragment="review-from"
      id="review-from">
     <div th:text="'From: ' + ${startLocation}"></div>
-    <div th:if=${origin} th:text="'Start Airport: ' + ${origin}"></div>
+    <div th:text="${origin}?'Start Airport: ' + ${origin}:'Select Start Airport'"></div>
 </div>
 <div th:fragment="review-to"
      id="review-to">
     <div th:text="'To: ' + ${endLocation}"></div>
-    <div th:if=${destination} th:text="'End Airport: ' + ${destination}"></div></div>
+    <div th:text="${destination}?'End Airport: ' + ${destination}:'Select End Airport'"></div></div>
 </html>

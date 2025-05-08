@@ -80,7 +80,17 @@
     <div th:unless="${locations != null && locations.size > 0}"
          class="list-group-item list-group-item-secondary">No saved trips. Click 'Add Location' to plan new trip.</div>
 </div>
-
+<input th:fragment="airport-details-input"
+       th:if="${airportDisplay}"
+       th:id="${elemId}"
+       th:value="${airportDisplay.iata}"
+       th:data-latitude="${airportDisplay.latitude}"
+       th:data-longitude="${airportDisplay.longitude}"
+       th:data-countryCode="${airportDisplay.countryCode}"
+       th:data-city="${airportDisplay.city}"
+       th:data-subdivision="${airportDisplay.subdivision}"
+       th:data-distance="${airportDisplay.subdivision}"
+>
 <datalist th:fragment="all-airports"
           id="all-airports">
     <option th:each="airportDisplay,iter : ${airportList}"

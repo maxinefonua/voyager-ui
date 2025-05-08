@@ -1,11 +1,14 @@
 package org.voyager.controller;
+import io.micrometer.common.util.StringUtils;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.*;
 import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.location.LocationForm;
@@ -21,6 +24,7 @@ import org.voyager.validate.ValidationUtils;
 import java.util.*;
 
 import static org.voyager.utils.ConstantsUI.*;
+import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
 
 @Controller
 public class MainController {
@@ -102,27 +106,6 @@ public class MainController {
         return "fragments/tab :: trips-tab";
     }
 
-    @GetMapping("/nearby-airports-old")
-    @Cacheable("nearbyAirportsCache")
-    public Collection<ModelAndView> nearbyAirports2(Model model, @RequestParam Integer iterIndex, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
-        AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional);
-        Optional<AirportType> type = Optional.empty();
-        Optional<Airline> airline = Optional.empty();
-        switch (airportFilter) {
-            case DELTA -> airline = Optional.of(Airline.DELTA);
-            case CIVIL -> type = Optional.of(AirportType.CIVIL);
-            case MILITARY -> type = Optional.of(AirportType.MILITARY);
-        }
-        List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5,type,airline);
-        return List.of(
-                new ModelAndView("fragments/result-display :: iata-code-list",
-                        Map.of("nearbyAirports", nearbyAirports,
-                                "iterIndex",iterIndex,
-                                "latitude",latitude,
-                                "longitude",longitude)));
-
-    }
-
     @GetMapping("/nearby-airports")
     @Cacheable("nearbyAirportsCache")
     public String nearbyAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
@@ -169,16 +152,42 @@ public class MainController {
     }
 
     @GetMapping("/review")
-    public String updateTripReview(Model model, @RequestParam Boolean fromOrigin, @RequestParam Integer selectedId, @RequestParam(required = false) String airportCode) {
+    public Collection<ModelAndView> updateTripReview(Model model, @RequestParam Boolean fromOrigin, @RequestParam Integer selectedId, @RequestParam(required = false) String airportCode) {
+        ModelAndView reviewFragment = getUpdatedReviewFragment(fromOrigin,selectedId,airportCode);
+        if (airportCode != null) return List.of(reviewFragment);
         LocationDisplay locationDisplay = voyagerAPI.getLocationById(selectedId);
+        List<AirportDisplay> civilList = voyagerAPI.nearbyAirports(locationDisplay.getLatitude(),locationDisplay.getLongitude(),10,Optional.of(AirportType.CIVIL),Optional.empty());
+        List<AirportDisplay> deltaList = voyagerAPI.nearbyAirports(locationDisplay.getLatitude(),locationDisplay.getLongitude(),5,Optional.empty(),Optional.of(Airline.DELTA));
+        deltaList.forEach(airportDisplay -> {
+            while (!civilList.isEmpty() && airportDisplay.getIata().equals(civilList.get(0).getIata())) civilList.remove(0);
+            while (!civilList.isEmpty() && airportDisplay.getDistance() < civilList.get(0).getDistance()) civilList.remove(0);
+        });
+        List<AirportDisplay> nonDeltaAirportList = civilList.stream().limit(5).toList();
+        if (nonDeltaAirportList.isEmpty()) return List.of(reviewFragment);
+        return List.of(reviewFragment,
+                new ModelAndView("fragments/form :: non-delta-airport",Map.of(
+                        "nonDeltaAirportList",nonDeltaAirportList,
+                        "isStart",fromOrigin,
+                        "closestAirportIata",nonDeltaAirportList.get(0).getIata()
+                ))
+        );
+    }
+
+    public ModelAndView getUpdatedReviewFragment(Boolean fromOrigin,Integer selectedId, String airportCode) {
+        LocationDisplay locationDisplay = voyagerAPI.getLocationById(selectedId);
+        Boolean validAiportCode = voyagerAPI.ifValidIataCode(airportCode);
+        Map<String,Object> modelAttributes = new HashMap<>();
+        String viewName = null;
         if (fromOrigin) {
-            model.addAttribute("startLocation",locationDisplay.getName());
-            model.addAttribute("origin",airportCode);
-            return "fragments/trips :: review-from";
+            modelAttributes.put("startLocation",locationDisplay.getName());
+            if (validAiportCode) modelAttributes.put("origin",airportCode);
+            viewName = "fragments/trips :: review-from";
+        } else {
+            modelAttributes.put("endLocation",locationDisplay.getName());
+            if (validAiportCode) modelAttributes.put("destination",airportCode);
+            viewName = "fragments/trips :: review-to";
         }
-        model.addAttribute("endLocation",locationDisplay.getName());
-        model.addAttribute("destination",airportCode);
-        return "fragments/trips :: review-to";
+        return new ModelAndView(viewName).addAllObjects(modelAttributes);
     }
 
     @GetMapping("/test")

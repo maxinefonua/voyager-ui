@@ -89,7 +89,6 @@
         };
 
         function addTripLocationToMap(optionSelected,isStart) {
-          console.log('addTripLocationToMap called');
           const longitude = optionSelected.dataset.longitude;
           const latitude = optionSelected.dataset.latitude;
           if (isStart) {
@@ -158,6 +157,11 @@
               lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }
         };
+
+        function addNonDeltaAirportToMap(selectedAirport) {
+            console.log('addNonDeltaAirportToMap called');
+            console.log(selectedAirport);
+        }
 
         function checkAirportInputWithList(airportInputElem,isStart,airportListId) {
             const airportList = document.getElementById(airportListId);

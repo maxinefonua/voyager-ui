@@ -1,4 +1,5 @@
 package org.voyager.service.impl;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,5 +137,25 @@ public class VoyagerAPIService implements VoyagerAPI {
                         new ParameterizedTypeReference<List<AirportDisplay>>() {});
         validateVoyagerResponse(airportsResponse,airportsURL);
         return airportsResponse.getBody();
+    }
+
+    @Override
+    public Boolean ifValidIataCode(String iata) {
+        if (StringUtils.isEmpty(iata)) return false;
+        return getAirportByIata(iata).isPresent();
+    }
+
+    @Override
+    public Optional<AirportDisplay> getAirportByIata(String iata) {
+        String airportByIataURL = voyagerAPIConfig.buildAirportByIataURL(iata);
+        LOGGER.debug("full airport by iata URL: " + airportByIataURL);
+        ResponseEntity<AirportDisplay> airportResponse = restTemplate
+                .exchange(airportByIataURL,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        AirportDisplay.class);
+        if (!airportResponse.getStatusCode().is2xxSuccessful()) return Optional.empty();
+        assert airportResponse.getBody() != null;
+        return Optional.of(airportResponse.getBody());
     }
 }

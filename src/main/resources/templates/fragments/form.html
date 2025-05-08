@@ -44,6 +44,32 @@
          th:attrappend="id=${isStart}?'start':'end'"
          th:text="${isStart}?'Select start location to enable airport selection':'Select end location to enable airport selection'">
     </div>
+    <div th:id="${isStart}?'non-delta-start':'non-delta-end'"
+         th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
+    ></div>
+</div>
+<div th:fragment="non-delta-airport"
+     th:if="${nonDeltaAirportList}"
+     th:id="${isStart}?'non-delta-start':'non-delta-end'"
+     th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
+>
+    <div class="input-group mt-4">
+        <span class="input-group-text">Closer Airports Available</span>
+        <datalist th:id="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
+            <!--        TODO: change country codes to country -->
+            <option th:each="airportDisplay : ${nonDeltaAirportList}"
+                    th:value="${airportDisplay.iata}"
+                    th:text="${airportDisplay.name} + ' in ' + ${airportDisplay.subdivision} +'. '+ ${airportDisplay.countryCode}"
+            ></option>
+        </datalist>
+        <input th:id="${isStart}?'selected-non-delta-airport-start':'selected-non-delta-airport-end'"
+                type="hidden">
+        <input class="form-control"
+               th:placeholder="'Click to Select ' + ${closestAirportIata}"
+               oninput="addNonDeltaAirportToMap(this.value)"
+               th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
+        <button class="btn btn-primary">Add to Trip</button>
+    </div>
 </div>
 <form th:fragment="add-location-form"
       id="input-group-"
