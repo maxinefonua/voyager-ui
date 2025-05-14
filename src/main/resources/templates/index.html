@@ -158,9 +158,13 @@
           }
         };
 
-        function addNonDeltaAirportToMap(selectedAirport) {
+        function addNonDeltaAirportToMap(selectedIata) {
             console.log('addNonDeltaAirportToMap called');
-            console.log(selectedAirport);
+            console.log(selectedIata);
+            const allAirports = document.getElementById('all-airports');
+            if (allAirports && allAirports.options && allAirports.options.namedItem(selectedIata.toUpperCase())) {
+                const selectedOption = allAirports.options.namedItem(selectedIata.toUpperCase());
+            }
         }
 
         function checkAirportInputWithList(airportInputElem,isStart,airportListId) {
@@ -221,9 +225,13 @@
         }
 
         function addAirportMarker(airportOptionElem) {
-            var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
-                      .setHTML(airportOptionElem.dataset.value);
-            var airportMarker = new mapboxgl.Marker({color:"#9B1631"})
+            console.log(airportOptionElem);
+            const el = document.createElement('div');
+            el.style.backgroundImage = `url(https://docs.mapbox.com/help/demos/custom-markers-gl-js/mapbox-icon.png)`;
+            el.className = 'marker';
+            var airportPopup =  new mapboxgl.Popup({ offset: [0,-25] }) // add popups
+                      .setHTML(`<strong>${airportOptionElem.dataset.airport}</strong><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>Official website: <a href="https://www.finavia.fi/en/airports/helsinki-airport" target="_blank" title="Opens in a new window">Helsinki Airport</a>`);
+            var airportMarker = new mapboxgl.Marker(el)
                 .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
                 .setPopup(airportPopup)
                 .addTo(map);

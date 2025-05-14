@@ -3,6 +3,7 @@
         th:each="airportDisplay,iter : ${nearbyAirports}"
         th:name="${airportDisplay.iata}"
         th:value="${airportDisplay.iata}"
+        th:data-airport="${airportDisplay.name}"
         th:data-longitude="${airportDisplay.longitude}"
         th:data-latitude="${airportDisplay.latitude}"
         th:data-city="${airportDisplay.city}"
