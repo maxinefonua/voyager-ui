@@ -170,7 +170,7 @@ public class MainController {
         // -> updates path review
 
     @GetMapping("/review-location-reset")
-    public Collection<ModelAndView> resetLocationReview(Model model, @RequestParam Boolean fromOrigin, @RequestParam(required = false) Integer startLocationId, @RequestParam(required = false) Integer endLocationId, @RequestParam(required = false) String savedAirportCode) {
+    public Collection<ModelAndView> resetLocationReview(Model model, @RequestParam Boolean fromOrigin, @RequestParam(required = false) Integer startLocationId, @RequestParam(required = false) Integer endLocationId, @RequestParam(required = false) String startAirportCode, @RequestParam(required = false) String endAirportCode) {
         LocationDisplay startLocation = null;
         LocationDisplay endLocation = null;
         if (startLocationId != 0) startLocation = voyagerAPI.getLocationById(startLocationId);
@@ -178,10 +178,9 @@ public class MainController {
 
         AirportDisplay startAirport = null;
         AirportDisplay endAirport = null;
-        if (voyagerAPI.ifValidIataCode(savedAirportCode)) {
-            if (fromOrigin) endAirport = voyagerAPI.getAirportByIata(savedAirportCode).get();
-            else startAirport = voyagerAPI.getAirportByIata(savedAirportCode).get();
-        }
+        if (voyagerAPI.ifValidIataCode(startAirportCode)) startAirport = voyagerAPI.getAirportByIata(startAirportCode).get();
+        if (voyagerAPI.ifValidIataCode(endAirportCode)) endAirport = voyagerAPI.getAirportByIata(startAirportCode).get();
+
         ModelAndView reviewFragment = getUpdatedReviewPath(startLocation,endLocation,startAirport,endAirport);
 
         // reset closer non-delta airports
@@ -236,21 +235,18 @@ public class MainController {
         ));
     }
 
-    public ModelAndView getUpdatedReviewFragment2(Boolean fromOrigin,Integer selectedId, String airportCode) {
-        LocationDisplay locationDisplay = voyagerAPI.getLocationById(selectedId);
-        Boolean validAiportCode = voyagerAPI.ifValidIataCode(airportCode);
-        Map<String,Object> modelAttributes = new HashMap<>();
-        String viewName = null;
-        if (fromOrigin) {
-            modelAttributes.put("startLocation",locationDisplay.getName());
-            if (validAiportCode) modelAttributes.put("origin",airportCode);
-            viewName = "fragments/trips :: review-from";
-        } else {
-            modelAttributes.put("endLocation",locationDisplay.getName());
-            if (validAiportCode) modelAttributes.put("destination",airportCode);
-            viewName = "fragments/trips :: review-to";
-        }
-        return new ModelAndView(viewName).addAllObjects(modelAttributes);
+    @GetMapping("/review-airport-reset")
+    public Collection<ModelAndView> resetAirportReview(Model model, @RequestParam Boolean fromOrigin, @RequestParam(required = false) String startAirportCode, @RequestParam(required = false) String endAirportCode, @RequestParam(required = false) Integer startLocationId, @RequestParam(required = false) Integer endLocationId) {
+        LocationDisplay startLocation = null;
+        LocationDisplay endLocation = null;
+        if (startLocationId != 0) startLocation = voyagerAPI.getLocationById(startLocationId);
+        if (endLocationId != 0) endLocation = voyagerAPI.getLocationById(endLocationId);
+
+        AirportDisplay startAirport = null;
+        AirportDisplay endAirport = null;
+        if (voyagerAPI.ifValidIataCode(startAirportCode)) startAirport = voyagerAPI.getAirportByIata(startAirportCode).get();
+        if (voyagerAPI.ifValidIataCode(endAirportCode)) endAirport = voyagerAPI.getAirportByIata(endAirportCode).get();
+        return List.of(getUpdatedReviewPath(startLocation,endLocation,startAirport,endAirport));
     }
 
     @GetMapping("/test")

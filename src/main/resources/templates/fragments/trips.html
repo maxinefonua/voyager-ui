@@ -34,11 +34,11 @@
                             hx-get="/review-location-reset"
                             hx-trigger="change"
                             hx-target="#review-summary"
-                            hx-include="#select-end-location"
+                            hx-include="#select-end-location,#airport-end-code"
                             hx-vals='"fromOrigin":"true"'
                             hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],true)"
                     >
-                        <option selected disabled>Start Location</option>
+                        <option selected disabled value="0">Start Location</option>
                     </select>
                     <div th:replace="~{fragments/form :: airport-form-initial(true)}"></div>
                 </div>
@@ -58,7 +58,7 @@
                             hx-get="/review-location-reset"
                             hx-trigger="change"
                             hx-target="#review-summary"
-                            hx-include="#select-start-location"
+                            hx-include="#select-start-location,#airport-start-code"
                             hx-vals='"fromOrigin":"false"'
                             hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],false)"
                     >

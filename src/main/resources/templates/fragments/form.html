@@ -29,14 +29,15 @@
                th:placeholder="${isStart}?'Start Airport':'End Airport'"
                disabled
                type="text" aria-label="Airport"
-               hx-swap="outerHTML transition:true"
-               hx-get="/review"
+               hx-swap="innerHTML transition:true"
+               hx-get="/review-airport-reset"
                hx-trigger="input"
-               th:hx-target="${isStart}?'#review-from':'#review-to'"
+               hx-target="#review-summary"
                th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
-               th:hx-include="${isStart}?'#select-start-location':'#select-end-location'"
+               hx-include="#select-start-location,#select-end-location,"
+               th:attrappend="hx-include=${isStart}?'#airport-end-code':'#airport-start-code'"
                th:hx-on::after-request="${isStart}?'checkAirportInputWithList(this,' + ${isStart} + ',\'filtered-airports-start\')':'checkAirportInputWithList(this,' + ${isStart} + ',\'filtered-airports-end\')'"
-               name="airportCode"
+               th:name="${isStart}?startAirportCode:endAirportCode"
                th:list="${isStart}?'filtered-airports-start':'filtered-airports-end'" required
         >
     </div>
