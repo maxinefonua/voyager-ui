@@ -14,6 +14,7 @@ import org.voyager.model.AirportType;
 import org.voyager.utils.ConstantsUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.voyager.utils.ConstantsUtils.*;
@@ -54,6 +55,9 @@ public class VoyagerAPIConfig {
 
     @Value("/airports/{iata}")
     String airportByIataPath;
+
+    @Value("/path/{origin}/to/{destination}")
+    String pathPath;
 
     private HttpEntity<String> httpEntityWithHeaders;
     private UriComponentsBuilder nearbyAirportsURI;
@@ -143,6 +147,19 @@ public class VoyagerAPIConfig {
         airline.ifPresent(airportType -> airportsURL.queryParam(AIRLINE_PARAM_NAME, airportType));
         return airportsURL.toUriString();
     }
+
+    public String buildPathURL(String originIata, String destinationIata) {
+        UriComponentsBuilder pathURL = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(pathPath);
+        return pathURL.buildAndExpand(Map.of(
+                "origin",originIata,
+                "destination",destinationIata
+        )).toUriString();
+    }
+
 
     public String buildAirportByIataURL(String iata) {
         return UriComponentsBuilder

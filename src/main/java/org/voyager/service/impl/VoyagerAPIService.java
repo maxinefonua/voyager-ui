@@ -20,6 +20,7 @@ import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
+import org.voyager.model.route.PathDisplay;
 import org.voyager.service.VoyagerAPI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -157,5 +158,18 @@ public class VoyagerAPIService implements VoyagerAPI {
         if (!airportResponse.getStatusCode().is2xxSuccessful()) return Optional.empty();
         assert airportResponse.getBody() != null;
         return Optional.of(airportResponse.getBody());
+    }
+
+    @Override
+    public PathDisplay getPath(String originIata, String destinationIata) {
+        String pathURL = voyagerAPIConfig.buildPathURL(originIata,destinationIata);
+        LOGGER.debug("full airports URL: " + pathURL);
+        ResponseEntity<PathDisplay> airportsResponse = restTemplate
+                .exchange(pathURL,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        PathDisplay.class);
+        validateVoyagerResponse(airportsResponse,pathURL);
+        return airportsResponse.getBody();
     }
 }

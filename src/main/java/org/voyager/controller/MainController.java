@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
 import org.voyager.model.result.ResultSearch;
+import org.voyager.model.route.PathDisplay;
 import org.voyager.service.VoyagerAPI;
 import org.voyager.validate.ValidationUtils;
 
@@ -227,6 +228,18 @@ public class MainController {
 
         String origin = startAirport != null ? startAirport.getIata() : "Select Origin Airport";
         String destination = endAirport != null ? endAirport.getIata() : "Select Destination Airport";
+
+        if (startAirport != null && endAirport != null)  {
+            PathDisplay pathDisplay = voyagerAPI.getPath(origin,destination);
+            return new ModelAndView("fragments/trips :: review-path", Map.of(
+                    "start", start,
+                    "end", end,
+                    "origin", origin,
+                    "destination", destination,
+                    "pathDisplay", pathDisplay
+            ));
+        }
+
         return new ModelAndView("fragments/trips :: review-path", Map.of(
                 "start", start,
                 "end", end,

@@ -87,7 +87,7 @@
 <div th:fragment="review-path">
     <div th:text="'From: '+${start} + ' -> ' + ${end}"></div>
     <div th:text="'Airport: '+${origin} + ' -> ' + ${destination}"></div>
-    <div th:if="${pathDisplay}">
+    <div th:if="${pathDisplay != null}">
         <div th:each="routeDisplay,iter : ${pathDisplay.routeDisplayList}"
              th:text="${routeDisplay.origin} + ' -> ' + ${routeDisplay.destination}">
         </div>

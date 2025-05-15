@@ -15,22 +15,25 @@ import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
+import org.voyager.model.route.PathDisplay;
+import org.voyager.model.route.RouteDisplay;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface VoyagerAPI {
     public static final Logger LOGGER = LoggerFactory.getLogger(VoyagerAPI.class);
-    public abstract VoyagerListResponse<ResultSearch> lookup(String query, int skipRows, Optional<Integer> limitOptional);
-    public abstract LookupAttribution lookupAttribution();
-    public abstract VoyagerResponseAPI<TownDisplay> towns();
-    public abstract List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline);
-    public abstract List<LocationDisplay> getLocations();
+    VoyagerListResponse<ResultSearch> lookup(String query, int skipRows, Optional<Integer> limitOptional);
+    LookupAttribution lookupAttribution();
+    VoyagerResponseAPI<TownDisplay> towns();
+    List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline);
+    List<LocationDisplay> getLocations();
     LocationDisplay getLocationById(Integer id);
-    public abstract LocationDisplay addLocation(LocationForm locationForm);
+    LocationDisplay addLocation(LocationForm locationForm);
     List<AirportDisplay> airports(Optional<AirportType> type, Optional<Airline> airline);
     Boolean ifValidIataCode(String airportCode);
     Optional<AirportDisplay> getAirportByIata(String iata);
+    PathDisplay getPath(String origin, String destination);
 
     public default void validateVoyagerResponse(ResponseEntity responseEntity, String requestURL){
         if (responseEntity.getStatusCode().value() != 200 || responseEntity.getBody() == null) {
