@@ -49,11 +49,12 @@
     ></div>
 </div>
 <div th:fragment="non-delta-airport"
-     th:if="${nonDeltaAirportList}"
      th:id="${isStart}?'non-delta-start':'non-delta-end'"
      th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
 >
-    <div class="input-group mt-4">
+    <div class="input-group mt-4"
+         th:if="${nonDeltaAirportList}"
+    >
         <span class="input-group-text">Closer Airports Available</span>
         <datalist th:id="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
             <!--        TODO: change country codes to country -->

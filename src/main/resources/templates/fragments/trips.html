@@ -29,11 +29,12 @@
                      class="overflow-auto p-2">
                     <select class="form-select"
                             id="select-start-location"
-                            name="selectedId"
-                            hx-swap="outerHTML transition:true"
-                            hx-get="/review"
+                            name="startLocationId"
+                            hx-swap="innerHTML transition:true"
+                            hx-get="/review-location-reset"
                             hx-trigger="change"
-                            hx-target="#review-from"
+                            hx-target="#review-summary"
+                            hx-include="#select-end-location"
                             hx-vals='"fromOrigin":"true"'
                             hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],true)"
                     >
@@ -52,15 +53,16 @@
                      class="overflow-auto p-2">
                     <select class="form-select"
                             id="select-end-location"
-                            name="selectedId"
-                            hx-swap="outerHTML transition:true"
-                            hx-get="/review"
+                            name="endLocationId"
+                            hx-swap="innerHTML transition:true"
+                            hx-get="/review-location-reset"
                             hx-trigger="change"
-                            hx-target="#review-to"
+                            hx-target="#review-summary"
+                            hx-include="#select-start-location"
                             hx-vals='"fromOrigin":"false"'
                             hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],false)"
                     >
-                        <option selected disabled>End Location</option>
+                        <option selected disabled value="0">End Location</option>
                     </select>
                     <div th:replace="~{fragments/form :: airport-form-initial(false)}"></div>
                 </div>
@@ -69,8 +71,7 @@
                      style="height:250px"
                      class="overflow-auto p-2">
                     <div id="review-summary">
-                        <div id="review-from">Select From Location and Start Airport</div>
-                        <div id="review-to">Select To Location and Start Airport</div>
+                        <div>TBD - Select From/To locations and airports to enable review</div>
                     </div>
                 </div>
             </div>
@@ -83,13 +84,13 @@
     <a class="list-group-item list-group-item-action" href="#to-city" onclick="zoomToTripLocation(false)">To</a>
     <a class="list-group-item list-group-item-action" href="#review" onclick="mapFitToTrip()">Review</a>
 </div>
-<div th:fragment="review-from"
-     id="review-from">
-    <div th:text="'From: ' + ${startLocation}"></div>
-    <div th:text="${origin}?'Start Airport: ' + ${origin}:'Select Start Airport'"></div>
+<div th:fragment="review-path">
+    <div th:text="'From: '+${start} + ' -> ' + ${end}"></div>
+    <div th:text="'Airport: '+${origin} + ' -> ' + ${destination}"></div>
+    <div th:if="${pathDisplay}">
+        <div th:each="routeDisplay,iter : ${pathDisplay.routeDisplayList}"
+             th:text="${routeDisplay.origin} + ' -> ' + ${routeDisplay.destination}">
+        </div>
+    </div>
 </div>
-<div th:fragment="review-to"
-     id="review-to">
-    <div th:text="'To: ' + ${endLocation}"></div>
-    <div th:text="${destination}?'End Airport: ' + ${destination}:'Select End Airport'"></div></div>
 </html>
