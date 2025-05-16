@@ -152,24 +152,6 @@ public class MainController {
         return "fragments/locations :: saved-locations-options";
     }
 
-    // changing start location
-        // -> resets the start nearby airport list DELTA
-        // -> resets the start nearby airport list CIVIL
-        // -> resets the start review location
-        // -> resets the start review airport
-    // changing start airport
-        // -> resets the start review airport
-        // -> updates path review
-    // changing end location
-        // -> resets the end nearby airport list DELTA
-        // -> resets the end nearby airport list CIVIL
-        // -> resets the end review location
-        // -> clears the end review airport
-        // -> clears path review
-    // changing end airport
-        // -> resets the end review airport
-        // -> updates path review
-
     @GetMapping("/review-location-reset")
     public Collection<ModelAndView> resetLocationReview(Model model, @RequestParam Boolean fromOrigin, @RequestParam(required = false) Integer startLocationId, @RequestParam(required = false) Integer endLocationId, @RequestParam(required = false) String startAirportCode, @RequestParam(required = false) String endAirportCode) {
         LocationDisplay startLocation = null;
@@ -203,63 +185,54 @@ public class MainController {
             if (deltaList.get(0).getDistance() <= airportDisplay.getDistance()) nonDeltaAirportList.remove(airportDisplay);
         });
 
-
         List<AirportDisplay> closer = nonDeltaAirportList.stream().limit(5).toList();
-        if (nonDeltaAirportList.isEmpty()) {
-            return List.of(reviewFragment,
-                    new ModelAndView("fragments/form :: non-delta-airport",Map.of(
-                            "isStart",fromOrigin
-                    ))
-            );
+        Map<String,Object> attributes = new HashMap<>(Map.of(
+                "isStart",fromOrigin));
+        if (!nonDeltaAirportList.isEmpty())  {
+            attributes.put("nonDeltaAirportList",closer);
+            attributes.put("closestAirportIata",closer.get(0).getIata());
         }
-
-        return List.of(reviewFragment,
-                new ModelAndView("fragments/form :: non-delta-airport",Map.of(
-                        "nonDeltaAirportList",closer,
-                        "isStart",fromOrigin,
-                        "closestAirportIata",closer.get(0).getIata()
-                ))
-        );
+        ModelAndView nonDeltaMav = new ModelAndView("fragments/form :: non-delta-airport",attributes);
+        return List.of(reviewFragment,nonDeltaMav);
     }
 
     public ModelAndView getUpdatedReviewPath(LocationDisplay startLocation, LocationDisplay endLocation, AirportDisplay startAirport, AirportDisplay endAirport) {
         String start = startLocation != null ? startLocation.getName() : "Select Start Location";
         String end = endLocation != null ? endLocation.getName() : "Select End Location";
-
         String origin = startAirport != null ? startAirport.getIata() : "Select Origin Airport";
         String destination = endAirport != null ? endAirport.getIata() : "Select Destination Airport";
-
-        if (startAirport != null && endAirport != null)  {
-            PathDisplay pathDisplay = voyagerAPI.getPath(origin,destination);
-            return new ModelAndView("fragments/trips :: review-path", Map.of(
-                    "start", start,
-                    "end", end,
-                    "origin", origin,
-                    "destination", destination,
-                    "pathDisplay", pathDisplay
-            ));
-        }
-
-        return new ModelAndView("fragments/trips :: review-path", Map.of(
-                "start", start,
+        Map<String,Object> attributes = new HashMap<>(Map.of(
+                "start",start,
                 "end", end,
                 "origin", origin,
-                "destination", destination
-        ));
+                "destination", destination));
+        if (startAirport != null && endAirport != null) attributes.put("pathDisplay",voyagerAPI.getPath(origin,destination));
+        return new ModelAndView("fragments/trips :: review-path", attributes);
     }
 
     @GetMapping("/review-airport-reset")
     public Collection<ModelAndView> resetAirportReview(Model model, @RequestParam Boolean fromOrigin, @RequestParam(required = false) String startAirportCode, @RequestParam(required = false) String endAirportCode, @RequestParam(required = false) Integer startLocationId, @RequestParam(required = false) Integer endLocationId) {
-        LocationDisplay startLocation = null;
-        LocationDisplay endLocation = null;
+        LocationDisplay startLocation = null, endLocation = null;
         if (startLocationId != 0) startLocation = voyagerAPI.getLocationById(startLocationId);
         if (endLocationId != 0) endLocation = voyagerAPI.getLocationById(endLocationId);
 
-        AirportDisplay startAirport = null;
-        AirportDisplay endAirport = null;
+        AirportDisplay startAirport = null, endAirport = null;
         if (voyagerAPI.ifValidIataCode(startAirportCode)) startAirport = voyagerAPI.getAirportByIata(startAirportCode).get();
         if (voyagerAPI.ifValidIataCode(endAirportCode)) endAirport = voyagerAPI.getAirportByIata(endAirportCode).get();
         return List.of(getUpdatedReviewPath(startLocation,endLocation,startAirport,endAirport));
+    }
+
+    // TODO: check if this is possible -> to add input airport to datalist in DOM
+    private ModelAndView addEndAirportFragment(AirportDisplay endAirport) {
+        return new ModelAndView("iata-code-list", Map.of(
+                "nearbyAirports", List.of(endAirport)
+        ));
+    }
+    // TODO: check if this is possible -> to add input airport to datalist in DOM
+    private ModelAndView addStartAirportFragment(AirportDisplay startAirport) {
+        return new ModelAndView("iata-code-list", Map.of(
+                "nearbyAirports", List.of(startAirport)
+        ));
     }
 
     @GetMapping("/test")

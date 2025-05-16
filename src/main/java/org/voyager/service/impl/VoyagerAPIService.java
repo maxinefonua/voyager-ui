@@ -27,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
+
 @Service
 public class VoyagerAPIService implements VoyagerAPI {
     @Autowired
@@ -142,7 +144,7 @@ public class VoyagerAPIService implements VoyagerAPI {
 
     @Override
     public Boolean ifValidIataCode(String iata) {
-        if (StringUtils.isEmpty(iata)) return false;
+        if (StringUtils.isEmpty(iata) || !iata.matches(IATA_CODE_REGEX)) return false;
         return getAirportByIata(iata).isPresent();
     }
 
