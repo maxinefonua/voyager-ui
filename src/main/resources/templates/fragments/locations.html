@@ -91,19 +91,6 @@
        th:data-subdivision="${airportDisplay.subdivision}"
        th:data-distance="${airportDisplay.subdivision}"
 >
-<datalist th:fragment="all-airports"
-          id="all-airports">
-    <option th:each="airportDisplay,iter : ${airportList}"
-            th:name="${airportDisplay.iata}"
-            th:value="${airportDisplay.iata}"
-            th:data-longitude="${airportDisplay.longitude}"
-            th:data-latitude="${airportDisplay.latitude}"
-            th:data-city="${airportDisplay.city}"
-            th:data-subdivision="${airportDisplay.subdivision}"
-            th:data-country="${airportDisplay.countryCode}"
-            th:data-type="${airportDisplay.type.name}"
-            th:text="${airportDisplay.name}"></option>
-</datalist>
 <option th:fragment="saved-locations-options"
         th:each="locationDisplay,iter : ${locations}"
         th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"

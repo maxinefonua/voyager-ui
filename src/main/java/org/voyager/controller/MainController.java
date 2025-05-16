@@ -92,7 +92,7 @@ public class MainController {
         }
         List<AirportDisplay> airportList = voyagerAPI.airports(type,airline);
         model.addAttribute("airportList",airportList);
-        return "fragments/locations :: all-airports";
+        return "fragments/result-display :: iata-code-list";
     }
 
     @GetMapping("/trips")
@@ -116,9 +116,7 @@ public class MainController {
             case MILITARY -> type = Optional.of(AirportType.MILITARY);
         }
         List<AirportDisplay> nearbyAirports = voyagerAPI.nearbyAirports(latitude,longitude,5,type,airline);
-        model.addAttribute("nearbyAirports",nearbyAirports);
-        model.addAttribute("latitude",latitude);
-        model.addAttribute("longitude",longitude);
+        model.addAttribute("airportList",nearbyAirports);
         return "fragments/result-display :: iata-code-list";
     }
 

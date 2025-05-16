@@ -1,6 +1,6 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
 <option th:fragment="iata-code-list"
-        th:each="airportDisplay,iter : ${nearbyAirports}"
+        th:each="airportDisplay,iter : ${airportList}"
         th:name="${airportDisplay.iata}"
         th:value="${airportDisplay.iata}"
         th:data-airport="${airportDisplay.name}"
@@ -10,5 +10,6 @@
         th:data-subdivision="${airportDisplay.subdivision}"
         th:data-country="${airportDisplay.countryCode}"
         th:data-type="${airportDisplay.type.name}"
+        th:data-distance="${airportDisplay.distance}"
         th:text="${airportDisplay.name}"></option>
 </html>
