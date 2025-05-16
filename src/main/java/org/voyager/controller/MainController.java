@@ -1,14 +1,11 @@
 package org.voyager.controller;
 import jakarta.validation.Valid;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.*;
 import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.location.LocationForm;
@@ -18,14 +15,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
 import org.voyager.model.result.ResultSearch;
-import org.voyager.model.route.PathDisplay;
 import org.voyager.service.VoyagerAPI;
 import org.voyager.validate.ValidationUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.voyager.utils.ConstantsUI.*;
-import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
 
 @Controller
 public class MainController {
@@ -162,7 +158,7 @@ public class MainController {
         AirportDisplay startAirport = null;
         AirportDisplay endAirport = null;
         if (voyagerAPI.ifValidIataCode(startAirportCode)) startAirport = voyagerAPI.getAirportByIata(startAirportCode).get();
-        if (voyagerAPI.ifValidIataCode(endAirportCode)) endAirport = voyagerAPI.getAirportByIata(startAirportCode).get();
+        if (voyagerAPI.ifValidIataCode(endAirportCode)) endAirport = voyagerAPI.getAirportByIata(endAirportCode).get();
 
         ModelAndView reviewFragment = getUpdatedReviewPath(startLocation,endLocation,startAirport,endAirport);
 
@@ -178,17 +174,17 @@ public class MainController {
             civilList.addAll(voyagerAPI.nearbyAirports(endLocation.getLatitude(),endLocation.getLongitude(),10,Optional.of(AirportType.CIVIL),Optional.empty()));
             deltaList.addAll(voyagerAPI.nearbyAirports(endLocation.getLatitude(),endLocation.getLongitude(),5,Optional.empty(),Optional.of(Airline.DELTA)));
         }
-
-        List<AirportDisplay> nonDeltaAirportList = new ArrayList<>(civilList);
-        deltaList.forEach(nonDeltaAirportList::remove);
-        civilList.forEach(airportDisplay -> {
-            if (deltaList.get(0).getDistance() <= airportDisplay.getDistance()) nonDeltaAirportList.remove(airportDisplay);
-        });
-
-        List<AirportDisplay> closer = nonDeltaAirportList.stream().limit(5).toList();
+        Set<String> deltaCodes = deltaList.stream().map(AirportDisplay::getIata).collect(Collectors.toSet());
+        List<AirportDisplay> filtered = civilList.stream().filter(airportDisplay -> !deltaCodes.contains(airportDisplay.getIata())).toList();
+        List<AirportDisplay> closer = new ArrayList<>();
+        for (AirportDisplay airportDisplay : filtered) {
+            if (airportDisplay.getDistance() >= deltaList.get(0).getDistance()) break;
+            closer.add(airportDisplay);
+        }
+        closer = closer.stream().limit(5).toList();
         Map<String,Object> attributes = new HashMap<>(Map.of(
                 "isStart",fromOrigin));
-        if (!nonDeltaAirportList.isEmpty())  {
+        if (!closer.isEmpty())  {
             attributes.put("nonDeltaAirportList",closer);
             attributes.put("closestAirportIata",closer.get(0).getIata());
         }

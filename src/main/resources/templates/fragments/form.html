@@ -56,7 +56,7 @@
     <div class="input-group mt-4"
          th:if="${nonDeltaAirportList}"
     >
-        <span class="input-group-text">Closer Airports Available</span>
+        <span class="input-group-text">Closer Non-Delta Airports</span>
         <datalist th:id="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
             <!--        TODO: change country codes to country -->
             <option th:each="airportDisplay : ${nonDeltaAirportList}"
@@ -68,9 +68,8 @@
                 type="hidden">
         <input class="form-control"
                th:placeholder="'Click to Select ' + ${closestAirportIata}"
-               oninput="addNonDeltaAirportToMap(this.value)"
+               th:oninput="'addNonDeltaAirportToMap(this.value,'+${isStart}+')'"
                th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
-        <button class="btn btn-primary">Add to Trip</button>
     </div>
 </div>
 <form th:fragment="add-location-form"
