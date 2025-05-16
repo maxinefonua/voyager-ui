@@ -187,30 +187,35 @@
             }
         }
 
-        function checkAirportInputWithList(airportInputElem,isStart,airportListId) {
-            const airportList = document.getElementById(airportListId);
+        function addAirportToMap(airportInputElem,isStart) {
+            console.log('addAirportToMap called');
             if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
-                if (airportList && airportList.options && airportList.options.namedItem(airportInputElem.value.toUpperCase())) {
-                    const airportMatch = airportList.options.namedItem(airportInputElem.value.toUpperCase());
+                const allAirports = document.getElementById('all-airports');
+                if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
+                    const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
                     if (isStart) {
                         if (airportStartMarker) airportStartMarker.remove();
                         airportStartMarker = addAirportMarker(airportMatch);
-                        const invalidFeedback = document.getElementById("airport-invalid-feedback-start");
-                        if (invalidFeedback) invalidFeedback.remove();
                         airportInputElem.classList.remove('is-invalid');
                         mapFitBothMarkers(startMarker,airportStartMarker);
                     } else {
                         if (airportEndMarker) airportEndMarker.remove();
                         airportEndMarker = addAirportMarker(airportMatch);
-                        const invalidFeedback = document.getElementById("airport-invalid-feedback-end");
-                        if (invalidFeedback) invalidFeedback.remove();
                         airportInputElem.classList.remove('is-invalid');
                         mapFitBothMarkers(endMarker,airportEndMarker);
                     }
+                }
             } else {
-              console.log('checkAirportInput called with input: ' + airportInput.value + ' and isStart: ' + isStart + ', no match.');
+                console.log('checkAirportInput called with input: ' + airportInputElem.value + ' and isStart: ' + isStart + ', no match.');
+                airportInputElem.classList.add('is-invalid');
+                if (isStart && airportStartMarker) {
+                    airportStartMarker.remove();
+                    airportStartMarker = null;
+                } else if (!isStart && airportEndMarker) {
+                    airportEndMarker.remove();
+                    airportEndMarker = null;
+                }
             }
-          }
         };
 
         function checkAirportInput(iterIndex) {

@@ -36,7 +36,7 @@
                th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
                hx-include="#select-start-location,#select-end-location,"
                th:attrappend="hx-include=${isStart}?'#airport-end-code':'#airport-start-code'"
-               th:hx-on::after-request="${isStart}?'checkAirportInputWithList(this,' + ${isStart} + ',\'filtered-airports-start\')':'checkAirportInputWithList(this,' + ${isStart} + ',\'filtered-airports-end\')'"
+               th:hx-on::after-request="'addAirportToMap(this,' + ${isStart} + ')'"
                th:name="${isStart}?startAirportCode:endAirportCode"
                th:list="${isStart}?'filtered-airports-start':'filtered-airports-end'" required
         >
