@@ -16,34 +16,26 @@
                 th:hx-on::after-request="${isStart}?'setAirportPlaceHolderFromList(\'airport-start-code\',\'filtered-airports-start\')':'setAirportPlaceHolderFromList(\'airport-end-code\',\'filtered-airports-end\')'"
                 th:hx-on::before-request="'clearAirportMarkerMapFitToLocation('+${isStart}+')'"
                 hx-swap="innerHTML"
-                disabled
         >
             <option selected value="DELTA">Delta Airports</option>
             <hr class="dropdown-divider">
-            <option value="CIVIL">Civil</option>
-            <option value="MILITARY">Military</option>
-            <option value="ALL">All</option>
+            <option disabled>Additional Airline Support Under Development</option>
         </select>
         <input th:id="${isStart}?'airport-start-code':'airport-end-code'"
                class="form-control"
                th:placeholder="${isStart}?'Start Airport':'End Airport'"
-               disabled
                type="text" aria-label="Airport"
                hx-swap="innerHTML transition:true"
                hx-get="/review-airport-reset"
                hx-trigger="input"
                hx-target="#review-summary"
                th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
-               hx-include="#select-start-location,#select-end-location,"
+               hx-include="#select-start-location,#select-end-location,#non-delta-start-code,#non-delta-end-code,"
                th:attrappend="hx-include=${isStart}?'#airport-end-code':'#airport-start-code'"
                th:hx-on::after-request="'addAirportToMap(this,' + ${isStart} + ')'"
                th:name="${isStart}?startAirportCode:endAirportCode"
                th:list="${isStart}?'filtered-airports-start':'filtered-airports-end'" required
         >
-    </div>
-    <div id="airport-disabled-text-"
-         th:attrappend="id=${isStart}?'start':'end'"
-         th:text="${isStart}?'Select start location to enable airport selection':'Select end location to enable airport selection'">
     </div>
     <div th:id="${isStart}?'non-delta-start':'non-delta-end'"
          th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
@@ -64,11 +56,18 @@
                     th:text="${airportDisplay.name} + ' in ' + ${airportDisplay.subdivision} +'. '+ ${airportDisplay.countryCode}"
             ></option>
         </datalist>
-        <input th:id="${isStart}?'selected-non-delta-airport-start':'selected-non-delta-airport-end'"
-                type="hidden">
         <input class="form-control"
-               th:placeholder="'Click to Select ' + ${closestAirportIata}"
-               th:oninput="'addNonDeltaAirportToMap(this.value,'+${isStart}+')'"
+               th:id="${isStart}?'non-delta-start-code':'non-delta-end-code'"
+               th:name="${isStart}?'nonDeltaStartCode':'nonDeltaEndCode'"
+               th:placeholder="'Click to Add ' + ${closestAirportIata}"
+               hx-swap="innerHTML transition:true"
+               hx-get="/review-airport-reset"
+               hx-trigger="input"
+               hx-target="#review-summary"
+               th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
+               hx-include="#select-start-location,#select-end-location,#airport-end-code,#airport-start-code,"
+               th:attrappend="hx-include=${isStart}?'#non-delta-end-code':'#non-delta-start-code'"
+               th:hx-on::after-request="'addNonDeltaAirportToMap(this.value,'+${isStart}+')'"
                th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
     </div>
 </div>

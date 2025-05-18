@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml"
+      xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Trip Content</title>
@@ -10,7 +11,7 @@
         <div class="col-2 d-flex justify-content-center">
           <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
         </div>
-        <div class="col-8">
+        <div class="col-9">
             <div id="scrollable-content"
                     data-bs-spy="scroll"
                     data-bs-target="#trips-scroll-nav"
@@ -34,7 +35,7 @@
                             hx-get="/review-location-reset"
                             hx-trigger="change"
                             hx-target="#review-summary"
-                            hx-include="#select-end-location,#airport-end-code"
+                            hx-include="#select-end-location,#airport-end-code,#non-delta-end-code"
                             hx-vals='"fromOrigin":"true"'
                             hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],true)"
                     >
@@ -58,7 +59,7 @@
                             hx-get="/review-location-reset"
                             hx-trigger="change"
                             hx-target="#review-summary"
-                            hx-include="#select-start-location,#airport-start-code"
+                            hx-include="#select-start-location,#airport-start-code,#non-delta-start-code"
                             hx-vals='"fromOrigin":"false"'
                             hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],false)"
                     >
@@ -67,12 +68,10 @@
                     <div th:replace="~{fragments/form :: airport-form-initial(false)}"></div>
                 </div>
                 <h4 id="review">Review</h4>
-                <div id="from-result-container"
-                     style="height:250px"
+                <div id="review-summary"
+                     style="height:200px"
                      class="overflow-auto p-2">
-                    <div id="review-summary">
-                        <div>TBD - Select From/To locations and airports to enable review</div>
-                    </div>
+                    <div th:replace="~{fragments/trips :: review-path}"></div>
                 </div>
             </div>
         </div>
@@ -84,12 +83,71 @@
     <a class="list-group-item list-group-item-action" href="#to-city" onclick="zoomToTripLocation(false)">To</a>
     <a class="list-group-item list-group-item-action" href="#review" onclick="mapFitToTrip()">Review</a>
 </div>
-<div th:fragment="review-path">
-    <div th:text="'From: '+${start} + ' -> ' + ${end}"></div>
-    <div th:text="'Airport: '+${origin} + ' -> ' + ${destination}"></div>
-    <div th:if="${pathDisplay != null}">
-        <div th:each="routeDisplay,iter : ${pathDisplay.routeDisplayList}"
-             th:text="${routeDisplay.origin} + ' -> ' + ${routeDisplay.destination}">
+<div th:fragment="review-path" class="container text-center">
+    <div class="row justify-content-center">
+        <div class="col-5">
+            <figure>
+                <blockquote class="blockquote">
+                    <span th:if="${startLocation}"
+                       th:text="${startLocation.name} + ', ' + ${startLocation.subdivision}"></span>
+                    <i th:unless="${startLocation}">Select Start Location</i>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                   <div th:if="${nonDeltaStartAirport}">
+                        Initial Check-In: <strong th:text="${nonDeltaStartAirport.iata}"></strong>
+                   </div>
+                    <span th:text="${nonDeltaStartAirport}?'Delta Check-In: ':'Check-In: '"></span>
+                    <strong th:if="${startAirport}" th:text="${startAirport.iata}"></strong>
+                    <i th:unless="${startAirport}">Select Start Airport</i>
+                </figcaption>
+            </figure>
+        </div>
+        <button class="vr btn-primary container">Rev</button>
+        <div class="col-5">
+            <figure>
+                <blockquote class="blockquote">
+                    <span th:if="${endLocation}"
+                          th:text="${endLocation.name} + ', ' + ${endLocation.subdivision}"></span>
+                    <i th:unless="${endLocation}">Select End Location</i>
+                </blockquote>
+                <figcaption class="blockquote-footer">
+                    <div th:if="${nonDeltaEndAirport}">
+                        Final Destination: <strong th:text="${nonDeltaEndAirport.iata}"></strong>
+                    </div>
+                    <span th:text="${nonDeltaEndAirport}?'Delta Destination: ':'Destination: '"></span>
+                    <strong th:if="${endAirport}" th:text="${endAirport.iata}"></strong>
+                    <i th:unless="${endAirport}">Select Start Airport</i>
+                </figcaption>
+            </figure>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-5">
+            <h5>Delta Route</h5>
+            <div class="m-2">
+                <span th:text="${startAirport}?${startAirport.iata}:'?'"></span>
+                <span th:if="${middleAirports}" th:each="iata,iter : ${middleAirports}" th:text="' -> ' + ${iata}"></span>
+                <span th:text="${endAirport}?' -> ' + ${endAirport.iata}:' -> ?'"></span>
+            </div>
+        </div>
+        <button class="vr btn-primary container" disabled></button>
+        <div class="col-5">
+            <h5 th:if="${middleAirports}">Allowed Airports</h5>
+            <div th:if="${middleAirports}"
+                 class="hstack gap-5 form-check m-2 justify-content-center">
+                <div>
+                    <input class="form-check-input" type="checkbox" value="" id="start-checked" checked disabled>
+                    <label class="form-check-label" for="checkChecked" th:text="${startAirport.iata}"></label>
+                </div>
+                <div th:each="iata,iter : ${middleAirports}">
+                    <input class="form-check-input" type="checkbox" th:value="${iata}" checked>
+                    <label class="form-check-label" for="checkChecked" th:text="${iata}"></label>
+                </div>
+                <div>
+                    <input class="form-check-input" type="checkbox" value="" id="checkChecked" checked disabled>
+                    <label class="form-check-label" for="checkChecked" th:text="${endAirport.iata}"></label>
+                </div>
+            </div>
         </div>
     </div>
 </div>

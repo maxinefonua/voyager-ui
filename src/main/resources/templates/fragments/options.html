@@ -12,4 +12,9 @@
         th:data-type="${airportDisplay.type.name}"
         th:data-distance="${airportDisplay.distance}"
         th:text="${airportDisplay.name}"></option>
+<option th:fragment="limited-iata-code-list"
+        th:each="airportDisplay,iter : ${airportList}"
+        th:name="${airportDisplay.iata}"
+        th:value="${airportDisplay.iata}"
+        th:text="${airportDisplay.name}"></option>
 </html>

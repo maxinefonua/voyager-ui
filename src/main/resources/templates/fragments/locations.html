@@ -22,7 +22,7 @@
         <input th:id="'airport-code-'+${iterIndex}"
                class="form-control"
                type="text" aria-label="Airport"
-               th:oninput="'checkAirportInput('+${iterIndex}+')'"
+               oninput="checkAirportInput(this)"
                name="airport-code"
                th:list="'filtered-list-'+${iterIndex}" required>
     </div>

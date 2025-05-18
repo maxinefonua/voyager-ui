@@ -109,12 +109,7 @@
             else fitMapToElemWithBounds(optionSelected);
 
             const airportSelectElement = document.getElementById('airport-filter-select-start');
-            airportSelectElement.disabled = false;
             airportSelectElement.dispatchEvent(new Event('change'));
-
-            document.getElementById('airport-start-code').disabled = false;
-            const disabledText = document.getElementById('airport-disabled-text-start');
-            if (disabledText) disabledText.remove();
           } else {
             if (endMarker) endMarker.remove();
             if (airportEndMarker) {
@@ -130,12 +125,7 @@
             else fitMapToElemWithBounds(optionSelected);
 
             const airportSelectElement = document.getElementById('airport-filter-select-end');
-            airportSelectElement.disabled = false;
             airportSelectElement.dispatchEvent(new Event('change'));
-
-            document.getElementById('airport-end-code').disabled = false;
-            const disabledText = document.getElementById('airport-disabled-text-end');
-            if (disabledText) disabledText.remove();
           }
         };
 
@@ -155,6 +145,10 @@
                 fitMapToElemWithBounds(startSelect[startSelect.selectedIndex]);
             } else if (!isStart && endSelect && endSelect.selectedIndex !=0) {
                 fitMapToElemWithBounds(endSelect[endSelect.selectedIndex]);
+            } else if (isStart && airportStartMarker) {
+                centerMapOnMarker(airportStartMarker);
+            } else if (!isStart && airportEndMarker) {
+                centerMapOnMarker(airportEndMarker);
             }
         }
 
@@ -167,6 +161,7 @@
               lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
           }
         };
+
         var nonDeltaStartMarker = null;
         var nonDeltaEndMarker = null;
 
@@ -182,13 +177,19 @@
             const allAirports = document.getElementById('all-airports');
             if (allAirports && allAirports.options && allAirports.options.namedItem(selectedIata.toUpperCase())) {
                 const selectedOption = allAirports.options.namedItem(selectedIata.toUpperCase());
-                if (isStart) nonDeltaStartMarker = addAirportMarkerWithColor(selectedOption);
-                else nonDeltaEndMarker = addAirportMarkerWithColor(selectedOption);
+                if (isStart) {
+                    nonDeltaStartMarker = addAirportMarkerWithColor(selectedOption);
+                    if (airportStartMarker) mapFitThreeMarkers(nonDeltaStartMarker,startMarker,airportStartMarker);
+                    else mapFitBothMarkers(startMarker,nonDeltaStartMarker);
+                } else {
+                    nonDeltaEndMarker = addAirportMarkerWithColor(selectedOption);
+                    if (airportEndMarker) mapFitThreeMarkers(nonDeltaEndMarker,endMarker,airportEndMarker);
+                    else mapFitBothMarkers(endMarker,nonDeltaEndMarker);
+                }
             }
         }
 
         function addAirportToMap(airportInputElem,isStart) {
-            console.log('addAirportToMap called');
             if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
                 const allAirports = document.getElementById('all-airports');
                 if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
@@ -206,7 +207,6 @@
                     }
                 }
             } else {
-                console.log('checkAirportInput called with input: ' + airportInputElem.value + ' and isStart: ' + isStart + ', no match.');
                 airportInputElem.classList.add('is-invalid');
                 if (isStart && airportStartMarker) {
                     airportStartMarker.remove();
@@ -218,37 +218,57 @@
             }
         };
 
-        function checkAirportInput(iterIndex) {
-          const airportInput = document.getElementById("airport-code-"+iterIndex);
-          const airportList = document.getElementById("filtered-list-"+iterIndex);
-          if (airportInput && airportInput.value && regexIata.test(airportInput.value)) {
-            if (airportList && airportList.options && airportList.options.namedItem(airportInput.value.toUpperCase())) {
-              const airportMatch = airportList.options.namedItem(airportInput.value.toUpperCase());
-              const invalidFeedback = document.getElementById("airport-invalid-feedback-"+iterIndex);
-              if (invalidFeedback) {
-                invalidFeedback.remove();
-                airportInput.classList.remove('is-invalid');
-              }
-              updateWithAirportMap(airportMatch.dataset.longitude,airportMatch.dataset.latitude);
+        function checkAirportInput(airportInputElem) {
+          if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
+            const allAirports = document.getElementById('all-airports');
+            if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
+              const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
+              if (airportMatch) airportInputElem.classList.remove('is-invalid');
+              else airportInputElem.classList.add('is-invalid');
+              updateWithAirportMap(airportMatch);
             } else {
-              console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInput.value.length + ', no match. Airport value: ' + airportInput.value);
+              console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInputElem.value.length + ', no match. Airport value: ' + airportInput.value);
             }
           }
         };
 
         function mapFitBothMarkers(marker1,marker2) {
+            if (marker1 == null) centerMapOnMarker(marker2);
+            else if (marker2 == null) centerMapOnMarker(marker1);
+            else {
+                const lngLat1 = marker1.getLngLat();
+                const lngLat2 = marker2.getLngLat();
+                const south = lngLat1.lat < lngLat2.lat ? lngLat1.lat : lngLat2.lat;
+                const north = lngLat1.lat > lngLat2.lat ? lngLat1.lat : lngLat2.lat;
+                const west = lngLat1.lng < lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+                const east = lngLat1.lng > lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+                const bounds = [west,south,east,north];
+                map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
+            }
+        }
+
+        function mapFitThreeMarkers(marker1,marker2,marker3) {
             const lngLat1 = marker1.getLngLat();
             const lngLat2 = marker2.getLngLat();
-            const south = lngLat1.lat < lngLat2.lat ? lngLat1.lat : lngLat2.lat;
-            const north = lngLat1.lat > lngLat2.lat ? lngLat1.lat : lngLat2.lat;
-            const west = lngLat1.lng < lngLat2.lng ? lngLat1.lng : lngLat2.lng;
-            const east = lngLat1.lng > lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+            const lngLat3 = marker3.getLngLat();
+
+            var south = lngLat1.lat < lngLat2.lat ? lngLat1.lat : lngLat2.lat;
+            if (lngLat3.lat < south) south = lngLat3.lat;
+
+            var north = lngLat1.lat > lngLat2.lat ? lngLat1.lat : lngLat2.lat;
+            if (lngLat3.lat > north) north = lngLat3.lat;
+
+            var west = lngLat1.lng < lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+            if (lngLat3.lng < west) west = lngLat3.lng;
+
+            var east = lngLat1.lng > lngLat2.lng ? lngLat1.lng : lngLat2.lng;
+            if (lngLat3.lng > east) east = lngLat3.lng;
+
             const bounds = [west,south,east,north];
             map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
         }
 
         function addAirportMarkerWithColor(airportOptionElem) {
-            console.log(airportOptionElem);
             const el = document.createElement('div');
             el.style.backgroundImage = `url(../images/airport-marker.svg)`;
             el.style.width = '30px';
@@ -265,7 +285,6 @@
         }
 
         function addAirportMarker(airportOptionElem) {
-            console.log(airportOptionElem);
             const el = document.createElement('div');
             el.style.backgroundImage = `url(../images/airport-marker.svg)`;
             el.style.width = '30px';
@@ -280,22 +299,22 @@
             return airportMarker;
         }
 
-        function updateWithAirportMap(longitude,latitude) {
+        function updateWithAirportMap(selectedOption) {
           if (airportMarker) airportMarker.remove();
           if (lookupMarker) {
             const lngLat = lookupMarker.getLngLat();
-            const south = lngLat.lat < latitude? lngLat.lat : latitude;
-            const north = lngLat.lat > latitude? lngLat.lat : latitude;
-            const west = lngLat.lng < longitude? lngLat.lng : longitude;
-            const east = lngLat.lng > longitude? lngLat.lng : longitude;
+            const south = lngLat.lat < selectedOption.dataset.latitude? lngLat.lat : selectedOption.dataset.latitude;
+            const north = lngLat.lat > selectedOption.dataset.latitude? lngLat.lat : selectedOption.dataset.latitude;
+            const west = lngLat.lng < selectedOption.dataset.longitude? lngLat.lng : selectedOption.dataset.longitude;
+            const east = lngLat.lng > selectedOption.dataset.longitude? lngLat.lng : selectedOption.dataset.longitude;
             const bounds = [west,south,east,north];
             map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 40, right: 40}});
             airportMarker = new mapboxgl.Marker({color:"#9B1631"})
-                .setLngLat([longitude,latitude])
+                .setLngLat([selectedOption.dataset.longitude,selectedOption.dataset.latitude])
                 .setPopup(
                     new mapboxgl.Popup({ offset: 25 }) // add popups
                       .setHTML(
-                        `<h3>Test Title</h3><p>Test Description</p>`
+                        `<strong>${selectedOption.value}</strong> | <i>${selectedOption.dataset.airport}</i> Located in ${selectedOption.dataset.city}, ${selectedOption.dataset.subdivision} of ${selectedOption.dataset.country}.`
                       )
                   )
                 .addTo(map);
@@ -306,6 +325,13 @@
           map.flyTo({
               center: [0, 0],
               zoom: 0
+          });
+        }
+
+        function centerMapOnMarker(marker) {
+          map.flyTo({
+              center: marker.getLngLat(),
+              zoom: 9
           });
         }
 
