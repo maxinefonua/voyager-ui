@@ -9,7 +9,7 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v1.13.3/mapbox-gl.css" rel="stylesheet" />
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
-    <link th:href="@{/css/stylesheet.css}" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../css/stylesheet.css"  />
 </head>
 <body onload="mapToFirst('location-display-0',false)">
     <div class="page-wrapper" style="display:flex;flex-direction:column;">
@@ -296,11 +296,8 @@
 
         function addAirportMarkerWithColor(airportOptionElem) {
             const el = document.createElement('div');
-            el.style.backgroundImage = `url(../images/airport-marker.svg)`;
-            el.style.width = '30px';
-            el.style.height = '30px';
-            el.style.filter = 'invert(90%) contrast(200%)';
-            el.className = 'marker';
+            el.className = 'airport-marker-non-delta';
+            el.style.filter = 'drop-shadow(rgb(173, 181, 189) 3px 5px 1px) inverse(90%) contrast(%200)';
             var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
                       .setHTML(`<strong>${airportOptionElem.value} | </strong><i>${airportOptionElem.dataset.airport}</i><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>(Add as hyperlink from airport name, add as another property of AirportDisplay class)Official website: <a href="https://www.finavia.fi/en/airports/helsinki-airport" target="_blank" title="Opens in a new window">Helsinki Airport</a>`);
             var airportMarker = new mapboxgl.Marker(el)
@@ -312,10 +309,7 @@
 
         function addAirportMarker(airportOptionElem) {
             const el = document.createElement('div');
-            el.style.backgroundImage = `url(../images/airport-marker.svg)`;
-            el.style.width = '30px';
-            el.style.height = '30px';
-            el.className = 'marker';
+            el.className = 'airport-marker';
             var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
                       .setHTML(`<strong>${airportOptionElem.value} | </strong><i>${airportOptionElem.dataset.airport}</i><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>(Add as hyperlink from airport name, add as another property of AirportDisplay class)Official website: <a href="https://www.finavia.fi/en/airports/helsinki-airport" target="_blank" title="Opens in a new window">Helsinki Airport</a>`);
             var airportMarker = new mapboxgl.Marker(el)

@@ -8,26 +8,27 @@
 </head>
 <div th:fragment="trips" class="container">
     <div class="row justify-content-center">
-        <div class="col-2 d-flex justify-content-center">
+        <div class="col-1 d-flex justify-content-center">
           <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
         </div>
-        <div class="col-9">
+        <div class="col-11">
             <div id="scrollable-content"
                     data-bs-spy="scroll"
                     data-bs-target="#trips-scroll-nav"
                     data-bs-smooth-scroll="true"
                     class="scrollspy-example overflow-y-scroll"
                     style="height:250px;"
-                    tabind.  ex="0">
+                    tabindex="0">
                 <h4 id="from-city">From</h4>
-                <span id="from-location-container"
-                     style="height:250px"
-                     hx-swap="beforeend transition:true"
-                     hx-get="/lookup"
-                     hx-trigger="load"
-                     hx-target="#select-start-location"
-                     hx-vals='"isStart":"true"'
+                <div style="height:250px"
                      class="overflow-auto p-2">
+                    <span id="from-location-container"
+                          hx-swap="beforeend transition:true"
+                          hx-get="/lookup"
+                          hx-trigger="load"
+                          hx-target="#select-start-location"
+                          hx-vals='"isStart":"true"'
+                          class="overflow-auto">
                     <select class="form-select"
                             id="select-start-location"
                             name="startLocationId"
@@ -41,8 +42,13 @@
                     >
                         <option selected disabled value="0">Start Location</option>
                     </select>
+                    <datalist id="filtered-airports-start"></datalist>
                     <div th:replace="~{fragments/form :: airport-form-initial(true)}"></div>
                 </span>
+                    <div id="non-delta-start"
+                         hx-swap-oob="outerHTML:#non-delta-start">
+                    </div>
+                </div>
                 <h4 id="to-city">To</h4>
                 <div id="to-location-container"
                      hx-get="/lookup"
@@ -65,7 +71,11 @@
                     >
                         <option selected disabled value="0">End Location</option>
                     </select>
+                    <datalist id="filtered-airports-end"></datalist>
                     <div th:replace="~{fragments/form :: airport-form-initial(false)}"></div>
+                    <div id="non-delta-end"
+                         hx-swap-oob="outerHTML:#non-delta-end">
+                    </div>
                 </div>
                 <h4 id="review">Review</h4>
                 <div id="review-summary"
@@ -78,10 +88,10 @@
     </div>
 </div>
 <div th:fragment="trips-scroll-nav"
-     id="trips-scroll-nav" style="width:90px" class="list-group">
-    <a class="list-group-item list-group-item-action" href="#from-city" onclick="zoomToTripLocation(true)">From</a>
-    <a class="list-group-item list-group-item-action" href="#to-city" onclick="zoomToTripLocation(false)">To</a>
-    <a class="list-group-item list-group-item-action" href="#review" onclick="mapFitToTrip()">Review</a>
+     id="trips-scroll-nav" style="width:40px" class="list-group">
+    <a class="list-group-item list-group-item-action" href="#from-city" onclick="zoomToTripLocation(true)">u</a>
+    <a class="list-group-item list-group-item-action" href="#to-city" onclick="zoomToTripLocation(false)">d</a>
+    <a class="list-group-item list-group-item-action" href="#review" onclick="mapFitToTrip()">c</a>
 </div>
 <div th:fragment="review-path" class="container text-center">
     <div class="row justify-content-center">
@@ -102,7 +112,7 @@
                 </figcaption>
             </figure>
         </div>
-        <button class="vr btn-primary container">Rev</button>
+        <button class="vr btn-reverse container"></button>
         <div class="col-5">
             <figure>
                 <blockquote class="blockquote">
@@ -111,17 +121,17 @@
                     <i th:unless="${endLocation}">Select End Location</i>
                 </blockquote>
                 <figcaption class="blockquote-footer">
+                    <span th:text="${nonDeltaEndAirport}?'Delta Destination: ':'Destination: '"></span>
+                    <strong th:if="${endAirport}" th:text="${endAirport.iata}"></strong>
                     <div th:if="${nonDeltaEndAirport}">
                         Final Destination: <strong th:text="${nonDeltaEndAirport.iata}"></strong>
                     </div>
-                    <span th:text="${nonDeltaEndAirport}?'Delta Destination: ':'Destination: '"></span>
-                    <strong th:if="${endAirport}" th:text="${endAirport.iata}"></strong>
                     <i th:unless="${endAirport}">Select Start Airport</i>
                 </figcaption>
             </figure>
         </div>
     </div>
-    <div class="row justify-content-center">
+    <div th:if="${startAirport != null or endAirport != null}" class="row justify-content-center">
         <div class="col-5">
             <h5>Delta Route</h5>
             <div class="m-2">

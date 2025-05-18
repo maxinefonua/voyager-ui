@@ -1,8 +1,34 @@
-.marker {
-  background-image: url('../images/airport-marker.svg');
+.btn-reverse:hover {
+    opacity: 1.0;
+}
+
+.btn-reverse {
+    background: url(../images/reverse.svg);
+    background-repeat: no-repeat;
+    border: 0px;
+    background-position: center;
+    transition: all 0.2s;
+}
+
+.airport-marker {
+  background-image: url(../images/airport-marker.svg);
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(rgb(173, 181, 189) 3px 5px 1px);
+}
+
+svg path {
+    fill: #0d6efd
+}
+
+.airport-marker-non-delta {
+  background-image: url(../images/airport-marker.svg);
   background-size: cover;
   width: 30px;
   height: 30px;
   border-radius: 50%;
   cursor: pointer;
+  border: 0px;
+  filter: drop-shadow(rgb(130, 130, 130) 1px 1px 3px) invert(96%) contrast(800%);
 }
