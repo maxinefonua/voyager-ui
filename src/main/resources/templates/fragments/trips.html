@@ -127,15 +127,15 @@
                           th:text="${nonDeltaEndAirport.city} + ', ' + ${nonDeltaEndAirport.subdivision}"></span>
                     <span th:if="${endLocation == null && nonDeltaEndAirport == null && endAirport != null}"
                           th:text="${endAirport.city} + ', ' + ${endAirport.subdivision}"></span>
-                    <i th:if="${startLocation == null && startAirport == null && nonDeltaStartAirport == null}">Select Start Location</i>
+                    <i th:if="${endLocation == null && endAirport == null && nonDeltaEndAirport == null}">Select End Location</i>
                 </blockquote>
                 <figcaption class="blockquote-footer">
                     <span th:text="${nonDeltaEndAirport}?'Delta Destination: ':'Destination: '"></span>
                     <strong th:if="${endAirport}" th:text="${endAirport.iata}"></strong>
+                    <i th:unless="${endAirport}">Select End Airport</i>
                     <div th:if="${nonDeltaEndAirport}">
                         Final Destination: <strong th:text="${nonDeltaEndAirport.iata}"></strong>
                     </div>
-                    <i th:unless="${endAirport}">Select End Airport</i>
                 </figcaption>
             </figure>
         </div>

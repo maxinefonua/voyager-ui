@@ -1,5 +1,6 @@
 package org.voyager.controller;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -281,8 +282,10 @@ public class MainController {
 
         AirportDisplay startAirport = null, endAirport = null;
         if (voyagerAPI.isDeltaIataCode(startAirportCode)) startAirport = voyagerAPI.getAirportByIata(startAirportCode).get();
+        else if (voyagerAPI.isValidIataCode(startAirportCode) && StringUtils.isBlank(nonDeltaStartCode)) nonDeltaStartCode = startAirportCode;
         if (voyagerAPI.isDeltaIataCode(endAirportCode)) endAirport = voyagerAPI.getAirportByIata(endAirportCode).get();
-
+        else if (voyagerAPI.isValidIataCode(endAirportCode) && StringUtils.isBlank(nonDeltaEndCode)) nonDeltaEndCode = endAirportCode;
+        
         AirportDisplay nonDeltaStartAirport = null, nonDeltaEndAirport = null;
         if (voyagerAPI.isValidIataCode(nonDeltaStartCode)) nonDeltaStartAirport = voyagerAPI.getAirportByIata(nonDeltaStartCode).get();
         if (voyagerAPI.isValidIataCode(nonDeltaEndCode)) nonDeltaEndAirport = voyagerAPI.getAirportByIata(nonDeltaEndCode).get();

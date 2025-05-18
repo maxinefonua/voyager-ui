@@ -15,6 +15,7 @@ import org.voyager.model.AirportDisplay;
 import org.voyager.model.AirportType;
 import org.voyager.model.TownDisplay;
 import org.voyager.model.delta.DeltaDisplay;
+import org.voyager.model.delta.DeltaStatus;
 import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.location.LocationForm;
 import org.voyager.model.response.VoyagerListResponse;
@@ -22,11 +23,13 @@ import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.model.route.PathDisplay;
+import org.voyager.model.route.Status;
 import org.voyager.service.VoyagerAPI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
 
@@ -164,7 +167,10 @@ public class VoyagerAPIService implements VoyagerAPI {
                             HttpMethod.GET,
                             voyagerAPIConfig.getHttpEntity(),
                             DeltaDisplay.class);
-            return deltaResponse.getStatusCode().value() == 200;
+            if (deltaResponse.getStatusCode().value() != 200) return false;
+            DeltaDisplay result = deltaResponse.getBody();
+            if (result == null) return false;
+            return !result.getStatus().equals(DeltaStatus.TERMINATED);
         } catch (Exception e) {
             LOGGER.info(String.format("Exception thrown when checking if Delta exists for iata %s. Error = %s",iata,e.getMessage()),e);
             return false;
