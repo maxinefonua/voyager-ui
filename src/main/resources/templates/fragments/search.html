@@ -79,6 +79,7 @@
                 + ${resultSearch.subdivision} + ' in '
                 + ${resultSearch.countryName} + '.'">
                 </p>
+                <form th:replace="~{fragments/locations :: airport-form(iterIndex=${iter.index},longitude=${resultSearch.longitude},latitude=${resultSearch.latitude})}"></form>
                 <form th:replace="~{fragments/form :: add-location-form}"></form>
             </div>
         </div>

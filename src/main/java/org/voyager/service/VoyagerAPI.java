@@ -16,7 +16,6 @@ import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.model.route.PathDisplay;
-import org.voyager.model.route.RouteDisplay;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +30,8 @@ public interface VoyagerAPI {
     LocationDisplay getLocationById(Integer id);
     LocationDisplay addLocation(LocationForm locationForm);
     List<AirportDisplay> airports(Optional<AirportType> type, Optional<Airline> airline);
-    Boolean ifValidIataCode(String airportCode);
+    Boolean isValidIataCode(String airportCode);
+    Boolean isDeltaIataCode(String airportCode);
     Optional<AirportDisplay> getAirportByIata(String iata);
     PathDisplay getPath(String origin, String destination);
 

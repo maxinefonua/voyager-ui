@@ -41,6 +41,30 @@
          th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
     ></div>
 </div>
+
+<form th:fragment="non-delta-airport-not-trips"
+      th:if="${nonDeltaAirportList}"
+      th:id="'closer-airports-form-'+${iterIndex}"
+>
+    <div class="input-group mt-4 mb-4"
+         th:if="${nonDeltaAirportList}"
+    >
+        <span class="input-group-text">Closer Non-Delta Airports</span>
+        <datalist th:id="'closer-non-delta-airports-' + ${iterIndex}"
+        >
+            <!--        TODO: change country codes to country -->
+            <option th:each="airportDisplay : ${nonDeltaAirportList}"
+                    th:value="${airportDisplay.iata}"
+                    th:text="${airportDisplay.name} + ' in ' + ${airportDisplay.subdivision} +'. '+ ${airportDisplay.countryCode}"
+            ></option>
+        </datalist>
+        <input class="form-control"
+               th:placeholder="'Click to Add ' + ${closestAirportIata}"
+               th:oninput="addNonDeltaAirportToMapNotTrips(this.value)"
+               th:list="'closer-non-delta-airports-' + ${iterIndex}">
+    </div>
+</form>
+
 <div th:fragment="non-delta-airport"
      th:id="${isStart}?'non-delta-start':'non-delta-end'"
      th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
@@ -71,6 +95,13 @@
                th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
     </div>
 </div>
+<form th:fragment="remove-location-display"
+      th:if=${locationDisplay}>
+    <div class="d-grid gap-2">
+        <button disabled
+                class="btn btn-outline-danger" th:value="${locationDisplay.id}">Remove</button>
+    </div>
+</form>
 <form th:fragment="add-location-form"
       id="input-group-"
       th:attrappend="id=${iter.index}"

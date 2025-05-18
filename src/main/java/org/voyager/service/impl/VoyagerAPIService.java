@@ -14,6 +14,7 @@ import org.voyager.model.Airline;
 import org.voyager.model.AirportDisplay;
 import org.voyager.model.AirportType;
 import org.voyager.model.TownDisplay;
+import org.voyager.model.delta.DeltaDisplay;
 import org.voyager.model.location.LocationDisplay;
 import org.voyager.model.location.LocationForm;
 import org.voyager.model.response.VoyagerListResponse;
@@ -143,9 +144,26 @@ public class VoyagerAPIService implements VoyagerAPI {
     }
 
     @Override
-    public Boolean ifValidIataCode(String iata) {
+    public Boolean isValidIataCode(String iata) {
         if (StringUtils.isEmpty(iata) || !iata.matches(IATA_CODE_REGEX)) return false;
         return getAirportByIata(iata).isPresent();
+    }
+
+    @Override
+    public Boolean isDeltaIataCode(String iata) {
+        if (StringUtils.isEmpty(iata) || !iata.matches(IATA_CODE_REGEX)) return false;
+        return detaAirportExists(iata);
+    }
+
+    private Boolean detaAirportExists(String iata) {
+        String deltaWithIataUrl = voyagerAPIConfig.buildDeltaWithIataUrl(iata);
+        LOGGER.debug("full delta URL: " + deltaWithIataUrl);
+        ResponseEntity<DeltaDisplay> deltaResponse = restTemplate
+                .exchange(deltaWithIataUrl,
+                        HttpMethod.GET,
+                        voyagerAPIConfig.getHttpEntity(),
+                        DeltaDisplay.class);
+        return deltaResponse.getStatusCode().value() == 200;
     }
 
     @Override

@@ -44,6 +44,12 @@ public class VoyagerAPIConfig {
     @Value("/towns")
     String townPath;
 
+    @Value("/delta")
+    String deltaPath;
+
+    @Value("/delta/{iata}")
+    String deltaWithIataPath;
+
     @Value("/iata")
     String iataPath;
 
@@ -177,5 +183,16 @@ public class VoyagerAPIConfig {
                 .port(port)
                 .path(lookupAttributionPath)
                 .toUriString();
+    }
+
+    public String buildDeltaWithIataUrl(String iata) {
+        UriComponentsBuilder pathURL = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(deltaWithIataPath);
+        return pathURL.buildAndExpand(Map.of(
+                "iata",iata
+        )).toUriString();
     }
 }

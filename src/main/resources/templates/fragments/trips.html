@@ -20,7 +20,7 @@
                     style="height:250px;"
                     tabind.  ex="0">
                 <h4 id="from-city">From</h4>
-                <div id="from-location-container"
+                <span id="from-location-container"
                      style="height:250px"
                      hx-swap="beforeend transition:true"
                      hx-get="/lookup"
@@ -42,7 +42,7 @@
                         <option selected disabled value="0">Start Location</option>
                     </select>
                     <div th:replace="~{fragments/form :: airport-form-initial(true)}"></div>
-                </div>
+                </span>
                 <h4 id="to-city">To</h4>
                 <div id="to-location-container"
                      hx-get="/lookup"

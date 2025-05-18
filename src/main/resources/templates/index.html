@@ -83,6 +83,7 @@
         function updateLookupMap(iterIndex,longitude,latitude,bounds) {
           if (airportMarker) airportMarker.remove();
           if (lookupMarker) lookupMarker.remove();
+          if (nonDeltaAirportMarker) nonDeltaAirportMarker.remove();
           const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
           if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
               map.fitBounds(bounds);
@@ -131,6 +132,8 @@
 
         function mapFitToTrip() {
             if (startMarker && endMarker) mapFitBothMarkers(startMarker,endMarker);
+            else if (airportStartMarker && airportEndMarker) mapFitBothMarkers(airportStartMarker,airportEndMarker);
+            else recenterMap();
         }
 
         function fitMapToElemWithBounds(elem) {
@@ -155,6 +158,7 @@
         function zoomToLocationMap(iterIndex,longitude,latitude,bounds) {
           if (airportMarker) airportMarker.remove();
           if (lookupMarker) lookupMarker.remove();
+          if (nonDeltaAirportMarker) nonDeltaAirportMarker.remove();
           const clickedButton = document.getElementById("location-display-"+iterIndex);
           if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
               map.fitBounds(bounds);
@@ -164,6 +168,22 @@
 
         var nonDeltaStartMarker = null;
         var nonDeltaEndMarker = null;
+        var nonDeltaAirportMarker = null;
+
+        function addNonDeltaAirportToMapNotTrips(selectedIata) {
+            if (nonDeltaAirportMarker) {
+                nonDeltaAirportMarker.remove();
+                nonDeltaAirportMarker = null;
+            }
+            if (!regexIata.test(selectedIata)) return;
+            const allAirports = document.getElementById('all-airports');
+            if (allAirports && allAirports.options && allAirports.options.namedItem(selectedIata.toUpperCase())) {
+                const selectedOption = allAirports.options.namedItem(selectedIata.toUpperCase());
+                nonDeltaAirportMarker = addAirportMarkerWithColor(selectedOption);
+                if (airportMarker) mapFitThreeMarkers(lookupMarker,airportMarker,nonDeltaAirportMarker);
+                else mapFitBothMarkers(lookupMarker,nonDeltaAirportMarker);
+            }
+        }
 
         function addNonDeltaAirportToMap(selectedIata,isStart) {
             if (isStart && nonDeltaStartMarker) {
@@ -219,13 +239,19 @@
         };
 
         function checkAirportInput(airportInputElem) {
+            if (airportMarker) {
+                airportMarker.remove();
+                airportMarker = null;
+            }
           if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
             const allAirports = document.getElementById('all-airports');
             if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
               const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
               if (airportMatch) airportInputElem.classList.remove('is-invalid');
               else airportInputElem.classList.add('is-invalid');
-              updateWithAirportMap(airportMatch);
+              airportMarker = addAirportMarker(airportMatch);
+              if (lookupMarker) mapFitBothMarkers(lookupMarker,airportMarker);
+              else centerMapOnMarker(airportMarker);
             } else {
               console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInputElem.value.length + ', no match. Airport value: ' + airportInput.value);
             }
@@ -360,6 +386,18 @@
             airportEndMarker.remove();
             airportEndMarker = null;
           }
+          if (nonDeltaAirportMarker) {
+            nonDeltaAirportMarker.remove();
+            nonDeltaAirportMarker = null;
+          }
+          if (nonDeltaStartMarker) {
+            nonDeltaStartMarker.remove();
+            nonDeltaStartMarker = null;
+          }
+          if (nonDeltaEndMarker) {
+            nonDeltaEndMarker.remove();
+            nonDeltaEndMarker = null;
+          }
         }
 
         function clearAirportMarkerFitToElemId(marker,elemIdWithBounds) {
@@ -407,6 +445,7 @@
         function mapToFirst(elementId,fromSearch) {
           if (lookupMarker) lookupMarker.remove();
           if (airportMarker) airportMarker.remove();
+          if (nonDeltaAirportMarker) nonDeltaAirportMarker.remove();
           const firstElemButton = document.getElementById(elementId);
           if (firstElemButton) {
             const longitude = firstElemButton.dataset.lng;
