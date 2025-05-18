@@ -100,7 +100,11 @@
                 <blockquote class="blockquote">
                     <span th:if="${startLocation}"
                        th:text="${startLocation.name} + ', ' + ${startLocation.subdivision}"></span>
-                    <i th:unless="${startLocation}">Select Start Location</i>
+                    <span th:if="${startLocation == null && nonDeltaStartAirport != null}"
+                          th:text="${nonDeltaStartAirport.city} + ', ' + ${nonDeltaStartAirport.subdivision}"></span>
+                    <span th:if="${startLocation == null && nonDeltaStartAirport == null && startAirport != null}"
+                          th:text="${startAirport.city} + ', ' + ${startAirport.subdivision}"></span>
+                    <i th:if="${startLocation == null && startAirport == null && nonDeltaStartAirport == null}">Select Start Location</i>
                 </blockquote>
                 <figcaption class="blockquote-footer">
                    <div th:if="${nonDeltaStartAirport}">
@@ -112,13 +116,18 @@
                 </figcaption>
             </figure>
         </div>
-        <button class="vr btn-reverse container"></button>
+        <button class="vr btn-reverse container"
+                th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}"></button>
         <div class="col-5">
             <figure>
                 <blockquote class="blockquote">
                     <span th:if="${endLocation}"
                           th:text="${endLocation.name} + ', ' + ${endLocation.subdivision}"></span>
-                    <i th:unless="${endLocation}">Select End Location</i>
+                    <span th:if="${endLocation == null && nonDeltaEndAirport != null}"
+                          th:text="${nonDeltaEndAirport.city} + ', ' + ${nonDeltaEndAirport.subdivision}"></span>
+                    <span th:if="${endLocation == null && nonDeltaEndAirport == null && endAirport != null}"
+                          th:text="${endAirport.city} + ', ' + ${endAirport.subdivision}"></span>
+                    <i th:if="${startLocation == null && startAirport == null && nonDeltaStartAirport == null}">Select Start Location</i>
                 </blockquote>
                 <figcaption class="blockquote-footer">
                     <span th:text="${nonDeltaEndAirport}?'Delta Destination: ':'Destination: '"></span>
@@ -126,7 +135,7 @@
                     <div th:if="${nonDeltaEndAirport}">
                         Final Destination: <strong th:text="${nonDeltaEndAirport.iata}"></strong>
                     </div>
-                    <i th:unless="${endAirport}">Select Start Airport</i>
+                    <i th:unless="${endAirport}">Select End Airport</i>
                 </figcaption>
             </figure>
         </div>

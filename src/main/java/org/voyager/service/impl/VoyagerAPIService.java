@@ -158,12 +158,17 @@ public class VoyagerAPIService implements VoyagerAPI {
     private Boolean detaAirportExists(String iata) {
         String deltaWithIataUrl = voyagerAPIConfig.buildDeltaWithIataUrl(iata);
         LOGGER.debug("full delta URL: " + deltaWithIataUrl);
-        ResponseEntity<DeltaDisplay> deltaResponse = restTemplate
-                .exchange(deltaWithIataUrl,
-                        HttpMethod.GET,
-                        voyagerAPIConfig.getHttpEntity(),
-                        DeltaDisplay.class);
-        return deltaResponse.getStatusCode().value() == 200;
+        try {
+            ResponseEntity<DeltaDisplay> deltaResponse = restTemplate
+                    .exchange(deltaWithIataUrl,
+                            HttpMethod.GET,
+                            voyagerAPIConfig.getHttpEntity(),
+                            DeltaDisplay.class);
+            return deltaResponse.getStatusCode().value() == 200;
+        } catch (Exception e) {
+            LOGGER.info(String.format("Exception thrown when checking if Delta exists for iata %s. Error = %s",iata,e.getMessage()),e);
+            return false;
+        }
     }
 
     @Override

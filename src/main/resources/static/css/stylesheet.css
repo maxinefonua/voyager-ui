@@ -1,4 +1,4 @@
-.btn-reverse:hover {
+.btn-reverse:hover:enabled {
     opacity: 1.0;
 }
 
