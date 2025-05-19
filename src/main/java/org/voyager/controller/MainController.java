@@ -106,6 +106,17 @@ public class MainController {
         return "fragments/tab :: trips-tab";
     }
 
+    @GetMapping("/reverse-trip")
+    @Cacheable("reverseCache")
+    public Collection<ModelAndView> reverseTrip(@RequestParam(required = false) String startAirportCode,
+                                                @RequestParam(required = false) String endAirportCode,
+                                                @RequestParam(required = false) Integer startLocationId,
+                                                @RequestParam(required = false) Integer endLocationId,
+                                                @RequestParam(required = false) String nonDeltaStartCode,
+                                                @RequestParam(required = false) String nonDeltaEndCode) {
+        return resetAirportReview(endAirportCode,startAirportCode,endLocationId,startLocationId,nonDeltaEndCode,nonDeltaStartCode);
+    }
+
     @GetMapping("/closer-airports")
     @Cacheable("closerAirportsCache")
     public String closerAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam Integer iterIndex) {
@@ -269,8 +280,7 @@ public class MainController {
     }
 
     @GetMapping("/review-airport-reset")
-    public Collection<ModelAndView> resetAirportReview(@RequestParam Boolean fromOrigin,
-                                                       @RequestParam(required = false) String startAirportCode,
+    public Collection<ModelAndView> resetAirportReview(@RequestParam(required = false) String startAirportCode,
                                                        @RequestParam(required = false) String endAirportCode,
                                                        @RequestParam(required = false) Integer startLocationId,
                                                        @RequestParam(required = false) Integer endLocationId,
@@ -285,7 +295,7 @@ public class MainController {
         else if (voyagerAPI.isValidIataCode(startAirportCode) && StringUtils.isBlank(nonDeltaStartCode)) nonDeltaStartCode = startAirportCode;
         if (voyagerAPI.isDeltaIataCode(endAirportCode)) endAirport = voyagerAPI.getAirportByIata(endAirportCode).get();
         else if (voyagerAPI.isValidIataCode(endAirportCode) && StringUtils.isBlank(nonDeltaEndCode)) nonDeltaEndCode = endAirportCode;
-        
+
         AirportDisplay nonDeltaStartAirport = null, nonDeltaEndAirport = null;
         if (voyagerAPI.isValidIataCode(nonDeltaStartCode)) nonDeltaStartAirport = voyagerAPI.getAirportByIata(nonDeltaStartCode).get();
         if (voyagerAPI.isValidIataCode(nonDeltaEndCode)) nonDeltaEndAirport = voyagerAPI.getAirportByIata(nonDeltaEndCode).get();

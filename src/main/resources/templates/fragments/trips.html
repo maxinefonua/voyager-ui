@@ -116,7 +116,13 @@
                 </figcaption>
             </figure>
         </div>
+<!--        TODO: implement reverse flights/trip, needs an API, swap all values, return same review-path -->
         <button class="vr btn-reverse container"
+                hx-get="/reverse-trip"
+                hx-target="#review-summary"
+                hx-swap="innerHTML transition:true"
+                hx-include="#select-start-location,#select-end-location,#airport-start-code,#airport-end-code,#non-delta-start-code,#non-delta-end-code"
+                hx-on::after-request="swapSelectionsAndInputs(`select-start-location`,`select-end-location`,`airport-start-code`,`airport-end-code`,`non-delta-start-code`,`non-delta-end-code`)"
                 th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}"></button>
         <div class="col-5">
             <figure>

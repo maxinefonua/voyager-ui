@@ -60,6 +60,32 @@
     </div>
 </form>
 
+<div th:fragment="non-delta-hidden"
+     th:id="${isStart}?'non-delta-start':'non-delta-end'">
+    <span class="input-group-text">Closer Airport</span>
+    <datalist th:id="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
+            <!--        TODO: change country codes to country -->
+            <option th:each="airportDisplay : ${nonDeltaAirportList}"
+                    th:value="${airportDisplay.iata}"
+                    th:text="${airportDisplay.name} + ' in ' + ${airportDisplay.subdivision} +'. '+ ${airportDisplay.countryCode}"
+            ></option>
+        </datalist>
+        <input class="form-control"
+               th:id="${isStart}?'non-delta-start-code':'non-delta-end-code'"
+               th:name="${isStart}?'nonDeltaStartCode':'nonDeltaEndCode'"
+               th:placeholder="'Click to Add ' + ${closestAirportIata}"
+               hx-swap="innerHTML transition:true"
+               hx-get="/review-airport-reset"
+               hx-trigger="input"
+               hx-target="#review-summary"
+               th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
+               hx-include="#select-start-location,#select-end-location,#airport-end-code,#airport-start-code,"
+               th:attrappend="hx-include=${isStart}?'#non-delta-end-code':'#non-delta-start-code'"
+               th:hx-on::after-request="'addNonDeltaAirportToMap(this.value,'+${isStart}+')'"
+               th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
+    </div>
+</div>
+
 <div th:fragment="non-delta-airport"
      th:id="${isStart}?'non-delta-start':'non-delta-end'"
      th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
