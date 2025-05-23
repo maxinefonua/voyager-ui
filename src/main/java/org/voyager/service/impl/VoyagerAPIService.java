@@ -11,18 +11,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.voyager.config.VoyagerAPIConfig;
 import org.voyager.model.Airline;
-import org.voyager.model.AirportDisplay;
-import org.voyager.model.AirportType;
-import org.voyager.model.TownDisplay;
-import org.voyager.model.delta.DeltaDisplay;
+import org.voyager.model.airport.Airport;
+import org.voyager.model.airport.AirportType;
+import org.voyager.model.delta.Delta;
 import org.voyager.model.delta.DeltaStatus;
-import org.voyager.model.location.LocationDisplay;
+import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationForm;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
-import org.voyager.model.route.PathDisplay;
+import org.voyager.model.route.Path;
 import org.voyager.model.route.Status;
 import org.voyager.service.VoyagerAPI;
 import java.net.URLEncoder;
@@ -67,81 +66,67 @@ public class VoyagerAPIService implements VoyagerAPI {
     }
 
     @Override
-    public VoyagerResponseAPI<TownDisplay> towns() {
-        String townsURL = voyagerAPIConfig.buildGetTownsURL();
-        LOGGER.debug("full towns URL: " + townsURL);
-        ResponseEntity<List<TownDisplay>> townsResponse = restTemplate
-                .exchange(townsURL,
-                        HttpMethod.GET,
-                        voyagerAPIConfig.getHttpEntity(),
-                        new ParameterizedTypeReference<List<TownDisplay>>() {});
-        validateVoyagerResponse(townsResponse,townsURL);
-        List<TownDisplay> towns = townsResponse.getBody();
-        return new VoyagerResponseAPI<>(towns.size(),towns);
-    }
-
-    @Override
-    public List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline) {
+    public List<Airport> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline) {
         String nearbyAirportsURL = voyagerAPIConfig.buildNearbyAirportsURL(latitude,longitude,limit,type,airline);
         LOGGER.debug("full nearbyAirports URL: " + nearbyAirportsURL);
-        ResponseEntity<List<AirportDisplay>> airportsResponse = restTemplate
+        ResponseEntity<List<Airport>> airportsResponse = restTemplate
                 .exchange(nearbyAirportsURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
-                        new ParameterizedTypeReference<List<AirportDisplay>>() {});
+                        new ParameterizedTypeReference<List<Airport>>() {});
         validateVoyagerResponse(airportsResponse,nearbyAirportsURL);
         return airportsResponse.getBody();
     }
 
     @Override
-    public List<LocationDisplay> getLocations() {
+    public List<Location> getLocations() {
         String locationsURL = voyagerAPIConfig.buildLocationsURL();
         LOGGER.debug("full locations URL: " + locationsURL);
-        ResponseEntity<List<LocationDisplay>> locationsResponse = restTemplate
+        ResponseEntity<List<Location>> locationsResponse = restTemplate
                 .exchange(locationsURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
-                        new ParameterizedTypeReference<List<LocationDisplay>>() {});
+                        new ParameterizedTypeReference<List<Location>>() {});
         validateVoyagerResponse(locationsResponse,locationsURL);
         return locationsResponse.getBody();
     }
 
     @Override
-    public LocationDisplay getLocationById(Integer id) {
+    public Location getLocationById(Integer id) {
         String locationByIdURL = voyagerAPIConfig.buildLocationByIdURL(id);
         LOGGER.debug("full location by id URL: " + locationByIdURL);
-        ResponseEntity<LocationDisplay> locationsResponse = restTemplate
+        ResponseEntity<Location> locationsResponse = restTemplate
                 .exchange(locationByIdURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
-                        LocationDisplay.class);
+                        Location.class);
         validateVoyagerResponse(locationsResponse,locationByIdURL);
         return locationsResponse.getBody();
     }
 
     @Override
-    public LocationDisplay addLocation(LocationForm locationForm) {
+    public Location addLocation(LocationForm locationForm) {
         String locationsURL = voyagerAPIConfig.buildLocationsURL();
         LOGGER.debug("full locations URL: " + locationsURL);
         HttpEntity<LocationForm> requestEntity = new HttpEntity<>(locationForm, voyagerAPIConfig.getHttpEntity().getHeaders());
-        ResponseEntity<LocationDisplay> locationsResponse = restTemplate
+        ResponseEntity<Location> locationsResponse = restTemplate
                 .exchange(locationsURL,
                         HttpMethod.POST,
                         requestEntity,
-                        LocationDisplay.class);
+                        Location.class);
         validateVoyagerResponse(locationsResponse,locationsURL);
         return locationsResponse.getBody();
     }
 
     @Override
-    public List<AirportDisplay> airports(Optional<AirportType> type, Optional<Airline> airline) {
+    public List<Airport> airports(Optional<AirportType> type, Optional<Airline> airline) {
         String airportsURL = voyagerAPIConfig.buildAirportsURL(type,airline);
         LOGGER.debug("full airports URL: " + airportsURL);
-        ResponseEntity<List<AirportDisplay>> airportsResponse = restTemplate
+        ResponseEntity<List<Airport>> airportsResponse = restTemplate
                 .exchange(airportsURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
-                        new ParameterizedTypeReference<List<AirportDisplay>>() {});
+                        new ParameterizedTypeReference<List<Airport>>() {});
         validateVoyagerResponse(airportsResponse,airportsURL);
         return airportsResponse.getBody();
     }
@@ -162,13 +147,13 @@ public class VoyagerAPIService implements VoyagerAPI {
         String deltaWithIataUrl = voyagerAPIConfig.buildDeltaWithIataUrl(iata);
         LOGGER.debug("full delta URL: " + deltaWithIataUrl);
         try {
-            ResponseEntity<DeltaDisplay> deltaResponse = restTemplate
+            ResponseEntity<Delta> deltaResponse = restTemplate
                     .exchange(deltaWithIataUrl,
                             HttpMethod.GET,
                             voyagerAPIConfig.getHttpEntity(),
-                            DeltaDisplay.class);
+                            Delta.class);
             if (deltaResponse.getStatusCode().value() != 200) return false;
-            DeltaDisplay result = deltaResponse.getBody();
+            Delta result = deltaResponse.getBody();
             if (result == null) return false;
             return !result.getStatus().equals(DeltaStatus.TERMINATED);
         } catch (Exception e) {
@@ -178,28 +163,28 @@ public class VoyagerAPIService implements VoyagerAPI {
     }
 
     @Override
-    public Optional<AirportDisplay> getAirportByIata(String iata) {
+    public Optional<Airport> getAirportByIata(String iata) {
         String airportByIataURL = voyagerAPIConfig.buildAirportByIataURL(iata);
         LOGGER.debug("full airport by iata URL: " + airportByIataURL);
-        ResponseEntity<AirportDisplay> airportResponse = restTemplate
+        ResponseEntity<Airport> airportResponse = restTemplate
                 .exchange(airportByIataURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
-                        AirportDisplay.class);
+                        Airport.class);
         if (!airportResponse.getStatusCode().is2xxSuccessful()) return Optional.empty();
         assert airportResponse.getBody() != null;
         return Optional.of(airportResponse.getBody());
     }
 
     @Override
-    public PathDisplay getPath(String originIata, String destinationIata) {
+    public Path getPath(String originIata, String destinationIata) {
         String pathURL = voyagerAPIConfig.buildPathURL(originIata,destinationIata);
         LOGGER.debug("full airports URL: " + pathURL);
-        ResponseEntity<PathDisplay> airportsResponse = restTemplate
+        ResponseEntity<Path> airportsResponse = restTemplate
                 .exchange(pathURL,
                         HttpMethod.GET,
                         voyagerAPIConfig.getHttpEntity(),
-                        PathDisplay.class);
+                        Path.class);
         validateVoyagerResponse(airportsResponse,pathURL);
         return airportsResponse.getBody();
     }

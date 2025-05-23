@@ -10,7 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.voyager.model.Airline;
-import org.voyager.model.AirportType;
+import org.voyager.model.airport.AirportType;
 import org.voyager.utils.ConstantsUtils;
 
 import java.util.List;

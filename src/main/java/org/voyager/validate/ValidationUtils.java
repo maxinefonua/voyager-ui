@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.Airline;
 import org.voyager.model.AirportFilter;
-import org.voyager.model.AirportType;
+import org.voyager.model.airport.AirportType;
 
 import java.util.Optional;
 

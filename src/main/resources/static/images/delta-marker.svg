@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 40 43">
+    <g transform="translate(0,-2) scale(0.85,0.85)">
+        <g transform="scale(1.25,1.25)">
+            <polygon opacity="0.065"
+                     points="18,40 1,35 35,35"
+                     style="stroke:black;stroke-width:0.5" stroke-linecap="round" stroke-linejoin="round"
+            />
+            <polygon opacity="0.065"
+                     points="18,39.3 3.75,35.2975 32.25,35.2975"
+                     style="stroke:black;stroke-width:0.25" stroke-linecap="round" stroke-linejoin="round"
+            />
+            <polygon opacity="0.065"
+                     points="18,38.6 7,35.75 28.425,35.75"
+                     style="stroke:black;stroke-width:0.2" stroke-linecap="round" stroke-linejoin="round"
+            />
+            <polygon opacity="0.065"
+                     points="18,38 9.95,36.125 25.475,36.125"
+                     style="stroke:black;stroke-width:0.175" stroke-linecap="round" stroke-linejoin="round"
+            />
+            <polygon opacity="0.065"
+                     points="18,37.5 12.95,36.525 22.475,36.525"
+                     style="stroke:black;stroke-width:0.125" stroke-linecap="round" stroke-linejoin="round"
+            />
+            <polygon opacity="0.065"
+                     points="18,37.125 15.5,36.825 19.925,36.825"
+                     style="stroke:black;stroke-width:0.125" stroke-linecap="round" stroke-linejoin="round"
+            />
+        </g>
+        <g transform="scale(2.5,2.5)">
+            <g>
+                <path d="M 9 1 L 18 14 L 9 10 L 0 14 Z Z M 9 12 L 18 16 H 0 Z Z"
+                      fill="#E3132C"/>
+            </g>
+            <g>
+                <path d="M 9 1 L 18 14 L 9 10 Z Z M 9 12 L 18 16 H 9 Z Z"
+                      fill="#9B1631"/>
+            </g>
+        </g>
+    </g>
+</svg>

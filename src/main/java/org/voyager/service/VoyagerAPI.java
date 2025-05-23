@@ -6,16 +6,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.Airline;
-import org.voyager.model.AirportDisplay;
-import org.voyager.model.AirportType;
-import org.voyager.model.TownDisplay;
-import org.voyager.model.location.LocationDisplay;
+import org.voyager.model.airport.Airport;
+import org.voyager.model.airport.AirportType;
+import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationForm;
 import org.voyager.model.response.VoyagerListResponse;
 import org.voyager.model.response.VoyagerResponseAPI;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
-import org.voyager.model.route.PathDisplay;
+import org.voyager.model.route.Path;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,16 +23,15 @@ public interface VoyagerAPI {
     public static final Logger LOGGER = LoggerFactory.getLogger(VoyagerAPI.class);
     VoyagerListResponse<ResultSearch> lookup(String query, int skipRows, Optional<Integer> limitOptional);
     LookupAttribution lookupAttribution();
-    VoyagerResponseAPI<TownDisplay> towns();
-    List<AirportDisplay> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline);
-    List<LocationDisplay> getLocations();
-    LocationDisplay getLocationById(Integer id);
-    LocationDisplay addLocation(LocationForm locationForm);
-    List<AirportDisplay> airports(Optional<AirportType> type, Optional<Airline> airline);
+    List<Airport> nearbyAirports(double latitude, double longitude, int limit, Optional<AirportType> type, Optional<Airline> airline);
+    List<Location> getLocations();
+    Location getLocationById(Integer id);
+    Location addLocation(LocationForm locationForm);
+    List<Airport> airports(Optional<AirportType> type, Optional<Airline> airline);
     Boolean isValidIataCode(String airportCode);
     Boolean isDeltaIataCode(String airportCode);
-    Optional<AirportDisplay> getAirportByIata(String iata);
-    PathDisplay getPath(String origin, String destination);
+    Optional<Airport> getAirportByIata(String iata);
+    Path getPath(String origin, String destination);
 
     public default void validateVoyagerResponse(ResponseEntity responseEntity, String requestURL){
         if (responseEntity.getStatusCode().value() != 200 || responseEntity.getBody() == null) {

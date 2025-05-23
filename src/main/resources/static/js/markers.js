@@ -127,7 +127,8 @@ function mapFitThreeMarkers(marker1,marker2,marker3) {
 function addAirportMarkerWithColor(airportOptionElem) {
     const el = document.createElement('div');
     el.className = 'airport-marker-non-delta';
-    el.style.filter = 'drop-shadow(rgb(173, 181, 189) 3px 5px 1px) inverse(90%) contrast(%200)';
+    el.innerHTML = ``
+//    el.style.filter = 'drop-shadow(rgb(173, 181, 189) 3px 5px 1px) inverse(90%) contrast(%200)';
     var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
               .setHTML(`<strong>${airportOptionElem.value} | </strong><i>${airportOptionElem.dataset.airport}</i><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>(Add as hyperlink from airport name, add as another property of AirportDisplay class)Official website: <a href="https://www.finavia.fi/en/airports/helsinki-airport" target="_blank" title="Opens in a new window">Helsinki Airport</a>`);
     var airportMarker = new mapboxgl.Marker(el)

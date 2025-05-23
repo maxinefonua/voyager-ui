@@ -23,6 +23,13 @@
 }
 
 .airport-marker {
+  background-image: url(../images/delta-marker.svg);
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+}
+
+.delta-marker {
   background-image: url(../images/airport-marker.svg);
   background-size: cover;
   width: 30px;
@@ -42,5 +49,4 @@ svg path {
   border-radius: 50%;
   cursor: pointer;
   border: 0px;
-  filter: drop-shadow(rgb(130, 130, 130) 1px 1px 3px) invert(96%) contrast(800%);
 }
