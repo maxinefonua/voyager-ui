@@ -27,7 +27,7 @@ function swapSelectionsAndInputs(selectStartElemId,selectEndElemId,startIataElem
     }
 }
 
-function checkAirportInput(airportInputElem) {
+function checkAirportInput(airportInputElem,iterIndex) {
     if (airportMarker) {
         airportMarker.remove();
         airportMarker = null;
@@ -42,7 +42,7 @@ function checkAirportInput(airportInputElem) {
             if (lookupMarker) mapFitBothMarkers(lookupMarker,airportMarker);
             else centerMapOnMarker(airportMarker);
         } else {
-            console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInputElem.value.length + ', no match. Airport value: ' + airportInput.value);
+            console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInputElem.value.length + ', no match. Airport value: ' + airportInputElem.value);
         }
     }
 };

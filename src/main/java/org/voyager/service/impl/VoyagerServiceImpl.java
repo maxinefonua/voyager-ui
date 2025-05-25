@@ -129,6 +129,11 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
+    public List<Airport> airports() {
+        return allAirports;
+    }
+
+    @Override
     public Boolean isValidIataCode(String airportCode) {
         if (StringUtils.isBlank(airportCode) || !airportCode.matches(IATA_CODE_REGEX)) return false;
         return allAirports.stream().map(Airport::getIata).collect(Collectors.toSet()).contains(airportCode);

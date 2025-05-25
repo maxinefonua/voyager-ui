@@ -101,6 +101,7 @@ public class MainController {
             case DELTA -> airportList.addAll(voyagerService.airports(Airline.DELTA));
             case CIVIL -> airportList.addAll(voyagerService.airports(AirportType.CIVIL));
             case MILITARY -> airportList.addAll(voyagerService.airports(AirportType.MILITARY));
+            case ALL -> airportList.addAll(voyagerService.airports());
         }
         model.addAttribute("airportList",airportList);
         return "fragments/options :: iata-code-list";

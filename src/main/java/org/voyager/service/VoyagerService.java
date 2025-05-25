@@ -24,6 +24,7 @@ public interface VoyagerService {
     List<Airport> airports(AirportType type, Airline airline);
     List<Airport> airports(AirportType type);
     List<Airport> airports(Airline airline);
+    List<Airport> airports();
     Boolean isValidIataCode(String airportCode);
     Boolean isDeltaIataCode(String airportCode);
     Airport getAirport(String iata);
