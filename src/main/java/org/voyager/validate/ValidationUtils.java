@@ -1,5 +1,6 @@
 package org.voyager.validate;
 
+import io.vavr.control.Option;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,9 +45,9 @@ public class ValidationUtils {
         return airline;
     }
 
-    public static AirportFilter resolveAirportFilterOptional(Optional<String> filterOptional) {
+    public static AirportFilter resolveAirportFilterOptional(Option<String> filterOptional) {
         AirportFilter airportFilter = AirportFilter.ALL;
-        String filterText = filterOptional.orElse(null);
+        String filterText = filterOptional.getOrElse("");
         if (StringUtils.isNotEmpty(filterText)) {
             try {
                 airportFilter = AirportFilter.valueOf(filterText.toUpperCase());

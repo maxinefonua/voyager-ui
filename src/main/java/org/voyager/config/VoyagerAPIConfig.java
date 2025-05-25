@@ -27,6 +27,7 @@ public class VoyagerAPIConfig {
     String protocol;
     String host;
     Integer port;
+    Integer maxThreads;
     String authToken;
 
     @Value("/search")
