@@ -158,6 +158,7 @@ public class MainController {
             case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,Airline.DELTA));
             case CIVIL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.CIVIL));
             case MILITARY -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.MILITARY));
+            case ALL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.CIVIL));
         }
         model.addAttribute("airportList",nearbyAirports);
         return "fragments/options :: limited-iata-code-list";

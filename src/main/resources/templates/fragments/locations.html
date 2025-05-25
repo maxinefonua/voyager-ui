@@ -15,6 +15,32 @@
                 hx-swap="innerHTML">
             <option selected value="DELTA">Delta Airports</option>
             <hr class="dropdown-divider">
+            <option value="ALL">All</option>
+        </select>
+        <input th:id="'airport-code-'+${iterIndex}"
+               class="form-control"
+               type="text" aria-label="Airport"
+               th:oninput="'checkAirportInput(this,'+${iterIndex}+')'"
+               name="airport-code"
+               th:list="'filtered-list-'+${iterIndex}" required>
+    </div>
+</div>
+
+<div th:fragment="airport-form2(iterIndex,longitude,latitude)">
+    <datalist id="filtered-list-" th:attrappend="id=${iterIndex}"></datalist>
+    <div class="input-group mb-4">
+        <select class="form-select"
+                name="airportFilter"
+                style="max-width:150px"
+                hx-get="/nearby-airports"
+                th:hx-vals="'{&quot;latitude&quot;:'+${latitude}+',&quot;longitude&quot;:'+${longitude}+'}'"
+                th:hx-on::after-request="'setAirportPlaceHolderFromList(\'airport-code-' + ${iterIndex} + '\',\'filtered-list-' + ${iterIndex} + '\')'"
+                th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iterIndex}+'\')'"
+                th:hx-target="'#filtered-list-'+${iterIndex}"
+                hx-trigger="load,change"
+                hx-swap="innerHTML">
+            <option selected value="DELTA">Delta Airports</option>
+            <hr class="dropdown-divider">
             <option disabled>Additional Airline Support Under Development</option>
         </select>
         <input th:id="'airport-code-'+${iterIndex}"
@@ -25,6 +51,7 @@
                th:list="'filtered-list-'+${iterIndex}" required>
     </div>
 </div>
+
 <div th:fragment="non-delta-airport-form(iterIndex,longitude,latitude)"
      th:id="'non-delta-airport-form-'+${iterIndex}"
      hx-get="/closer-airports"
