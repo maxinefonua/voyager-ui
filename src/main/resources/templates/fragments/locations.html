@@ -1,7 +1,9 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hx-get="http://www.w3.org/1999/xhtml"
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
+<!--TODO: add pinned airport as parameter -->
 <div th:fragment="airport-form(iterIndex,longitude,latitude)">
     <datalist id="filtered-list-" th:attrappend="id=${iterIndex}"></datalist>
+    <div id="pinned-airports-" th:attrappend="id=${iterIndex}"></div>
     <div class="input-group mb-4">
         <select class="form-select"
                 name="airportFilter"
@@ -21,9 +23,37 @@
                class="form-control"
                type="text" aria-label="Airport"
                th:oninput="'checkAirportInput(this,'+${iterIndex}+')'"
-               name="airport-code"
+               name="airportCode"
                th:list="'filtered-list-'+${iterIndex}" required>
+        <button class="col-2 btn btn-outline-secondary"
+                hx-get="/pin-airport"
+                th:hx-include="'#airport-code-'+${iterIndex}"
+                th:hx-target="'#pinned-airports-'+${iterIndex}"
+                hx-swap="beforeend transition:true"
+                hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
+                th:attrappend="id=${iterIndex}">Pin</button>
     </div>
+</div>
+
+<div th:fragment="pinned-airport"
+     th:if="${airport}"
+     th:id="'pinned-'+${airport.iata}"
+     class="d-flex input-group mb-2"
+>
+    <button class="col btn btn-outline-secondary text-truncate input-group-text">
+        <strong th:text="${airport.iata}"></strong>
+        <i th:text="${airport.name}"></i>
+        <span th:text="'| ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
+    </button>
+    <button class="col-2 btn btn-secondary"
+            hx-get="/unpin-airport"
+            th:hx-target="'#pinned-'+${airport.iata}"
+            hx-swap="outerHTML transition:true"
+            hx-on::after-request="console.log('enable/add unpinned airport from datalist')"
+            name="airportCode"
+            th:value="${airport.iata}">
+        Unpin
+    </button>
 </div>
 
 <div th:fragment="airport-form2(iterIndex,longitude,latitude)">
