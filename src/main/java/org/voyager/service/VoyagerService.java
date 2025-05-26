@@ -5,6 +5,7 @@ import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationForm;
+import org.voyager.model.location.LocationPatch;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
@@ -19,7 +20,8 @@ public interface VoyagerService {
     List<Airport> nearbyAirports(double latitude, double longitude, int limit,AirportType type);
     List<Airport> nearbyAirports(double latitude, double longitude, int limit,Airline airline);
     List<Location> getLocations();
-    Location getLocationById(Integer id);
+    Location getLocation(Integer id);
+    Location patchLocation(Integer id, LocationPatch locationPatch);
     Location addLocation(LocationForm locationForm);
     List<Airport> airports(AirportType type, Airline airline);
     List<Airport> airports(AirportType type);

@@ -23,6 +23,8 @@ public class BrowseController {
         Airport airport = voyagerService.getAirport(airportCode.toUpperCase());
         model.addAttribute("airport",airport);
         LOGGER.debug(String.format("pinning %s",airport));
+        // TODO:
+        // returns pinned airport and udpates some value that tracks list of airports
         return "fragments/locations :: pinned-airport";
     }
 

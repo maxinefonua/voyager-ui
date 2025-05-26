@@ -181,15 +181,6 @@ public class MainController {
                 new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
     }
-
-    @GetMapping("/lookup")
-    public String getSavedLocationOptions(Model model, @RequestParam Boolean isStart) {
-        List<Location> locations = voyagerService.getLocations();
-        model.addAttribute("locations", locations);
-        model.addAttribute("isStart", isStart);
-        return "fragments/locations :: saved-locations-options";
-    }
-
     @GetMapping("/review-location-reset")
     public Collection<ModelAndView> resetLocationReview(@RequestParam Boolean fromOrigin,
                                                         @RequestParam(required = false) Integer startLocationId,
@@ -200,8 +191,8 @@ public class MainController {
                                                         @RequestParam(required = false) String nonDeltaEndCode) {
         Location startLocation = null;
         Location endLocation = null;
-        if (startLocationId != 0) startLocation = voyagerService.getLocationById(startLocationId);
-        if (endLocationId != 0) endLocation = voyagerService.getLocationById(endLocationId);
+        if (startLocationId != 0) startLocation = voyagerService.getLocation(startLocationId);
+        if (endLocationId != 0) endLocation = voyagerService.getLocation(endLocationId);
 
         Airport startAirport = null;
         Airport endAirport = null;
@@ -295,8 +286,8 @@ public class MainController {
                                                        @RequestParam(required = false) String nonDeltaStartCode,
                                                        @RequestParam(required = false) String nonDeltaEndCode) {
         Location startLocation = null, endLocation = null;
-        if (startLocationId != 0) startLocation = voyagerService.getLocationById(startLocationId);
-        if (endLocationId != 0) endLocation = voyagerService.getLocationById(endLocationId);
+        if (startLocationId != 0) startLocation = voyagerService.getLocation(startLocationId);
+        if (endLocationId != 0) endLocation = voyagerService.getLocation(endLocationId);
 
         Airport startAirport = null, endAirport = null;
         if (voyagerService.isDeltaIataCode(startAirportCode)) startAirport = voyagerService.getAirport(startAirportCode);

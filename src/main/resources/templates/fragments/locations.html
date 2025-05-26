@@ -1,60 +1,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hx-get="http://www.w3.org/1999/xhtml"
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
 <!--TODO: add pinned airport as parameter -->
-<div th:fragment="airport-form(iterIndex,longitude,latitude)">
-    <datalist id="filtered-list-" th:attrappend="id=${iterIndex}"></datalist>
-    <div id="pinned-airports-" th:attrappend="id=${iterIndex}"></div>
-    <div class="input-group mb-4">
-        <select class="form-select"
-                name="airportFilter"
-                style="max-width:150px"
-                hx-get="/nearby-airports"
-                th:hx-vals="'{&quot;latitude&quot;:'+${latitude}+',&quot;longitude&quot;:'+${longitude}+'}'"
-                th:hx-on::after-request="'setAirportPlaceHolderFromList(\'airport-code-' + ${iterIndex} + '\',\'filtered-list-' + ${iterIndex} + '\')'"
-                th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iterIndex}+'\')'"
-                th:hx-target="'#filtered-list-'+${iterIndex}"
-                hx-trigger="load,change"
-                hx-swap="innerHTML">
-            <option selected value="DELTA">Delta Airports</option>
-            <hr class="dropdown-divider">
-            <option value="ALL">All</option>
-        </select>
-        <input th:id="'airport-code-'+${iterIndex}"
-               class="form-control"
-               type="text" aria-label="Airport"
-               th:oninput="'checkAirportInput(this,'+${iterIndex}+')'"
-               name="airportCode"
-               th:list="'filtered-list-'+${iterIndex}" required>
-        <button class="col-2 btn btn-outline-secondary"
-                hx-get="/pin-airport"
-                th:hx-include="'#airport-code-'+${iterIndex}"
-                th:hx-target="'#pinned-airports-'+${iterIndex}"
-                hx-swap="beforeend transition:true"
-                hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
-                th:attrappend="id=${iterIndex}">Pin</button>
-    </div>
-</div>
 
-<div th:fragment="pinned-airport"
-     th:if="${airport}"
-     th:id="'pinned-'+${airport.iata}"
-     class="d-flex input-group mb-2"
->
-    <button class="col btn btn-outline-secondary text-truncate input-group-text">
-        <strong th:text="${airport.iata}"></strong>
-        <i th:text="${airport.name}"></i>
-        <span th:text="'| ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
-    </button>
-    <button class="col-2 btn btn-secondary"
-            hx-get="/unpin-airport"
-            th:hx-target="'#pinned-'+${airport.iata}"
-            hx-swap="outerHTML transition:true"
-            hx-on::after-request="console.log('enable/add unpinned airport from datalist')"
-            name="airportCode"
-            th:value="${airport.iata}">
-        Unpin
-    </button>
-</div>
 
 <div th:fragment="airport-form2(iterIndex,longitude,latitude)">
     <datalist id="filtered-list-" th:attrappend="id=${iterIndex}"></datalist>
@@ -136,15 +83,15 @@
                 <div id="airports-container-"
                      class="container mb-2"
                      th:attrappend="id=${iter.index}">
-                    <div th:replace="~{fragments/locations :: airport-form(iterIndex=${iter.index},longitude=${locationDisplay.longitude},latitude=${locationDisplay.latitude})}"></div>
-                    <div th:replace="~{fragments/locations :: non-delta-airport-form(iterIndex=${iter.index},longitude=${locationDisplay.longitude},latitude=${locationDisplay.latitude})}"></div>
+                    <div th:replace="~{fragments/pinned :: pin-airport-form-initial(location=${locationDisplay})}"></div>
+<!--                    <div th:replace="~{fragments/locations :: non-delta-airport-form(iterIndex=${iter.index},longitude=${locationDisplay.longitude},latitude=${locationDisplay.latitude})}"></div>-->
                     <form th:replace="~{fragments/form :: remove-location-display}"></form>
                 </div>
             </div>
         </div>
     </div>
     <div th:unless="${locations != null && locations.size > 0}"
-         class="list-group-item list-group-item-secondary">No saved trips. Click 'Add Location' to plan new trip.</div>
+         class="list-group-item list-group-item-secondary">No saved locations. Click 'Browse' to add locations.</div>
 </div>
 <input th:fragment="airport-details-input"
        th:if="${airportDisplay}"

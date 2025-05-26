@@ -1,0 +1,108 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hx-get="http://www.w3.org/1999/xhtml"
+      xmlns:hx-on="http://www.w3.org/1999/xhtml">
+
+<!--PINNED AIRPORT FOR LOCATION FORM -->
+<div th:fragment="pinned-airport"
+     th:if="${airport}"
+     th:id="'pinned-'+${airport.iata}"
+     class="d-flex input-group justify-content-center mb-2"
+>
+    <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text">
+        <strong th:text="${airport.iata}"></strong>
+        <i th:text="${airport.name}"></i>
+        <span th:text="'| ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
+    </button>
+    <input type="hidden" th:name="'airportCodes['${airportCounter}]" value="${airport.iata}">
+    <button class="col-2 col-lg-1 btn btn-secondary"
+            hx-get="/unpin-airport"
+            th:hx-target="'#pinned-'+${airport.iata}"
+            hx-swap="outerHTML transition:true"
+            hx-on::after-request="console.log('enable/add unpinned airport from datalist')"
+            name="airportCode"
+            th:value="${airport.iata}">
+        Unpin
+    </button>
+</div>
+
+<!-- INITIAL AIRPORT FORM TO ADD PINNED AIRPORT -->
+<div th:fragment="airport-form(iterIndex,longitude,latitude)">
+    <div th:id="'pinned-airports-' + i"
+            th:each="airportCode,airportIter : ${airportCodes}">
+        <div th:text="${airportCode} + ' index of ' + ${airportIter.index}"></div>
+    </div>
+    <datalist id="filtered-list-" th:attrappend="id=${iterIndex}"></datalist>
+    <div id="pinned-airports-" th:attrappend="id=${iterIndex}"></div>
+    <div class="input-group mb-4">
+        <select class="form-select"
+                name="airportFilter"
+                style="max-width:150px"
+                hx-get="/nearby-airports"
+                th:hx-vals="'{&quot;latitude&quot;:'+${latitude}+',&quot;longitude&quot;:'+${longitude}+'}'"
+                th:hx-on::after-request="'setAirportPlaceHolderFromList(\'airport-code-' + ${iterIndex} + '\',\'filtered-list-' + ${iterIndex} + '\')'"
+                th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iterIndex}+'\')'"
+                th:hx-target="'#filtered-list-'+${iterIndex}"
+                hx-trigger="load,change"
+                hx-swap="innerHTML">
+            <option selected value="DELTA">Delta Airports</option>
+            <hr class="dropdown-divider">
+            <option value="ALL">All Civil</option>
+            <option value="MILITARY">Military</option>
+        </select>
+        <input th:id="'airport-code-'+${iterIndex}"
+               class="form-control"
+               type="text" aria-label="Airport"
+               th:oninput="'checkAirportInput(this,'+${iterIndex}+')'"
+               name="airportCode"
+               th:list="'filtered-list-'+${iterIndex}" required>
+        <button class="col-2 btn btn-outline-secondary"
+                hx-get="/update-airport-input-form"
+                th:hx-include="'#airport-code-'+${iterIndex}"
+                th:hx-target="'#pinned-airports-'+${iterIndex}"
+                hx-swap="beforeend transition:true"
+                hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
+                th:attrappend="id=${iterIndex}">Pin</button>
+    </div>
+</div>
+
+
+<!-- UPDATED AIRPORT FORM INCLUDING PINNED AIRPORTS -->
+<div th:fragment="airport-form(iterIndex,longitude,latitude)">
+
+    <datalist id="filtered-list-" th:attrappend="id=${iterIndex}">
+        <div th:each=></div>
+    </datalist>
+    <div id="pinned-airports-" th:attrappend="id=${iterIndex}"></div>
+    <div class="input-group mb-4">
+        <select class="form-select"
+                name="airportFilter"
+                style="max-width:150px"
+                hx-get="/nearby-airports"
+                th:hx-vals="'{&quot;latitude&quot;:'+${latitude}+',&quot;longitude&quot;:'+${longitude}+'}'"
+                th:hx-on::after-request="'setAirportPlaceHolderFromList(\'airport-code-' + ${iterIndex} + '\',\'filtered-list-' + ${iterIndex} + '\')'"
+                th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iterIndex}+'\')'"
+                th:hx-target="'#filtered-list-'+${iterIndex}"
+                hx-trigger="change"
+                hx-swap="innerHTML">
+            <option selected value="DELTA">Delta Airports</option>
+            <hr class="dropdown-divider">
+            <option value="ALL">All Civil</option>
+            <option value="MILITARY">Military</option>
+        </select>
+        <input th:id="'airport-code-'+${iterIndex}"
+               class="form-control"
+               type="text" aria-label="Airport"
+               th:oninput="'checkAirportInput(this,'+${iterIndex}+')'"
+               name="airportCode"
+               th:list="'filtered-list-'+${iterIndex}" required>
+        <button class="col-2 btn btn-outline-secondary"
+                hx-get="/update-airport-input-form"
+                th:hx-include="'#airport-code-'+${iterIndex}"
+                th:hx-target="'#pinned-airports-'+${iterIndex}"
+                hx-swap="beforeend transition:true"
+                hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
+                th:attrappend="id=${iterIndex}">Pin</button>
+    </div>
+</div>
+
+
+</html>

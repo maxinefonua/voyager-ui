@@ -20,6 +20,7 @@ import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationForm;
+import org.voyager.model.location.LocationPatch;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
@@ -101,8 +102,13 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
-    public Location getLocationById(Integer id) {
+    public Location getLocation(Integer id) {
         return fetchLocation(id);
+    }
+
+    @Override
+    public Location patchLocation(Integer id, LocationPatch locationPatch) {
+        return fetchPatchedLocation(id,locationPatch);
     }
 
     @Override
@@ -162,6 +168,12 @@ public class VoyagerServiceImpl implements VoyagerService {
 
     private Location createLocation(LocationForm locationForm) {
         Either<ServiceError, Location> either = locationService.createLocation(locationForm);
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        return either.get();
+    }
+
+    private Location fetchPatchedLocation(Integer id, LocationPatch locationPatch) {
+        Either<ServiceError, Location> either = locationService.patchLocation(id,locationPatch);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
