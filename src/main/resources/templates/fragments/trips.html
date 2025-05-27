@@ -6,10 +6,11 @@
     <meta charset="UTF-8">
     <title>Trip Content</title>
 </head>
+<!--TRIPS MAIN BODY HEADERS AND SECTIONS-->
 <div th:fragment="trips" class="container">
     <div class="row justify-content-center">
         <div class="col-1 d-flex justify-content-center">
-          <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
+            <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
         </div>
         <div class="col-11">
             <div id="scrollable-content"
@@ -42,7 +43,12 @@
                     >
                         <option selected disabled value="0">Start Location</option>
                     </select>
-                    <datalist id="filtered-airports-start"></datalist>
+                        <datalist id="filtered-airports-start"></datalist>
+                        <div>THIS IS WHERE PINNED AIRPORTS WILL UPDATE
+                            <div id="pinned-start-airports"
+                                 hx-swap-oob="innerHTML:#pinned-start-airports transition:true"></div>
+                            THIS IS END OF PINNED AIRPORTS
+                        </div>
                     <div th:replace="~{fragments/form :: airport-form-initial(true)}"></div>
                 </span>
                     <div id="non-delta-start"
@@ -87,12 +93,16 @@
         </div>
     </div>
 </div>
+
+<!--TRIPS NAV BAR WITH AUTOSCROLL-->
 <div th:fragment="trips-scroll-nav"
      id="trips-scroll-nav" style="width:40px" class="list-group">
     <a class="list-group-item list-group-item-action" href="#from-city" onclick="zoomToTripLocation(true)">u</a>
     <a class="list-group-item list-group-item-action" href="#to-city" onclick="zoomToTripLocation(false)">d</a>
     <a class="list-group-item list-group-item-action" href="#review" onclick="mapFitToTrip()">c</a>
 </div>
+
+<!--TRIPS UPDATING REVIEW SECTION-->
 <div th:fragment="review-path" class="container text-center">
     <div class="row justify-content-center">
         <div class="col-5">
