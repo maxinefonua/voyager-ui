@@ -8,11 +8,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.voyager.model.LocationDetails;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationPatch;
 import org.voyager.service.VoyagerService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -22,25 +24,26 @@ public class SavedController {
     @Autowired
     VoyagerService voyagerService;
 
+    @GetMapping("/saved")
+    public String getSaved(Model model) {
+        List<Location> locations = voyagerService.getLocations();
+        List<LocationDetails> locationDetailsList = new ArrayList<>();
+        locations.forEach(location-> {
+            // TODO: add country details for airports
+            List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
+                    .map(iata -> voyagerService.getAirport(iata)).toList());
+            locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
+        });
+        model.addAttribute("locationDetailsList",locationDetailsList);
+        return "fragments/tab :: saved-tab";
+    }
+
     @GetMapping("/lookup")
     public String getSavedLocationOptions(Model model, @RequestParam Boolean isStart) {
         List<Location> locations = voyagerService.getLocations();
         model.addAttribute("locations", locations);
         model.addAttribute("isStart", isStart);
         return "fragments/locations :: saved-locations-options";
-    }
-
-    @GetMapping("/pinned-airport-display")
-    public String fetchPinnedAirport(Model model, String airportCode, Integer locationId) {
-        LOGGER.debug(String.format("/pinned-airport called from locationId %d and airportCode %s",
-                locationId,airportCode));
-        if (voyagerService.isValidIataCode(airportCode)) {
-            Airport airport = voyagerService.getAirport(airportCode.toUpperCase());
-            model.addAttribute("airport", airport); // button display
-            model.addAttribute("locationId", locationId); // for unpin button
-            LOGGER.debug(String.format("pinning %s", airport));
-        }
-        return "fragments/pinned :: pinned-airport-display";
     }
 
     @GetMapping("/unpin-airport-location")

@@ -58,13 +58,34 @@
           name="airportCodes"
           th:object="${airportCodes}"></form>
     <datalist id="filtered-list-" th:attrappend="id=${iter.index}"></datalist>
-    <div id="pinned-airports-" th:attrappend="id=${iter.index}"></div>
+    <div th:unless="${resultDetails.location}" id="pinned-airports-" th:attrappend="id=${iter.index}"></div>
+    <div th:if="${resultDetails.location}" th:id="'saved-pinned-aiports-'+${resultDetails.location.id}">
+        <div th:each="airport : ${resultDetails.airportList}"
+             th:id="'pinned-'+${airport.iata}+'-location-'+${resultDetails.location.id}"
+             class="d-flex input-group justify-content-center mb-2"
+        >
+            <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text">
+                <strong th:text="${airport.iata}"></strong>
+                <i th:text="' ' + ${airport.name} + ' '"></i>
+                <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
+            </button>
+            <button class="col-2 col-lg-1 btn-sm btn btn-secondary"
+                    hx-get="/unpin-airport-location"
+                    th:hx-vals="'{&quot;locationId&quot;:'+${resultDetails.location.id}+'}'"
+                    th:hx-target="'#pinned-'+${airport.iata}+'-location-'+${resultDetails.location.id}"
+                    hx-swap="outerHTML transition:true"
+                    hx-on::after-request="console.log('enable/add unpinned airport from datalist')"
+                    name="airportCode"
+                    th:value="${airport.iata}">Unpin
+            </button>
+        </div>
+    </div>
     <div class="input-group mb-4">
         <select class="form-select"
                 name="airportFilter"
                 style="max-width:150px"
                 hx-get="/nearby-airports"
-                th:hx-vals="'{&quot;latitude&quot;:'+${resultSearch.latitude}+',&quot;longitude&quot;:'+${resultSearch.longitude}+'}'"
+                th:hx-vals="'{&quot;latitude&quot;:'+${resultDetails.resultSearch.latitude}+',&quot;longitude&quot;:'+${resultDetails.resultSearch.longitude}+'}'"
                 th:hx-on::after-request="'setAirportPlaceHolderFromList(\'airport-code-' + ${iter.index} + '\',\'filtered-list-' + ${iter.index} + '\')'"
                 th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iter.index}+'\')'"
                 th:hx-target="'#filtered-list-'+${iter.index}"
@@ -81,7 +102,8 @@
                th:oninput="'checkAirportInput(this,'+${iter.index}+')'"
                name="airportCode"
                th:list="'filtered-list-'+${iter.index}" required>
-        <button class="col-2 btn btn-outline-secondary"
+        <button th:unless="${resultDetails.location}"
+                class="col-2 btn btn-outline-secondary"
                 hx-get="/pin-airport"
                 th:hx-include="'#airport-code-' + ${iter.index} + ',#pinned-airport-form-' + ${iter.index}"
                 th:hx-vals="'{&quot;iterIndex&quot;:'+${iter.index}+'}'"
@@ -89,6 +111,15 @@
                 hx-swap="outerHTML transition:true"
                 hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
                 th:attrappend="id=${iter.index}">Pin</button>
+        <button th:if="${resultDetails.location}"
+                class="col-2 btn btn-sm btn-outline-secondary"
+                hx-get="/pin-airport-location"
+                th:hx-include="'#airport-code-' + ${iter.index}"
+                th:hx-vals="'{&quot;locationId&quot;:'+${resultDetails.location.id}+'}'"
+                th:hx-target="'#saved-pinned-aiports-'+${resultDetails.location.id}"
+                hx-swap="beforeend transition:true"
+                hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
+                th:attrappend="id=${resultDetails.location.id}">Pin</button>
     </div>
 </div>
 

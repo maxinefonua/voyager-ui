@@ -15,12 +15,12 @@ import org.voyager.config.VoyagerAPIConfig;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
+import org.voyager.error.ServiceException;
 import org.voyager.model.Airline;
+import org.voyager.model.ResultDetails;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
-import org.voyager.model.location.Location;
-import org.voyager.model.location.LocationForm;
-import org.voyager.model.location.LocationPatch;
+import org.voyager.model.location.*;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
@@ -82,6 +82,11 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
+    public SearchResult<ResultDetails> lookupWithDetails(String query, int skipRows, int limit) {
+        return fetchSearchResultsWithDetails(query,skipRows,limit);
+    }
+
+    @Override
     public LookupAttribution lookupAttribution() {
         return fetchAttribution();
     }
@@ -104,6 +109,11 @@ public class VoyagerServiceImpl implements VoyagerService {
     @Override
     public Location getLocation(Integer id) {
         return fetchLocation(id);
+    }
+
+    @Override
+    public Location getLocation(Source source, String sourceId) {
+        return fetchLocation(source,sourceId);
     }
 
     @Override
@@ -184,6 +194,29 @@ public class VoyagerServiceImpl implements VoyagerService {
         return either.get();
     }
 
+    private Location fetchLocation(Source source, String sourceId) {
+        Either<ServiceError, List<Location>> either = locationService.getLocations(source,sourceId);
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        List<Location> matches = either.get();
+        if (matches.size() > 1) {
+            // TODO: handle exception correctly
+            String message = String.format("Multiple locations returned for source '%s' and sourceId '%s'. Alerting not yet implemented",
+                    source,sourceId);
+            LOGGER.error(message);
+            throw new ResponseStatusException(HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.getCode()),
+                    message);
+        }
+        if (matches.isEmpty()) {
+            // TODO: handle exception correctly
+            String message = String.format("No locations returned for source '%s' and sourceId '%s'. Alerting not yet implemented",
+                    source,sourceId);
+            LOGGER.error(message);
+            throw new ResponseStatusException(HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.getCode()),
+                    message);
+        }
+        return matches.get(0);
+    }
+
     private List<Location> fetchLocations() {
         Either<ServiceError, List<Location>> either = locationService.getLocations();
         if (either.isLeft()) resolveServiceError(either.getLeft());
@@ -200,6 +233,30 @@ public class VoyagerServiceImpl implements VoyagerService {
         Either<ServiceError,SearchResult<ResultSearch>> either = searchService.search(query,skipRows,limit);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
+    }
+
+    private SearchResult<ResultDetails> fetchSearchResultsWithDetails(String query, int skipRows, int limit) {
+        Either<ServiceError,SearchResult<ResultSearch>> either = searchService.search(query,skipRows,limit);
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        SearchResult<ResultSearch> results = either.get();
+        List<ResultDetails> resultDetailsList = results.getResults().stream()
+                .map(this::fetchResultDetails).toList();
+        return SearchResult.<ResultDetails>builder().results(resultDetailsList)
+                .resultCount(results.getResultCount()).build();
+    }
+
+    private ResultDetails fetchResultDetails(ResultSearch resultSearch) {
+        ResultDetails resultDetail = ResultDetails.builder().resultSearch(resultSearch).build();
+        if (!resultSearch.getStatus().equals(Status.NEW)) {
+            Location location = fetchLocation(
+                    Source.valueOf(resultSearch.getSource().toUpperCase()),
+                    resultSearch.getSourceId());
+            resultDetail.setLocation(location);
+            List<Airport> airports = new ArrayList<>();
+            location.getAirports().forEach(iata -> airports.add(getAirport(iata)));
+            resultDetail.setAirportList(airports);
+        }
+        return resultDetail;
     }
 
     private Path fetchPath(String origin, String destination, Set<String> exclusions) {

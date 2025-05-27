@@ -43,7 +43,10 @@
     </li>
 </ul>
 <div th:fragment="saved-tab" class="container mt-2">
-    <div th:replace="~{fragments/locations :: saved-locations}"></div>
+    <div th:if="${locationDetailsList != null && locationDetailsList.size > 0}"
+         th:replace="~{fragments/locations :: saved-locations}"></div>
+    <div th:unless="${locationDetailsList != null && locationDetailsList.size > 0}"
+         class="list-group-item list-group-item-secondary">No saved locations. 'Browse' to add locations.</div>
 </div>
 <div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>

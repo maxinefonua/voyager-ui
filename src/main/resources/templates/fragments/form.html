@@ -116,41 +116,40 @@
                th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
     </div>
 </div>
-<form th:fragment="remove-location-display"
-      th:if=${locationDisplay}>
+<form th:fragment="remove-location-display">
     <div class="d-grid gap-2">
         <button disabled
-                class="btn btn-outline-danger" th:value="${locationDisplay.id}">Remove</button>
+                class="btn btn-outline-danger" th:value="${locationDetail.location.id}">Archive</button>
     </div>
 </form>
 <form th:fragment="add-location-form"
       id="input-group-"
       th:attrappend="id=${iter.index}"
       th:object="${locationForm}">
-    <div th:if="${resultSearch.status.name() == 'NEW'}">
-        <input type="hidden" id="source" name="source" th:value="${resultSearch.source}" />
-        <input type="hidden" id="sourceId" name="sourceId" th:value="${resultSearch.sourceId}" />
-        <input type="hidden" id="name" name="name" th:value="${resultSearch.name}" />
-        <input type="hidden" id="subdivision" name="subdivision" th:value="${resultSearch.subdivision}" />
-        <input type="hidden" id="countryCode" name="countryCode" th:value="${resultSearch.countryCode}" />
-        <input type="hidden" id="latitude" name="latitude" th:value="${resultSearch.latitude}" />
-        <input type="hidden" id="longitude" name="longitude" th:value="${resultSearch.longitude}" />
-        <input type="hidden" id="west" name="west" th:value="${resultSearch.bounds[0]}" />
-        <input type="hidden" id="south" name="south" th:value="${resultSearch.bounds[1]}" />
-        <input type="hidden" id="east" name="east" th:value="${resultSearch.bounds[2]}" />
-        <input type="hidden" id="north" name="north" th:value="${resultSearch.bounds[3]}" />
+    <div th:if="${resultDetails.resultSearch.status.name() == 'NEW'}">
+        <input type="hidden" id="source" name="source" th:value="${resultDetails.resultSearch.source}" />
+        <input type="hidden" id="sourceId" name="sourceId" th:value="${resultDetails.resultSearch.sourceId}" />
+        <input type="hidden" id="name" name="name" th:value="${resultDetails.resultSearch.name}" />
+        <input type="hidden" id="subdivision" name="subdivision" th:value="${resultDetails.resultSearch.subdivision}" />
+        <input type="hidden" id="countryCode" name="countryCode" th:value="${resultDetails.resultSearch.countryCode}" />
+        <input type="hidden" id="latitude" name="latitude" th:value="${resultDetails.resultSearch.latitude}" />
+        <input type="hidden" id="longitude" name="longitude" th:value="${resultDetails.resultSearch.longitude}" />
+        <input type="hidden" id="west" name="west" th:value="${resultDetails.resultSearch.bounds[0]}" />
+        <input type="hidden" id="south" name="south" th:value="${resultDetails.resultSearch.bounds[1]}" />
+        <input type="hidden" id="east" name="east" th:value="${resultDetails.resultSearch.bounds[2]}" />
+        <input type="hidden" id="north" name="north" th:value="${resultDetails.resultSearch.bounds[3]}" />
     </div>
     <div class="d-grid gap-2">
-        <button th:if="${resultSearch.status.name() == 'NEW'}"
+        <button th:if="${resultDetails.resultSearch.status.name() == 'NEW'}"
                 class="btn btn-primary"
                 hx-post="/locations"
                 hx-swap="outerHTML transition:true"
                 type="submit"
                 th:hx-include="'#pinned-airport-form-' + ${iter.index}"
-                th:text="${resultSearch.status.display}"></button>
-        <button th:unless="${resultSearch.status.name() == 'NEW'}"
+                th:text="${resultDetails.resultSearch.status.display}"></button>
+        <button th:unless="${resultDetails.resultSearch.status.name() == 'NEW'}"
                 class="btn btn-outline-primary"
-                th:text="${resultSearch.status.display}"
+                th:text="${resultDetails.resultSearch.status.display}"
                 disabled></button>
     </div>
 </form>

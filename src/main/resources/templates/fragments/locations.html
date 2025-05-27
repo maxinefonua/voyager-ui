@@ -41,7 +41,7 @@
 <div th:fragment="saved-locations"
      id="savedLocations"
      class="accordion list-group">
-    <div th:if="${locations != null && locations.size > 0}" class="accordion item" th:each="locationDisplay,iter : ${locations}">
+    <div class="accordion item" th:each="locationDetail,iter : ${locationDetailsList}">
         <button th:if="${iter.first}"
                 id="location-display-0"
                 class="accordion-button list-group-item list-group-item-action list-group-item-light"
@@ -49,15 +49,15 @@
                 aria-controls="collapse-location-0"
                 data-bs-toggle="collapse"
                 data-bs-target="#collapse-location-0"
-                th:data-lat="${locationDisplay.latitude}"
-                th:data-lng="${locationDisplay.longitude}"
-                th:data-bounds-west="${locationDisplay.bbox[0]}"
-                th:data-bounds-south="${locationDisplay.bbox[1]}"
-                th:data-bounds-east="${locationDisplay.bbox[2]}"
-                th:data-bounds-north="${locationDisplay.bbox[3]}"
+                th:data-lat="${locationDetail.location.latitude}"
+                th:data-lng="${locationDetail.location.longitude}"
+                th:data-bounds-west="${locationDetail.location.bbox[0]}"
+                th:data-bounds-south="${locationDetail.location.bbox[1]}"
+                th:data-bounds-east="${locationDetail.location.bbox[2]}"
+                th:data-bounds-north="${locationDetail.location.bbox[3]}"
                 aria-expanded="true"
-                th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
-                th:onclick="zoomToLocationMap(0,[[${locationDisplay.longitude}]],[[${locationDisplay.latitude}]],[[${locationDisplay.bbox}]])"></button>
+                th:text="${locationDetail.location.name} + ', ' + ${locationDetail.location.subdivision} + ' | ' + ${locationDetail.location.countryCode}"
+                th:onclick="zoomToLocationMap(0,[[${locationDetail.location.longitude}]],[[${locationDetail.location.latitude}]],[[${locationDetail.location.bbox}]])"></button>
         <button th:unless="${iter.first}"
                 id="location-display-"
                 class="accordion-button list-group-item list-group-item-action list-group-item-light collapsed"
@@ -66,8 +66,8 @@
                 data-bs-toggle="collapse"
                 data-bs-target="#collapse-location-"
                 aria-expanded="false"
-                th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"
-                th:onclick="zoomToLocationMap([[${iter.index}]],[[${locationDisplay.longitude}]],[[${locationDisplay.latitude}]],[[${locationDisplay.bbox}]])"
+                th:text="${locationDetail.location.name} + ', ' + ${locationDetail.location.subdivision} + ' | ' + ${locationDetail.location.countryCode}"
+                th:onclick="zoomToLocationMap([[${iter.index}]],[[${locationDetail.location.longitude}]],[[${locationDetail.location.latitude}]],[[${locationDetail.location.bbox}]])"
                 th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"></button>
         <div
                 id="collapse-location-"
@@ -76,22 +76,19 @@
                 th:attrappend="id=${iter.index}"
                 th:classappend="${iter.first}? show">
             <div class="accordion-body">
-                <p th:text="${locationDisplay.name} +' is a locality of '
-                + ${locationDisplay.subdivision} + ' in '
-                + ${locationDisplay.countryCode} + '.'">
+                <p th:text="${locationDetail.location.name} +' is a locality of '
+                + ${locationDetail.location.subdivision} + ' in '
+                + ${locationDetail.location.countryCode} + '.'">
                 </p>
                 <div id="airports-container-"
                      class="container mb-2"
                      th:attrappend="id=${iter.index}">
-                    <div th:replace="~{fragments/pinned :: pin-airport-form-initial(location=${locationDisplay})}"></div>
-<!--                    <div th:replace="~{fragments/locations :: non-delta-airport-form(iterIndex=${iter.index},longitude=${locationDisplay.longitude},latitude=${locationDisplay.latitude})}"></div>-->
+                    <div th:replace="~{fragments/pinned :: pin-airport-form-initial(locationDetail=${locationDetail})}"></div>
                     <form th:replace="~{fragments/form :: remove-location-display}"></form>
                 </div>
             </div>
         </div>
     </div>
-    <div th:unless="${locations != null && locations.size > 0}"
-         class="list-group-item list-group-item-secondary">No saved locations. Click 'Browse' to add locations.</div>
 </div>
 <input th:fragment="airport-details-input"
        th:if="${airportDisplay}"

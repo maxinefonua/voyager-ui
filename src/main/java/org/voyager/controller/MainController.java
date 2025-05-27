@@ -5,11 +5,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
+import org.voyager.model.LocationDetails;
+import org.voyager.model.ResultDetails;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.AirportFilter;
 import org.voyager.model.Airline;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.location.Location;
+import org.voyager.model.location.Source;
+import org.voyager.model.location.Status;
 import org.voyager.model.response.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -51,13 +55,6 @@ public class MainController {
     @GetMapping("/general")
     public String generalPage() {
         return "general";
-    }
-
-    @GetMapping("/saved")
-    public String getSaved(Model model) {
-        List<Location> locations = voyagerService.getLocations();
-        model.addAttribute("locations",locations);
-        return "fragments/tab :: saved-tab";
     }
 
     @GetMapping("/add")
@@ -141,8 +138,8 @@ public class MainController {
     @GetMapping("/search")
     public Collection<ModelAndView> search(Model model, @ModelAttribute(SEARCH_TEXT_ATTRIBUTE_NAME) String searchText)  {
         long beforeSearch = System.currentTimeMillis();
-        SearchResult<ResultSearch> voyagerResponse = voyagerService.lookup(searchText,0,5);
-        List<ResultSearch> lookupResults = voyagerResponse.getResults();
+        SearchResult<ResultDetails> voyagerResponse = voyagerService.lookupWithDetails(searchText,0,5);
+        List<ResultDetails> lookupResults = voyagerResponse.getResults();
         Integer totalResultsCount = voyagerResponse.getResultCount();
         double duration = (System.currentTimeMillis() - beforeSearch)/1000.0;
         LOGGER.debug("duration of search: " + duration + "s");
