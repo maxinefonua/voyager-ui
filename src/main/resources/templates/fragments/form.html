@@ -146,6 +146,7 @@
                 hx-post="/locations"
                 hx-swap="outerHTML transition:true"
                 type="submit"
+                th:hx-include="'#pinned-airport-form-' + ${iter.index}"
                 th:text="${resultSearch.status.display}"></button>
         <button th:unless="${resultSearch.status.name() == 'NEW'}"
                 class="btn btn-outline-primary"

@@ -1,21 +1,15 @@
 package org.voyager.controller;
 import io.vavr.control.Option;
-import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.AirportFilter;
 import org.voyager.model.Airline;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.location.Location;
-import org.voyager.model.location.LocationForm;
 import org.voyager.model.response.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -70,26 +64,6 @@ public class MainController {
     public String getAdd(Model model) {
         model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
         return "fragments/tab :: add-tab";
-    }
-
-    @PostMapping("/locations")
-    public String addLocation(Model model, @ModelAttribute @Valid LocationForm locationForm, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            bindingResult.getAllErrors().forEach(error -> {
-                if (error instanceof FieldError fieldError)LOGGER.error(String.format("'%s' %s",fieldError.getField(),fieldError.getDefaultMessage()));
-                else LOGGER.error(error.getDefaultMessage());
-            });
-            model.addAttribute("locationForm",locationForm);
-            return "fragments/form :: add-form-error";
-        }
-        try{
-            Location saved = voyagerService.addLocation(locationForm);
-            LOGGER.info("saved: " + saved);
-            model.addAttribute("locationForm", locationForm);
-            return "fragments/form :: add-form-success";
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage(),e);
-        }
     }
 
     @GetMapping("/airports")
