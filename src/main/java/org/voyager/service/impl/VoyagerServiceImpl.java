@@ -248,9 +248,7 @@ public class VoyagerServiceImpl implements VoyagerService {
     private ResultDetails fetchResultDetails(ResultSearch resultSearch) {
         ResultDetails resultDetail = ResultDetails.builder().resultSearch(resultSearch).build();
         if (!resultSearch.getStatus().equals(Status.NEW)) {
-            Location location = fetchLocation(
-                    Source.valueOf(resultSearch.getSource().toUpperCase()),
-                    resultSearch.getSourceId());
+            Location location = fetchLocation(resultSearch.getSource(), resultSearch.getSourceId());
             resultDetail.setLocation(location);
             List<Airport> airports = new ArrayList<>();
             location.getAirports().forEach(iata -> airports.add(getAirport(iata)));

@@ -5,10 +5,7 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString(includeFieldNames = false)
+@Data @NoArgsConstructor
 public class AirportCodes {
     private List<String> codes = new ArrayList<>();
 }

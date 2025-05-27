@@ -63,7 +63,7 @@ public class BrowseController {
             return "fragments/form :: add-form-error";
         }
         try{
-            locationForm.setAirports(new HashSet<>(airportCodes.getCodes()));
+            locationForm.setAirports(airportCodes.getCodes());
             Location saved = voyagerService.addLocation(locationForm);
             LOGGER.info("saved: " + saved);
             model.addAttribute("locationForm", locationForm);
