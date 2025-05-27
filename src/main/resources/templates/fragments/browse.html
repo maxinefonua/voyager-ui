@@ -13,7 +13,7 @@
         <span th:text="'| ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
     </button>
     <input type="hidden" th:name="'airportCodes['${airportCounter}]" value="${airport.iata}">
-    <button class="col-2 col-lg-1 btn btn-secondary"
+    <button class="col-3 col-lg-1 btn btn-secondary"
             hx-get="/unpin-airport"
             th:hx-target="'#pinned-'+${airport.iata}"
             hx-swap="outerHTML transition:true"
@@ -38,7 +38,7 @@
             <span th:text="${airportList[__${iter.index}__].city} + ', ' + ${airportList[__${iter.index}__].subdivision} + ' of ' + ${airportList[__${iter.index}__].countryCode}"></span>
         </button>
         <input type="hidden" th:field="*{codes[__${iter.index}__]}" th:value="${code}" />
-        <button class="col-2 col-lg-1 btn btn-secondary"
+        <button class="col-3 col-lg-1 btn btn-secondary"
                 hx-get="/unpin-airport"
                 th:hx-target="'#pinned-airport-form-' + ${iterIndex}"
                 th:hx-vals="'{&quot;iterIndex&quot;:'+${iterIndex}+'}'"
@@ -69,7 +69,7 @@
                 <i th:text="' ' + ${airport.name} + ' '"></i>
                 <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
             </button>
-            <button class="col-2 col-lg-1 btn-sm btn btn-secondary"
+            <button class="col-3 col-lg-1 btn-sm btn btn-secondary"
                     hx-get="/unpin-airport-location"
                     th:hx-vals="'{&quot;locationId&quot;:'+${resultDetails.location.id}+'}'"
                     th:hx-target="'#pinned-'+${airport.iata}+'-location-'+${resultDetails.location.id}"

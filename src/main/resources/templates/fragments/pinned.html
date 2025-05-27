@@ -12,7 +12,7 @@
                 <i th:text="' ' + ${airport.name} + ' '"></i>
                 <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
             </button>
-            <button class="col-2 col-lg-1 btn-sm btn btn-secondary"
+            <button class="col-3 col-lg-1 btn-sm btn btn-secondary"
                     hx-get="/unpin-airport-location"
                     th:hx-vals="'{&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
                     th:hx-target="'#pinned-'+${airport.iata}+'-location-'+${locationDetail.location.id}"
@@ -52,7 +52,7 @@
         <i th:text="' ' + ${airport.name} + ' '"></i>
         <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
     </button>
-    <button class="col-2 col-lg-1 btn-sm btn btn-secondary"
+    <button class="col-3 col-lg-1 btn-sm btn btn-secondary"
             hx-get="/unpin-airport-location"
             th:hx-vals="'{&quot;locationId&quot;:'+${location.id}+'}'"
             th:hx-target="'#pinned-'+${airport.iata}+'-location-'+${location.id}"

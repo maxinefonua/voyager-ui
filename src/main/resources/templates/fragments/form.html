@@ -116,13 +116,28 @@
                th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
     </div>
 </div>
-<form th:fragment="remove-location-display">
-    <div class="d-grid gap-2">
-        <button disabled
-                class="btn btn-outline-danger" th:value="${locationDetail.location.id}">Archive</button>
+<form th:fragment="archive-location-display"
+      class="container">
+    <div class="row justify-content-center">
+        <button th:if="${locationDetail.location.status.name == 'SAVED'}" class="btn btn-outline-danger col-md-3 col-lg-2"
+                hx-get="/location-status"
+                hx-swap="outerHTML transition:true"
+                th:hx-vals="'{&quot;status&quot;:&quot;ARCHIVED&quot;,&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
+        >Archive</button>
+        <button th:if="${locationDetail.location.status.name == 'ARCHIVED'}" class="btn btn-outline-danger col-md-3 col-lg-2"
+                hx-get="/location-status"
+                hx-swap="outerHTML transition:true"
+                th:hx-vals="'{&quot;status&quot;:&quot;SAVED&quot;,&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
+        >Unarchive</button>
     </div>
 </form>
+<button th:fragment="archive-location-success"
+        class="btn btn-outline-danger col-md-3 col-lg-2"
+        disabled>
+    Archived
+</button>
 <form th:fragment="add-location-form"
+      class="d-grid gap-2"
       id="input-group-"
       th:attrappend="id=${iter.index}"
       th:object="${locationForm}">
@@ -139,16 +154,16 @@
         <input type="hidden" id="east" name="east" th:value="${resultDetails.resultSearch.bounds[2]}" />
         <input type="hidden" id="north" name="north" th:value="${resultDetails.resultSearch.bounds[3]}" />
     </div>
-    <div class="d-grid gap-2">
+    <div class="row justify-content-center">
         <button th:if="${resultDetails.resultSearch.status.name() == 'NEW'}"
-                class="btn btn-primary"
+                class="btn btn-primary col-8 col-lg-2"
                 hx-post="/locations"
                 hx-swap="outerHTML transition:true"
                 type="submit"
                 th:hx-include="'#pinned-airport-form-' + ${iter.index}"
                 th:text="${resultDetails.resultSearch.status.display}"></button>
         <button th:unless="${resultDetails.resultSearch.status.name() == 'NEW'}"
-                class="btn btn-outline-primary"
+                class="btn btn-outline-primary col-8 col-lg-2"
                 th:text="${resultDetails.resultSearch.status.display}"
                 disabled></button>
     </div>

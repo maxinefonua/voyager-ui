@@ -1,18 +1,26 @@
 package org.voyager.controller;
 
+import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.voyager.model.AirportCodes;
 import org.voyager.model.LocationDetails;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.location.Location;
+import org.voyager.model.location.LocationForm;
 import org.voyager.model.location.LocationPatch;
+import org.voyager.model.location.Status;
 import org.voyager.service.VoyagerService;
+import org.voyager.validate.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,5 +86,18 @@ public class SavedController {
         } else
             model.addAttribute("location",location);
         return "fragments/pinned :: pinned-airport";
+    }
+
+    @GetMapping("/location-status")
+    public String pinAirportToLocation(Model model, @NonNull Status status, @NonNull Integer locationId) {
+        Location location = voyagerService.getLocation(locationId);
+        if (!location.getStatus().equals(status)) {
+            LocationPatch locationPatch = LocationPatch.builder().status(status.name()).build();
+            LOGGER.debug(String.format("patch request %s to location %s",locationPatch,location));
+            Location patched = voyagerService.patchLocation(locationId,locationPatch);
+            LOGGER.info(String.format("patched location %s",patched));
+        }
+        model.addAttribute("status",location.getStatus());
+        return "fragments/form :: archive-location-success";
     }
 }
