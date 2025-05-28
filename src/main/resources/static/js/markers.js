@@ -103,8 +103,20 @@ function addAirportMarker(airportOptionElem,isDelta) {
 }
 
 function addLookupMarker(locationOptionElem,isSaved) {
-    var locationPopup =  new mapboxgl.Popup({ offset: 16 }) // add popups
-              .setHTML(`<strong>${locationOptionElem.dataset.location}</strong>
+    var locationPopup =  new mapboxgl.Popup({ offset:
+            {
+                'top': [0, 10],    // When popup appears below marker (anchor: 'top')
+                'top-left': [0, 10],
+                'top-right': [0, 10],
+                'bottom': [0, -42],  // When popup appears above marker (anchor: 'bottom')
+                'bottom-left': [0, -42],
+                'bottom-right': [0, -42],
+                'left': [13, 0],    // When popup appears to the right of marker (anchor: 'left')
+                'right': [-13, 0],    // When popup appears to the left of marker (anchor: 'right')
+                // Add other anchor positions as needed
+              }
+        }) // add popups
+              .setHTML(`<strong>${locationOptionElem.dataset.location}</strong>,
                <i>${locationOptionElem.dataset.subdivision}</i> |
                 Located in ${locationOptionElem.dataset.country}`);
 

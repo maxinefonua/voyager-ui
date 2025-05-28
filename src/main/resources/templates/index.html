@@ -50,7 +50,7 @@
                 .map(Number.parseFloat)
                 .filter(n => !isNaN(n));
             map.fitBounds(bounds);
-            lookupMarker = new mapboxgl.Marker().setLngLat([match.dataset.longitude,match.dataset.latitude]).addTo(map);
+            lookupMarker = addLookupMarker(match,true);
         }
     }
 };

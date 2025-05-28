@@ -39,6 +39,8 @@ function updateLookupMap(iterIndex,longitude,latitude,bounds) {
     const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
     if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
         map.fitBounds(bounds);
+//        addLookupMarker
+//locationOptionElem,isSaved
         lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
     }
 };

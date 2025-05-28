@@ -77,7 +77,10 @@ function checkAirportInput(airportInputElem,iterIndex) {
             if (airportMatch) {
                 airportInputElem.classList.remove('is-invalid');
                 airportMarker = addAirportMarker(airportMatch,isDelta);
-                if (lookupMarker) mapFitBothMarkers(lookupMarker,airportMarker);
+                if (lookupMarker) {
+                    if (lookupMarker.getPopup().isOpen()) lookupMarker.togglePopup();
+                    mapFitBothMarkers(lookupMarker,airportMarker);
+                }
                 else centerMapOnMarker(airportMarker);
             }
             else airportInputElem.classList.add('is-invalid');
