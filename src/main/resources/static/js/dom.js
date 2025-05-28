@@ -34,13 +34,18 @@ function checkAirportInput(airportInputElem,iterIndex) {
     }
     if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
         const allAirports = document.getElementById('all-airports');
+        const deltaAirports = document.getElementById('delta-airports');
         if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
             const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
-            if (airportMatch) airportInputElem.classList.remove('is-invalid');
+            const deltaMatch = deltaAirports.options.namedItem(airportInputElem.value.toUpperCase());
+            const isDelta = (deltaMatch != null);
+            if (airportMatch) {
+                airportInputElem.classList.remove('is-invalid');
+                airportMarker = addAirportMarker(airportMatch,isDelta);
+                if (lookupMarker) mapFitBothMarkers(lookupMarker,airportMarker);
+                else centerMapOnMarker(airportMarker);
+            }
             else airportInputElem.classList.add('is-invalid');
-            airportMarker = addAirportMarker(airportMatch);
-            if (lookupMarker) mapFitBothMarkers(lookupMarker,airportMarker);
-            else centerMapOnMarker(airportMarker);
         } else {
             console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInputElem.value.length + ', no match. Airport value: ' + airportInputElem.value);
         }

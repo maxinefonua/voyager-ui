@@ -76,7 +76,7 @@
         <input th:id="'airport-code-'+${iter.index}"
                class="form-control"
                type="text" aria-label="Airport"
-               th:oninput="'checkAirportInput(this,'+${iter.index}+')'"
+               th:oninput="'debouncedAirportInput(this,'+${iter.index}+')'"
                name="airportCode"
                th:list="'filtered-list-'+${iter.index}" required>
         <button th:unless="${resultDetails.location}"
