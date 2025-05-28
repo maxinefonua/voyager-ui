@@ -24,10 +24,10 @@
                 th:hx-vals="'{&quot;iterIndex&quot;:'+${iterIndex}+'}'"
                 th:hx-include="'#pinned-airport-form-' + ${iterIndex}"
                 hx-swap="outerHTML transition:true"
-                hx-on::after-request="console.log('enable/add unpinned airport from datalist')"
+                th:hx-on::after-request="'postUnpinAirport(\'airport-code-' + ${iterIndex} + '\',
+                    \'filtered-list-' + ${iterIndex} + '\', \'' + ${code} + '\')'"
                 name="airportCode"
-                th:value="${code}">
-            Unpin
+                th:value="${code}">Unpin
         </button>
     </div>
 </form>
@@ -57,7 +57,8 @@
                     th:hx-vals="'{&quot;locationId&quot;:'+${resultDetails.location.id}+'}'"
                     th:hx-target="'#pinned-'+${airport.iata}+'-location-'+${resultDetails.location.id}"
                     hx-swap="outerHTML transition:true"
-                    hx-on::after-request="console.log('enable/add unpinned airport from datalist')"
+                    th:hx-on::after-request="'postUnpinAirport(\'airport-code-' + ${iter.index} + '\',
+                        \'filtered-list-' + ${iter.index} + '\', \'' + ${airport.iata} + '\')'"
                     name="airportCode"
                     th:value="${airport.iata}">Unpin
             </button>
@@ -92,8 +93,9 @@
                 th:hx-vals="'{&quot;iterIndex&quot;:'+${iter.index}+'}'"
                 th:hx-target="'#pinned-airport-form-' + ${iter.index}"
                 hx-swap="outerHTML transition:true"
-                hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
-                th:attrappend="id=${iter.index}">Pin</button>
+                th:hx-on::after-request="'debouncedPostPinAirport(\'airport-code-' + ${iter.index} + '\',
+                    \'filtered-list-' + ${iter.index} + '\')'"
+                >Pin</button>
         <button th:if="${resultDetails.location}"
                 class="col-2 btn btn-sm btn-outline-secondary"
                 hx-get="/pin-airport-location"
@@ -101,8 +103,9 @@
                 th:hx-vals="'{&quot;locationId&quot;:'+${resultDetails.location.id}+'}'"
                 th:hx-target="'#saved-pinned-airports-'+${resultDetails.location.id}"
                 hx-swap="beforeend transition:true"
-                hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
-                th:attrappend="id=${resultDetails.location.id}">Pin</button>
+                th:hx-on::after-request="'debouncedPostPinAirport(\'airport-code-' + ${iter.index} + '\',
+                    \'filtered-list-' + ${iter.index} + '\')'"
+        >Pin</button>
     </div>
 </div>
 
