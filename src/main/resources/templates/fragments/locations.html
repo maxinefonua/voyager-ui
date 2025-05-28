@@ -49,15 +49,11 @@
                 aria-controls="collapse-location-0"
                 data-bs-toggle="collapse"
                 data-bs-target="#collapse-location-0"
-                th:data-lat="${locationDetail.location.latitude}"
-                th:data-lng="${locationDetail.location.longitude}"
-                th:data-bounds-west="${locationDetail.location.bbox[0]}"
-                th:data-bounds-south="${locationDetail.location.bbox[1]}"
-                th:data-bounds-east="${locationDetail.location.bbox[2]}"
-                th:data-bounds-north="${locationDetail.location.bbox[3]}"
+                th:data-name="${locationDetail.location.name}"
+                th:data-location-id="${locationDetail.location.id}"
                 aria-expanded="true"
                 th:text="${locationDetail.location.name} + ', ' + ${locationDetail.location.subdivision} + ' | ' + ${locationDetail.location.countryCode}"
-                th:onclick="zoomToLocationMap(0,[[${locationDetail.location.longitude}]],[[${locationDetail.location.latitude}]],[[${locationDetail.location.bbox}]])"></button>
+                th:onclick="zoomToLocationMap([[${locationDetail.location.name}]],[[${locationDetail.location.id}]],this)"></button>
         <button th:unless="${iter.first}"
                 id="location-display-"
                 class="accordion-button list-group-item list-group-item-action list-group-item-light collapsed"
@@ -67,7 +63,7 @@
                 data-bs-target="#collapse-location-"
                 aria-expanded="false"
                 th:text="${locationDetail.location.name} + ', ' + ${locationDetail.location.subdivision} + ' | ' + ${locationDetail.location.countryCode}"
-                th:onclick="zoomToLocationMap([[${iter.index}]],[[${locationDetail.location.longitude}]],[[${locationDetail.location.latitude}]],[[${locationDetail.location.bbox}]])"
+                th:onclick="zoomToLocationMap([[${locationDetail.location.name}]],[[${locationDetail.location.id}]],this)"
                 th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"></button>
         <div
                 id="collapse-location-"

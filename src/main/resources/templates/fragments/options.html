@@ -31,5 +31,9 @@
         th:data-latitude="${location.latitude}"
         th:data-subdivision="${location.subdivision}"
         th:data-country="${location.countryCode}"
+        th:data-bounds="${#strings.arrayJoin(
+    #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),
+    ','
+)}"
         th:text="${location.name}"></option>
 </html>

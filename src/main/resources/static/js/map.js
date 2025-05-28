@@ -99,16 +99,6 @@ function zoomToTripLocation(isStart) {
     }
 }
 
-function zoomToLocationMap(iterIndex,longitude,latitude,bounds) {
-    if (airportMarker) airportMarker.remove();
-    if (lookupMarker) lookupMarker.remove();
-    const clickedButton = document.getElementById("location-display-"+iterIndex);
-    if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
-        map.fitBounds(bounds);
-        lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
-    }
-};
-
 function recenterMap() {
     map.flyTo({
         center: [0, 0],
@@ -138,7 +128,11 @@ function mapToFirst(elementId,fromSearch) {
         const latitude = firstElemButton.dataset.lat;
         const bounds = [firstElemButton.dataset.boundsWest,firstElemButton.dataset.boundsSouth,firstElemButton.dataset.boundsEast,firstElemButton.dataset.boundsNorth]
         if (fromSearch) updateLookupMap(0,longitude,latitude,bounds);
-        else zoomToLocationMap(0,longitude,latitude,bounds);
+        else {
+            const locationName = firstElemButton.dataset.name;
+            const locationId = firstElemButton.dataset.locationId;
+            zoomToLocationMap(locationName,locationId,firstElemButton);
+        }
     }
 }
 

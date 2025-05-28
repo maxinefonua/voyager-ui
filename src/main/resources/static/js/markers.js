@@ -53,18 +53,6 @@ function mapFitThreeMarkers(marker1,marker2,marker3) {
     map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
 }
 
-function addAirportMarker(airportOptionElem) {
-    const el = document.createElement('div');
-    el.className = 'airport-marker';
-    var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
-              .setHTML(`<strong>${airportOptionElem.value} | </strong><i>${airportOptionElem.dataset.airport}</i><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>(Add as hyperlink from airport name, add as another property of AirportDisplay class)Official website: <a href="https://www.finavia.fi/en/airports/helsinki-airport" target="_blank" title="Opens in a new window">Helsinki Airport</a>`);
-    var airportMarker = new mapboxgl.Marker(el)
-        .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
-        .setPopup(airportPopup)
-        .addTo(map);
-    return airportMarker;
-}
-
 function addAirportToMap(airportInputElem,isStart) {
     if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
         const allAirports = document.getElementById('all-airports');
@@ -113,6 +101,24 @@ function addAirportMarker(airportOptionElem,isDelta) {
     airportMarker.togglePopup();
     return airportMarker;
 }
+
+function addLookupMarker(locationOptionElem,isSaved) {
+    var locationPopup =  new mapboxgl.Popup({ offset: 16 }) // add popups
+              .setHTML(`<strong>${locationOptionElem.dataset.location}</strong>
+               <i>${locationOptionElem.dataset.subdivision}</i> |
+                Located in ${locationOptionElem.dataset.country}`);
+
+    const el = document.createElement('div');
+    if (isSaved) el.className = 'lookup-marker';
+    else el.className = 'lookup-marker-from-results';
+    var locationMarker = new mapboxgl.Marker()
+        .setLngLat([locationOptionElem.dataset.longitude,locationOptionElem.dataset.latitude])
+        .setPopup(locationPopup)
+        .addTo(map);
+    locationMarker.togglePopup();
+    return locationMarker;
+}
+
 
 function updateWithAirportMap(selectedOption) {
     if (airportMarker) airportMarker.remove();
