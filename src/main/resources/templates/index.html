@@ -36,22 +36,16 @@
     <script src="../js/dom.js"></script>
     <script src="../js/delay.js"></script>
     <script>
-        function zoomToLocationMap(locationName,locationId,clickedButtonElem) {
+        function updateLookupMap(resultButtonElem) {
     if (airportMarker) airportMarker.remove();
     if (lookupMarker) lookupMarker.remove();
-    if (locationName && locationId && clickedButtonElem
-            && clickedButtonElem.getAttribute("aria-expanded") == "true") {
-        const elemName = locationName + '-' + locationId;
-        const allLocations = document.getElementById('all-locations');
-        if (allLocations && allLocations.options && allLocations.options.namedItem(elemName)) {
-            const match = allLocations.options.namedItem(elemName);
-            const bounds = match.dataset.bounds
-                .split(',')
-                .map(Number.parseFloat)
-                .filter(n => !isNaN(n));
-            map.fitBounds(bounds);
-            lookupMarker = addLookupMarker(match,true);
-        }
+    if (resultButtonElem && resultButtonElem.getAttribute("aria-expanded") == "true") {
+        const bounds = resultButtonElem.dataset.bounds
+            .split(',')
+            .map(Number.parseFloat)
+            .filter(n => !isNaN(n));
+        map.fitBounds(bounds);
+        lookupMarker = addLookupMarkerFromSearch(resultButtonElem);
     }
 };
     </script>

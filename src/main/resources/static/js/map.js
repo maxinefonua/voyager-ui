@@ -39,9 +39,26 @@ function updateLookupMap(iterIndex,longitude,latitude,bounds) {
     const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
     if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
         map.fitBounds(bounds);
-//        addLookupMarker
-//locationOptionElem,isSaved
         lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+    }
+};
+
+function zoomToLocationMap(locationName,locationId,clickedButtonElem) {
+    if (airportMarker) airportMarker.remove();
+    if (lookupMarker) lookupMarker.remove();
+    if (locationName && locationId && clickedButtonElem
+            && clickedButtonElem.getAttribute("aria-expanded") == "true") {
+        const elemName = locationName + '-' + locationId;
+        const allLocations = document.getElementById('all-locations');
+        if (allLocations && allLocations.options && allLocations.options.namedItem(elemName)) {
+            const match = allLocations.options.namedItem(elemName);
+            const bounds = match.dataset.bounds
+                .split(',')
+                .map(Number.parseFloat)
+                .filter(n => !isNaN(n));
+            map.fitBounds(bounds);
+            lookupMarker = addLookupMarker(match,true);
+        }
     }
 };
 
@@ -126,10 +143,9 @@ function mapToFirst(elementId,fromSearch) {
     if (airportMarker) airportMarker.remove();
     const firstElemButton = document.getElementById(elementId);
     if (firstElemButton) {
-        const longitude = firstElemButton.dataset.lng;
-        const latitude = firstElemButton.dataset.lat;
-        const bounds = [firstElemButton.dataset.boundsWest,firstElemButton.dataset.boundsSouth,firstElemButton.dataset.boundsEast,firstElemButton.dataset.boundsNorth]
-        if (fromSearch) updateLookupMap(0,longitude,latitude,bounds);
+        if (fromSearch) {
+            updateLookupMap(firstElemButton);
+        }
         else {
             const locationName = firstElemButton.dataset.name;
             const locationId = firstElemButton.dataset.locationId;

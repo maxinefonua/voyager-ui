@@ -87,9 +87,9 @@ function addAirportToMap(airportInputElem,isStart) {
 
 function addAirportMarker(airportOptionElem,isDelta) {
     var airportPopup =  new mapboxgl.Popup({ offset: 16 }) // add popups
-              .setHTML(`<strong>${airportOptionElem.value}</strong> <i>${airportOptionElem.dataset.airport}</i> |
-                Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}`)
-              ;
+              .setHTML(`<strong>${airportOptionElem.value}</strong> <i>${airportOptionElem.dataset.airport}</i>
+                in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision}
+                 of ${airportOptionElem.dataset.country}`);
 
     const el = document.createElement('div');
     if (isDelta) el.className = 'airport-marker';
@@ -117,8 +117,8 @@ function addLookupMarker(locationOptionElem,isSaved) {
               }
         }) // add popups
               .setHTML(`<strong>${locationOptionElem.dataset.location}</strong>,
-               <i>${locationOptionElem.dataset.subdivision}</i> |
-                Located in ${locationOptionElem.dataset.country}`);
+               <i>${locationOptionElem.dataset.subdivision}</i>
+               of ${locationOptionElem.dataset.country}`);
 
     const el = document.createElement('div');
     if (isSaved) el.className = 'lookup-marker';
@@ -131,28 +131,31 @@ function addLookupMarker(locationOptionElem,isSaved) {
     return locationMarker;
 }
 
-
-function updateWithAirportMap(selectedOption) {
-    if (airportMarker) airportMarker.remove();
-    if (lookupMarker) {
-        const lngLat = lookupMarker.getLngLat();
-        const south = lngLat.lat < selectedOption.dataset.latitude? lngLat.lat : selectedOption.dataset.latitude;
-        const north = lngLat.lat > selectedOption.dataset.latitude? lngLat.lat : selectedOption.dataset.latitude;
-        const west = lngLat.lng < selectedOption.dataset.longitude? lngLat.lng : selectedOption.dataset.longitude;
-        const east = lngLat.lng > selectedOption.dataset.longitude? lngLat.lng : selectedOption.dataset.longitude;
-        const bounds = [west,south,east,north];
-        map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 40, right: 40}});
-        airportMarker = new mapboxgl.Marker({color:"#9B1631"})
-            .setLngLat([selectedOption.dataset.longitude,selectedOption.dataset.latitude])
-            .setPopup(
-                new mapboxgl.Popup({ offset: 25 }) // add popups
-                    .setHTML(
-                        `<strong>${selectedOption.value}</strong> | <i>${selectedOption.dataset.airport}</i> Located in ${selectedOption.dataset.city}, ${selectedOption.dataset.subdivision} of ${selectedOption.dataset.country}.`
-                )
-            )
-            .addTo(map);
-    }
-};
+function addLookupMarkerFromSearch(searchButtonElem) {
+    var locationPopup =  new mapboxgl.Popup({ offset:
+            {
+                'top': [0, 10],    // When popup appears below marker (anchor: 'top')
+                'top-left': [0, 10],
+                'top-right': [0, 10],
+                'bottom': [0, -42],  // When popup appears above marker (anchor: 'bottom')
+                'bottom-left': [0, -42],
+                'bottom-right': [0, -42],
+                'left': [13, 0],    // When popup appears to the right of marker (anchor: 'left')
+                'right': [-13, 0],    // When popup appears to the left of marker (anchor: 'right')
+                // Add other anchor positions as needed
+              }
+        }) // add popups
+              .setHTML(`<strong>${searchButtonElem.dataset.name}</strong>,
+               <i>${searchButtonElem.dataset.subdivision}</i> |
+                of ${searchButtonElem.dataset.country}`);
+    const el = document.createElement('div');
+    var locationMarker = new mapboxgl.Marker()
+        .setLngLat([searchButtonElem.dataset.lng,searchButtonElem.dataset.lat])
+        .setPopup(locationPopup)
+        .addTo(map);
+    locationMarker.togglePopup();
+    return locationMarker;
+}
 
 function clearMarkers() {
     if (lookupMarker) {
