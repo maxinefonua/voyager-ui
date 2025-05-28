@@ -59,6 +59,27 @@ function addAirportToMap(airportInputElem,isStart) {
     }
 };
 
+function addAirportToMapFromCode(airportCode) {
+    if (airportMarker) airportMarker.remove();
+    if (airportCode) {
+        const allAirports = document.getElementById('all-airports');
+        const deltaAirports = document.getElementById('delta-airports');
+        if (allAirports && allAirports.options && allAirports.options.namedItem(airportCode)) {
+            const airportMatch = allAirports.options.namedItem(airportCode);
+            const deltaMatch = deltaAirports.options.namedItem(airportCode);
+            const isDelta = (deltaMatch != null);
+            if (airportMatch) {
+                airportMarker = addAirportMarker(airportMatch,isDelta);
+                if (lookupMarker) {
+                    if (lookupMarker.getPopup().isOpen()) lookupMarker.togglePopup();
+                    mapFitBothMarkers(lookupMarker,airportMarker);
+                }
+                else centerMapOnMarker(airportMarker);
+            }
+        }
+    }
+}
+
 function checkAirportInput(airportInputElem,iterIndex) {
     if (airportMarker) {
         airportMarker.remove();

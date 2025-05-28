@@ -9,7 +9,9 @@
              th:id="'pinned-'+${airport.iata}+'-location-'+${locationDetail.location.id}"
              class="d-flex input-group justify-content-center mb-2"
         >
-            <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text">
+            <button class="add-airport-button col col-lg-8 btn btn-outline-primary text-truncate input-group-text"
+                    th:attr="onclick='addAirportToMapFromCode(\'' + ${airport.iata} + '\');'"
+                >
                 <strong th:text="${airport.iata}"></strong>
                 <i th:text="' ' + ${airport.name} + ' '"></i>
                 <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
@@ -50,7 +52,9 @@
      th:id="'pinned-'+${airport.iata}+'-location-'+${location.id}"
      class="d-flex input-group justify-content-center mb-2"
 >
-    <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text">
+    <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text"
+            th:onclick="'addAirportToMapFromCode(' + ${airport.iata} + ')'"
+    >
         <strong th:text="${airport.iata}"></strong>
         <i th:text="' ' + ${airport.name} + ' '"></i>
         <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
