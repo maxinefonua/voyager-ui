@@ -46,6 +46,7 @@ function addAirportToMap(airportInputElem,isStart) {
                 airportInputElem.classList.remove('is-invalid');
                 mapFitBothMarkers(endMarker,airportEndMarker);
             }
+            airportInputElem.value = airportInputElem.value.toUpperCase(); // sets IATA value
         }
     } else {
         airportInputElem.classList.add('is-invalid');
@@ -81,10 +82,11 @@ function addAirportToMapFromCode(airportCode) {
 }
 
 function checkAirportInput(airportInputElem,iterIndex) {
-    if (airportMarker) {
+    if (airportMarker) { // clears airport marker
         airportMarker.remove();
         airportMarker = null;
     }
+    // if input is empty, remove invalid styling
     if (airportInputElem && (airportInputElem.value == null || airportInputElem.value.trim().length == 0)) {
         airportInputElem.classList.remove('is-invalid');
     }
@@ -103,6 +105,7 @@ function checkAirportInput(airportInputElem,iterIndex) {
                     mapFitBothMarkers(lookupMarker,airportMarker);
                 }
                 else centerMapOnMarker(airportMarker);
+                airportInputElem.value = airportInputElem.value.toUpperCase(); // sets IATA value
             }
             else airportInputElem.classList.add('is-invalid');
         } else {
