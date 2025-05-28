@@ -36,7 +36,7 @@
           th:object="${airportCodes}"></form>
     <datalist id="filtered-list-" th:attrappend="id=${iter.index}"></datalist>
     <div th:unless="${resultDetails.location}" id="pinned-airports-" th:attrappend="id=${iter.index}"></div>
-    <div th:if="${resultDetails.location}" th:id="'saved-pinned-aiports-'+${resultDetails.location.id}">
+    <div th:if="${resultDetails.location}" th:id="'saved-pinned-airports-'+${resultDetails.location.id}">
         <div th:each="airport : ${resultDetails.airportList}"
              th:id="'pinned-'+${airport.iata}+'-location-'+${resultDetails.location.id}"
              class="d-flex input-group justify-content-center mb-2"
@@ -93,7 +93,7 @@
                 hx-get="/pin-airport-location"
                 th:hx-include="'#airport-code-' + ${iter.index}"
                 th:hx-vals="'{&quot;locationId&quot;:'+${resultDetails.location.id}+'}'"
-                th:hx-target="'#saved-pinned-aiports-'+${resultDetails.location.id}"
+                th:hx-target="'#saved-pinned-airports-'+${resultDetails.location.id}"
                 hx-swap="beforeend transition:true"
                 hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
                 th:attrappend="id=${resultDetails.location.id}">Pin</button>

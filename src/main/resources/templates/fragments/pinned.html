@@ -4,7 +4,7 @@
 <!--SAVED LOCATION PIN AIRPORT FORM INITIAL -->
 <div th:fragment="pin-airport-form-initial(locationDetail)">
     <datalist id="filtered-list-" th:attrappend="id=${locationDetail.location.id}"></datalist>
-    <div th:id="'saved-pinned-aiports-'+${locationDetail.location.id}">
+    <div th:id="'saved-pinned-airports-'+${locationDetail.location.id}">
         <div th:each="airport : ${locationDetail.airportList}"
              th:id="'pinned-'+${airport.iata}+'-location-'+${locationDetail.location.id}"
              class="d-flex input-group justify-content-center mb-2"
@@ -39,7 +39,7 @@
                 hx-get="/pin-airport-location"
                 th:hx-include="'#airport-code-'+${locationDetail.location.id}"
                 th:hx-vals="'{&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
-                th:hx-target="'#saved-pinned-aiports-'+${locationDetail.location.id}"
+                th:hx-target="'#saved-pinned-airports-'+${locationDetail.location.id}"
                 hx-swap="beforeend transition:true"
                 hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
                 th:attrappend="id=${locationDetail.location.id}">Pin</button>
