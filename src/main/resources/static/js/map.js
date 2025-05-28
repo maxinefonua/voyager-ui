@@ -145,24 +145,10 @@ function mapToFirstLocation(fromSearch) {
         document.getElementById('searchButton').innerHTML = 'Search';
         document.getElementById('searchButton').disabled = false;
         const firstElemButton = document.getElementById('searchResultButtonHeader-0');
-        updateLookupMap(firstElemButton);
+        if (firstElemButton) updateLookupMap(firstElemButton);
     } else {
         const firstElemButton = document.getElementById('location-display-0');
-        const locationName = firstElemButton.dataset.name;
-        const locationId = firstElemButton.dataset.locationId;
-        zoomToLocationMap(locationName,locationId,firstElemButton);
-    }
-}
-
-function mapToFirst(elementId,fromSearch) {
-    if (lookupMarker) lookupMarker.remove();
-    if (airportMarker) airportMarker.remove();
-    const firstElemButton = document.getElementById(elementId);
-    if (firstElemButton) {
-        if (fromSearch) {
-            updateLookupMap(firstElemButton);
-        }
-        else {
+        if (firstElemButton) {
             const locationName = firstElemButton.dataset.name;
             const locationId = firstElemButton.dataset.locationId;
             zoomToLocationMap(locationName,locationId,firstElemButton);
