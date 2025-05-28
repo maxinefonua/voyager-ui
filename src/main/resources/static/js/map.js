@@ -36,7 +36,6 @@ map.addControl(nav);
 function updateLookupMap(iterIndex,longitude,latitude,bounds) {
     if (airportMarker) airportMarker.remove();
     if (lookupMarker) lookupMarker.remove();
-    if (nonDeltaAirportMarker) nonDeltaAirportMarker.remove();
     const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
     if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
         map.fitBounds(bounds);
@@ -53,10 +52,6 @@ function addTripLocationToMap(optionSelected,isStart) {
             airportStartMarker.remove();
             airportStartMarker = null;
         }
-        if (nonDeltaStartMarker) {
-            nonDeltaStartMarker.remove();
-            nonDeltaStartMarker = null;
-        }
         startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
 
         if (endMarker) mapFitBothMarkers(startMarker,endMarker);
@@ -69,10 +64,6 @@ function addTripLocationToMap(optionSelected,isStart) {
         if (airportEndMarker) {
             airportEndMarker.remove();
             airportEndMarker = null;
-        }
-        if (nonDeltaEndMarker) {
-            nonDeltaEndMarker.remove();
-            nonDeltaEndMarker = null;
         }
         endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
         if (startMarker) mapFitBothMarkers(startMarker,endMarker);
@@ -111,7 +102,6 @@ function zoomToTripLocation(isStart) {
 function zoomToLocationMap(iterIndex,longitude,latitude,bounds) {
     if (airportMarker) airportMarker.remove();
     if (lookupMarker) lookupMarker.remove();
-    if (nonDeltaAirportMarker) nonDeltaAirportMarker.remove();
     const clickedButton = document.getElementById("location-display-"+iterIndex);
     if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
         map.fitBounds(bounds);
@@ -142,7 +132,6 @@ function resetMapOnSearch() {
 function mapToFirst(elementId,fromSearch) {
     if (lookupMarker) lookupMarker.remove();
     if (airportMarker) airportMarker.remove();
-    if (nonDeltaAirportMarker) nonDeltaAirportMarker.remove();
     const firstElemButton = document.getElementById(elementId);
     if (firstElemButton) {
         const longitude = firstElemButton.dataset.lng;

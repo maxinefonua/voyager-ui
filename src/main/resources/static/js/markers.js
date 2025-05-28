@@ -6,9 +6,6 @@ var startMarker = null;
 var airportStartMarker = null;
 var endMarker = null;
 var airportEndMarker = null;
-var nonDeltaStartMarker = null;
-var nonDeltaEndMarker = null;
-var nonDeltaAirportMarker = null;
 
 function setAirportPlaceHolder(iterIndex) {
     if (airportMarker) airportMarker.remove();
@@ -19,75 +16,6 @@ function setAirportPlaceHolder(iterIndex) {
         airportInput.value = '';
     }
 }
-
-function addNonDeltaAirportToMapNotTrips(selectedIata) {
-    if (nonDeltaAirportMarker) {
-        nonDeltaAirportMarker.remove();
-        nonDeltaAirportMarker = null;
-    }
-    if (!regexIata.test(selectedIata)) return;
-    const allAirports = document.getElementById('all-airports');
-    if (allAirports && allAirports.options && allAirports.options.namedItem(selectedIata.toUpperCase())) {
-        const selectedOption = allAirports.options.namedItem(selectedIata.toUpperCase());
-        nonDeltaAirportMarker = addAirportMarkerWithColor(selectedOption);
-    if (airportMarker) mapFitThreeMarkers(lookupMarker,airportMarker,nonDeltaAirportMarker);
-        else mapFitBothMarkers(lookupMarker,nonDeltaAirportMarker);
-    }
-}
-
-function addNonDeltaAirportToMap(selectedIata,isStart) {
-    if (isStart && nonDeltaStartMarker) {
-        nonDeltaStartMarker.remove();
-        nonDeltaStartMarker = null;
-    } else if (!isStart && nonDeltaEndMarker) {
-        nonDeltaEndMarker.remove();
-        nonDeltaEndMarker.null;
-    }
-    if (!regexIata.test(selectedIata)) return;
-    const allAirports = document.getElementById('all-airports');
-    if (allAirports && allAirports.options && allAirports.options.namedItem(selectedIata.toUpperCase())) {
-        const selectedOption = allAirports.options.namedItem(selectedIata.toUpperCase());
-        if (isStart) {
-            nonDeltaStartMarker = addAirportMarkerWithColor(selectedOption);
-            if (airportStartMarker) mapFitThreeMarkers(nonDeltaStartMarker,startMarker,airportStartMarker);
-            else mapFitBothMarkers(startMarker,nonDeltaStartMarker);
-        } else {
-            nonDeltaEndMarker = addAirportMarkerWithColor(selectedOption);
-            if (airportEndMarker) mapFitThreeMarkers(nonDeltaEndMarker,endMarker,airportEndMarker);
-            else mapFitBothMarkers(endMarker,nonDeltaEndMarker);
-        }
-    }
-}
-
-function addAirportToMap(airportInputElem,isStart,airportFilter) {
-    if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
-        const allAirports = document.getElementById('all-airports');
-        if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
-            const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
-            if (isStart) {
-                if (airportStartMarker) airportStartMarker.remove();
-                airportStartMarker = addAirportMarker(airportMatch);
-                airportInputElem.classList.remove('is-invalid');
-                mapFitBothMarkers(startMarker,airportStartMarker);
-            } else {
-                if (airportEndMarker) airportEndMarker.remove();
-                airportEndMarker = addAirportMarker(airportMatch);
-                airportInputElem.classList.remove('is-invalid');
-                mapFitBothMarkers(endMarker,airportEndMarker);
-            }
-        }
-    } else {
-        airportInputElem.classList.add('is-invalid');
-        if (isStart && airportStartMarker) {
-            airportStartMarker.remove();
-            airportStartMarker = null;
-        } else if (!isStart && airportEndMarker) {
-            airportEndMarker.remove();
-            airportEndMarker = null;
-        }
-    }
-};
-
 
 function mapFitBothMarkers(marker1,marker2) {
     if (marker1 == null) centerMapOnMarker(marker2);
@@ -123,20 +51,6 @@ function mapFitThreeMarkers(marker1,marker2,marker3) {
 
     const bounds = [west,south,east,north];
     map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
-}
-
-function addAirportMarkerWithColor(airportOptionElem) {
-    const el = document.createElement('div');
-    el.className = 'airport-marker-non-delta';
-    el.innerHTML = ``
-//    el.style.filter = 'drop-shadow(rgb(173, 181, 189) 3px 5px 1px) inverse(90%) contrast(%200)';
-    var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
-              .setHTML(`<strong>${airportOptionElem.value} | </strong><i>${airportOptionElem.dataset.airport}</i><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>(Add as hyperlink from airport name, add as another property of AirportDisplay class)Official website: <a href="https://www.finavia.fi/en/airports/helsinki-airport" target="_blank" title="Opens in a new window">Helsinki Airport</a>`);
-    var airportMarker = new mapboxgl.Marker(el)
-        .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
-        .setPopup(airportPopup)
-        .addTo(map);
-    return airportMarker;
 }
 
 function addAirportMarker(airportOptionElem) {
@@ -246,18 +160,6 @@ function clearMarkers() {
     if (airportEndMarker) {
         airportEndMarker.remove();
         airportEndMarker = null;
-    }
-    if (nonDeltaAirportMarker) {
-        nonDeltaAirportMarker.remove();
-        nonDeltaAirportMarker = null;
-    }
-    if (nonDeltaStartMarker) {
-        nonDeltaStartMarker.remove();
-        nonDeltaStartMarker = null;
-    }
-    if (nonDeltaEndMarker) {
-        nonDeltaEndMarker.remove();
-        nonDeltaEndMarker = null;
     }
 }
 

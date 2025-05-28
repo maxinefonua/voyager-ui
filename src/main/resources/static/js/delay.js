@@ -10,4 +10,5 @@ function debounce(func, delay) {
 }
 
 // Apply debounce (500ms delay)
-const debouncedAirportInput = debounce(checkAirportInput, 500);
+const debouncedAirportInput = debounce(checkAirportInput, 1000);
+const debouncedAddAirportToMap = debounce(addAirportToMap, 1000);

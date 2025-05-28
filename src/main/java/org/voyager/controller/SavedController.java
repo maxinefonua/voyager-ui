@@ -72,6 +72,7 @@ public class SavedController {
 
     @GetMapping("/pin-airport-location")
     public String pinAirportToLocation(Model model, @NonNull String airportCode, @NonNull Integer locationId) {
+        airportCode = airportCode.toUpperCase();
         LOGGER.debug(String.format("/pin-airport-location called from locationId %d and airportCode %s",
                 locationId,airportCode));
         Location location = voyagerService.getLocation(locationId);

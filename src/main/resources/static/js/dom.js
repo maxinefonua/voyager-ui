@@ -27,10 +27,45 @@ function swapSelectionsAndInputs(selectStartElemId,selectEndElemId,startIataElem
     }
 }
 
+function addAirportToMap(airportInputElem,isStart) {
+    if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
+        const allAirports = document.getElementById('all-airports');
+        const deltaAirports = document.getElementById('delta-airports');
+        if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
+            const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
+            const deltaMatch = deltaAirports.options.namedItem(airportInputElem.value.toUpperCase());
+            const isDelta = (deltaMatch != null);
+            if (isStart) {
+                if (airportStartMarker) airportStartMarker.remove();
+                airportStartMarker = addAirportMarker(airportMatch,isDelta);
+                airportInputElem.classList.remove('is-invalid');
+                mapFitBothMarkers(startMarker,airportStartMarker);
+            } else {
+                if (airportEndMarker) airportEndMarker.remove();
+                airportEndMarker = addAirportMarker(airportMatch,isDelta);
+                airportInputElem.classList.remove('is-invalid');
+                mapFitBothMarkers(endMarker,airportEndMarker);
+            }
+        }
+    } else {
+        airportInputElem.classList.add('is-invalid');
+        if (isStart && airportStartMarker) {
+            airportStartMarker.remove();
+            airportStartMarker = null;
+        } else if (!isStart && airportEndMarker) {
+            airportEndMarker.remove();
+            airportEndMarker = null;
+        }
+    }
+};
+
 function checkAirportInput(airportInputElem,iterIndex) {
     if (airportMarker) {
         airportMarker.remove();
         airportMarker = null;
+    }
+    if (airportInputElem && (airportInputElem.value == null || airportInputElem.value.trim().length == 0)) {
+        airportInputElem.classList.remove('is-invalid');
     }
     if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
         const allAirports = document.getElementById('all-airports');
@@ -49,7 +84,7 @@ function checkAirportInput(airportInputElem,iterIndex) {
         } else {
             console.log('checkAirportInput called with index: ' + iterIndex + ', length: ' + airportInputElem.value.length + ', no match. Airport value: ' + airportInputElem.value);
         }
-    }
+    } else if (airportInputElem && airportInputElem.value && airportInputElem.value.trim().length > 0) airportInputElem.classList.add('is-invalid');
 };
 
 function setAirportPlaceHolderFromList(airportInputId,airportListId){
