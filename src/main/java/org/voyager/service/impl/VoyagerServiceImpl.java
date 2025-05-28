@@ -107,6 +107,11 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
+    public List<Location> getLocations(Status status) {
+        return fetchLocations(status);
+    }
+
+    @Override
     public Location getLocation(Integer id) {
         return fetchLocation(id);
     }
@@ -219,6 +224,12 @@ public class VoyagerServiceImpl implements VoyagerService {
 
     private List<Location> fetchLocations() {
         Either<ServiceError, List<Location>> either = locationService.getLocations();
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        return either.get();
+    }
+
+    private List<Location> fetchLocations(Status status) {
+        Either<ServiceError, List<Location>> either = locationService.getLocations(status);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
