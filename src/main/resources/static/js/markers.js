@@ -184,15 +184,19 @@ function addAirportToMap(airportInputElem,isStart) {
 };
 
 function addAirportMarker(airportOptionElem,isDelta) {
+    var airportPopup =  new mapboxgl.Popup({ offset: 16 }) // add popups
+              .setHTML(`<strong>${airportOptionElem.value}</strong> <i>${airportOptionElem.dataset.airport}</i> |
+                Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}`)
+              ;
+
     const el = document.createElement('div');
     if (isDelta) el.className = 'airport-marker';
     else el.className = 'airport-marker-non-delta';
-    var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
-              .setHTML(`<strong>${airportOptionElem.value} | </strong><i>${airportOptionElem.dataset.airport}</i><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>`);
     var airportMarker = new mapboxgl.Marker(el)
         .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
         .setPopup(airportPopup)
         .addTo(map);
+    airportMarker.togglePopup();
     return airportMarker;
 }
 
