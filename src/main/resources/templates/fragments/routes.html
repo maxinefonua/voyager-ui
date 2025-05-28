@@ -60,8 +60,11 @@
     <datalist th:if="${selection == 'AIRPORT'}" id="select-start-options">
         <option th:each="option,iter : ${optionList}" th:value="${option.value}" th:text="${option.display}"></option>
     </datalist>
+<!-- TODO: only allow add to map if matches airport filter -->
     <input th:if="${selection == 'AIRPORT'}" class="form-control"
-           placeholder="Enter Airport" list="select-start-options">
+           placeholder="Enter Airport" list="select-start-options"
+           oninput="addAirportToMap(this,true)"
+    >
     <select th:if="${selection == 'LOCATION'}" class="form-control">
         <option th:each="option,iter : ${optionList}" th:value="${option.value}" th:text="${option.display}"></option>
     </select>

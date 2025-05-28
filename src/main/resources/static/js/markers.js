@@ -88,6 +88,36 @@ function addAirportToMap(airportInputElem,isStart) {
     }
 };
 
+function addAirportToMap(airportInputElem,isStart,airportFilter) {
+    if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
+        const allAirports = document.getElementById('all-airports');
+        if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
+            const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
+            if (isStart) {
+                if (airportStartMarker) airportStartMarker.remove();
+                airportStartMarker = addAirportMarker(airportMatch);
+                airportInputElem.classList.remove('is-invalid');
+                mapFitBothMarkers(startMarker,airportStartMarker);
+            } else {
+                if (airportEndMarker) airportEndMarker.remove();
+                airportEndMarker = addAirportMarker(airportMatch);
+                airportInputElem.classList.remove('is-invalid');
+                mapFitBothMarkers(endMarker,airportEndMarker);
+            }
+        }
+    } else {
+        airportInputElem.classList.add('is-invalid');
+        if (isStart && airportStartMarker) {
+            airportStartMarker.remove();
+            airportStartMarker = null;
+        } else if (!isStart && airportEndMarker) {
+            airportEndMarker.remove();
+            airportEndMarker = null;
+        }
+    }
+};
+
+
 function mapFitBothMarkers(marker1,marker2) {
     if (marker1 == null) centerMapOnMarker(marker2);
     else if (marker2 == null) centerMapOnMarker(marker1);

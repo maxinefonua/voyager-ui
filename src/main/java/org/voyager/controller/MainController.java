@@ -65,17 +65,23 @@ public class MainController {
 
     @GetMapping("/airports")
     @Cacheable("airportsCache")
-    public String getAirports(Model model, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
-        AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional.map(Option::of).orElse(Option.none()));
+    public String getAirports(Model model, @RequestParam(AIRPORT_FILTER_PARAM_NAME) AirportFilter airportFilter) {
         List<Airport> airportList = new ArrayList<>();
         switch (airportFilter) {
             case DELTA -> airportList.addAll(voyagerService.airports(Airline.DELTA));
             case CIVIL -> airportList.addAll(voyagerService.airports(AirportType.CIVIL));
             case MILITARY -> airportList.addAll(voyagerService.airports(AirportType.MILITARY));
-            case ALL -> airportList.addAll(voyagerService.airports());
+            case ALL -> airportList.addAll(voyagerService.airports(Arrays.asList(AirportType.CIVIL,AirportType.MILITARY)));
         }
         model.addAttribute("airportList",airportList);
         return "fragments/options :: iata-code-list";
+    }
+
+    @GetMapping("/locations")
+    public String getLocations(Model model) {
+        List<Location> locationList = voyagerService.getLocations();
+        model.addAttribute("locationList",locationList);
+        return "fragments/options :: saved-location-list";
     }
 
     @GetMapping("/trips")

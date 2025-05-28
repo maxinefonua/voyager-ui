@@ -29,7 +29,9 @@ public class TripsController {
             case AIRPORT -> {
                 model.addAttribute("optionList",
                         voyagerService.airports(Airline.DELTA).stream().map(airport ->
-                        Option.builder().display(airport.getName()).value(airport.getIata()).build())
+                        Option.builder().display(String.format("%s | %s, %s of %s", airport.getName(),
+                                        airport.getCity(),airport.getSubdivision(),airport.getCountryCode()))
+                                .value(airport.getIata()).build())
                         .toList()
                 );
             }

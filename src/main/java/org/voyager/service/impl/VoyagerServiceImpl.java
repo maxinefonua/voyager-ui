@@ -144,6 +144,11 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
+    public List<Airport> airports(List<AirportType> typeList) {
+        return allAirports.stream().filter(airport -> typeList.contains(airport.getType())).toList();
+    }
+
+    @Override
     public List<Airport> airports(@NonNull Airline airline) {
         if (airline.equals(Airline.DELTA)) return deltaAirports;
         return fetchAirports(airline);
