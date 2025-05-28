@@ -9,7 +9,10 @@
     <div th:each="code,iter : *{codes}"
          class="d-flex input-group justify-content-center mb-2"
     >
-        <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text">
+        <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text"
+                type="button"
+                th:attr="onclick='addAirportToMapFromCode(\'' + ${code} + '\');'"
+        >
             <strong th:text="${code}"></strong>
             <i th:text="${airportList[__${iter.index}__].name}"></i>
             <span th:text="${airportList[__${iter.index}__].city} + ', ' + ${airportList[__${iter.index}__].subdivision} + ' of ' + ${airportList[__${iter.index}__].countryCode}"></span>
@@ -41,7 +44,10 @@
              th:id="'pinned-'+${airport.iata}+'-location-'+${resultDetails.location.id}"
              class="d-flex input-group justify-content-center mb-2"
         >
-            <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text">
+            <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text"
+                    type="button"
+                    th:attr="onclick='addAirportToMapFromCode(\'' + ${airport.iata} + '\');'"
+            >
                 <strong th:text="${airport.iata}"></strong>
                 <i th:text="' ' + ${airport.name} + ' '"></i>
                 <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>

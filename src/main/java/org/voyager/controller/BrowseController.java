@@ -31,8 +31,7 @@ public class BrowseController {
 
     @GetMapping("/pin-airport")
     public String pinAirport(Model model, String airportCode, Integer iterIndex, @ModelAttribute AirportCodes airportCodes) {
-        if (voyagerService.isValidIataCode(airportCode)) airportCodes.getCodes().add(airportCode);
-        // TODO: returns pinned airport and udpates some value that tracks list of airports
+        if (voyagerService.isValidIataCode(airportCode) && !airportCodes.getCodes().contains(airportCode)) airportCodes.getCodes().add(airportCode);
         List<Airport> airportList = airportCodes.getCodes().stream()
                 .map(iata -> voyagerService.getAirport(iata)).toList();
         model.addAttribute("airportCodes", airportCodes);
@@ -44,7 +43,6 @@ public class BrowseController {
     @GetMapping("/unpin-airport")
     public String unpinAirport(Model model, String airportCode, Integer iterIndex, @ModelAttribute AirportCodes airportCodes) {
         if (voyagerService.isValidIataCode(airportCode)) airportCodes.getCodes().remove(airportCode);
-        // TODO: returns pinned airport and udpates some value that tracks list of airports
         List<Airport> airportList = airportCodes.getCodes().stream()
                 .map(iata -> voyagerService.getAirport(iata)).toList();
         model.addAttribute("airportCodes", airportCodes);
