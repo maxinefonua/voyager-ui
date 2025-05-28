@@ -35,19 +35,6 @@
     <script src="../js/markers.js"></script>
     <script src="../js/dom.js"></script>
     <script src="../js/delay.js"></script>
-    <script>
-        function updateLookupMap(resultButtonElem) {
-    if (airportMarker) airportMarker.remove();
-    if (lookupMarker) lookupMarker.remove();
-    if (resultButtonElem && resultButtonElem.getAttribute("aria-expanded") == "true") {
-        const bounds = resultButtonElem.dataset.bounds
-            .split(',')
-            .map(Number.parseFloat)
-            .filter(n => !isNaN(n));
-        map.fitBounds(bounds);
-        lookupMarker = addLookupMarkerFromSearch(resultButtonElem);
-    }
-};
-    </script>
+    <script src="../js/pin.js"></script>
 </body>
 </html>

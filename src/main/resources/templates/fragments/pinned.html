@@ -41,7 +41,7 @@
                 th:hx-vals="'{&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
                 th:hx-target="'#saved-pinned-airports-'+${locationDetail.location.id}"
                 hx-swap="beforeend transition:true"
-                hx-on::after-request="console.log('disable/remove pinned airport from datalist')"
+                th:hx-on::after-request="'postPinAirport(\'airport-code-' + ${locationDetail.location.id} + '\')'"
                 th:attrappend="id=${locationDetail.location.id}">Pin</button>
     </div>
 </div>
@@ -53,7 +53,7 @@
      class="d-flex input-group justify-content-center mb-2"
 >
     <button class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text"
-            th:onclick="'addAirportToMapFromCode(' + ${airport.iata} + ')'"
+            th:attr="onclick='addAirportToMapFromCode(\'' + ${airport.iata} + '\');'"
     >
         <strong th:text="${airport.iata}"></strong>
         <i th:text="' ' + ${airport.name} + ' '"></i>

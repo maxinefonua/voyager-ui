@@ -33,13 +33,16 @@ const nav = new mapboxgl.NavigationControl({
 
 map.addControl(nav);
 
-function updateLookupMap(iterIndex,longitude,latitude,bounds) {
+function updateLookupMap(resultButtonElem) {
     if (airportMarker) airportMarker.remove();
     if (lookupMarker) lookupMarker.remove();
-    const clickedButton = document.getElementById("searchResultButtonHeader-"+iterIndex);
-    if (clickedButton && clickedButton.getAttribute("aria-expanded") == "true") {
+    if (resultButtonElem && resultButtonElem.getAttribute("aria-expanded") == "true") {
+        const bounds = resultButtonElem.dataset.bounds
+            .split(',')
+            .map(Number.parseFloat)
+            .filter(n => !isNaN(n));
         map.fitBounds(bounds);
-        lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
+        lookupMarker = addLookupMarkerFromSearch(resultButtonElem);
     }
 };
 
