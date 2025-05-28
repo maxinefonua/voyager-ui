@@ -59,35 +59,6 @@ function addNonDeltaAirportToMap(selectedIata,isStart) {
     }
 }
 
-function addAirportToMap(airportInputElem,isStart) {
-    if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
-        const allAirports = document.getElementById('all-airports');
-        if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
-            const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
-            if (isStart) {
-                if (airportStartMarker) airportStartMarker.remove();
-                airportStartMarker = addAirportMarker(airportMatch);
-                airportInputElem.classList.remove('is-invalid');
-                mapFitBothMarkers(startMarker,airportStartMarker);
-            } else {
-                if (airportEndMarker) airportEndMarker.remove();
-                airportEndMarker = addAirportMarker(airportMatch);
-                airportInputElem.classList.remove('is-invalid');
-                mapFitBothMarkers(endMarker,airportEndMarker);
-            }
-        }
-    } else {
-        airportInputElem.classList.add('is-invalid');
-        if (isStart && airportStartMarker) {
-            airportStartMarker.remove();
-            airportStartMarker = null;
-        } else if (!isStart && airportEndMarker) {
-            airportEndMarker.remove();
-            airportEndMarker = null;
-        }
-    }
-};
-
 function addAirportToMap(airportInputElem,isStart,airportFilter) {
     if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
         const allAirports = document.getElementById('all-airports');
@@ -173,6 +144,51 @@ function addAirportMarker(airportOptionElem) {
     el.className = 'airport-marker';
     var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
               .setHTML(`<strong>${airportOptionElem.value} | </strong><i>${airportOptionElem.dataset.airport}</i><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>(Add as hyperlink from airport name, add as another property of AirportDisplay class)Official website: <a href="https://www.finavia.fi/en/airports/helsinki-airport" target="_blank" title="Opens in a new window">Helsinki Airport</a>`);
+    var airportMarker = new mapboxgl.Marker(el)
+        .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
+        .setPopup(airportPopup)
+        .addTo(map);
+    return airportMarker;
+}
+
+function addAirportToMap(airportInputElem,isStart) {
+    if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
+        const allAirports = document.getElementById('all-airports');
+        const deltaAirports = document.getElementById('delta-airports');
+        if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
+            const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
+            const deltaMatch = deltaAirports.options.namedItem(airportInputElem.value.toUpperCase());
+            const isDelta = (deltaMatch != null);
+            if (isStart) {
+                if (airportStartMarker) airportStartMarker.remove();
+                airportStartMarker = addAirportMarker(airportMatch,isDelta);
+                airportInputElem.classList.remove('is-invalid');
+                mapFitBothMarkers(startMarker,airportStartMarker);
+            } else {
+                if (airportEndMarker) airportEndMarker.remove();
+                airportEndMarker = addAirportMarker(airportMatch,isDelta);
+                airportInputElem.classList.remove('is-invalid');
+                mapFitBothMarkers(endMarker,airportEndMarker);
+            }
+        }
+    } else {
+        airportInputElem.classList.add('is-invalid');
+        if (isStart && airportStartMarker) {
+            airportStartMarker.remove();
+            airportStartMarker = null;
+        } else if (!isStart && airportEndMarker) {
+            airportEndMarker.remove();
+            airportEndMarker = null;
+        }
+    }
+};
+
+function addAirportMarker(airportOptionElem,isDelta) {
+    const el = document.createElement('div');
+    if (isDelta) el.className = 'airport-marker';
+    else el.className = 'airport-marker-non-delta';
+    var airportPopup =  new mapboxgl.Popup({ offset: 25 }) // add popups
+              .setHTML(`<strong>${airportOptionElem.value} | </strong><i>${airportOptionElem.dataset.airport}</i><p>Located in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision} of ${airportOptionElem.dataset.country}</p>`);
     var airportMarker = new mapboxgl.Marker(el)
         .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
         .setPopup(airportPopup)
