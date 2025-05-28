@@ -138,6 +138,22 @@ function resetMapOnSearch() {
     document.getElementById('searchButton').innerHTML = 'Searching';
 }
 
+function mapToFirstLocation(fromSearch) {
+    if (lookupMarker) lookupMarker.remove();
+    if (airportMarker) airportMarker.remove();
+    if (fromSearch) {
+        document.getElementById('searchButton').innerHTML = 'Search';
+        document.getElementById('searchButton').disabled = false;
+        const firstElemButton = document.getElementById('searchResultButtonHeader-0');
+        updateLookupMap(firstElemButton);
+    } else {
+        const firstElemButton = document.getElementById('location-display-0');
+        const locationName = firstElemButton.dataset.name;
+        const locationId = firstElemButton.dataset.locationId;
+        zoomToLocationMap(locationName,locationId,firstElemButton);
+    }
+}
+
 function mapToFirst(elementId,fromSearch) {
     if (lookupMarker) lookupMarker.remove();
     if (airportMarker) airportMarker.remove();
@@ -152,10 +168,4 @@ function mapToFirst(elementId,fromSearch) {
             zoomToLocationMap(locationName,locationId,firstElemButton);
         }
     }
-}
-
-function setMapToFirstSearch() {
-    mapToFirst("searchResultButtonHeader-0",true);
-    document.getElementById('searchButton').innerHTML = 'Search';
-    document.getElementById('searchButton').disabled = false;
 }

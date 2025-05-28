@@ -25,7 +25,7 @@
                 hx-get="/saved"
                 hx-target="#tabContent"
                 hx-on::before-request="activate(this)"
-                hx-on::after-request="mapToFirst('location-display-0',false)"
+                hx-on::after-request="mapToFirstLocation(false)"
                 hx-swap="innerHTML">
             Saved
         </a>

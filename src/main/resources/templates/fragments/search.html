@@ -24,7 +24,7 @@
                 hx-target="#resultContainer"
                 hx-swap="innerHTML"
                 hx-on::before-request="resetMapOnSearch()"
-                hx-on::after-request="setMapToFirstSearch()">Search</button>
+                hx-on::after-request="mapToFirstLocation(true)">Search</button>
     </div>
     <div id="geotag" class="m-2 fw-lighter">Lookup powered by
         <a
