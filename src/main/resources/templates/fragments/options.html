@@ -16,10 +16,11 @@
 
 <!--AIRPORT OPTION DISPLAY-->
 <option th:fragment="limited-iata-code-list"
-        th:each="airportDisplay,iter : ${airportList}"
-        th:name="${airportDisplay.iata}"
-        th:value="${airportDisplay.iata}"
-        th:text="${airportDisplay.name}"></option>
+        th:each="airport,iter : ${airportList}"
+        th:name="${airport.iata}"
+        th:value="${airport.iata}"
+        th:disabled="${pinnedCodeList}?${#lists.contains(pinnedCodeList, airport.iata)}"
+        th:text="${airport.name}"></option>
 
 <!--ALL LOCATION OPTIONS-->
 <option th:fragment="saved-location-list"

@@ -122,23 +122,6 @@ public class MainController {
         return "fragments/form :: non-delta-airport-not-trips";
     }
 
-    @GetMapping("/nearby-airports")
-    @Cacheable("nearbyAirportsCache")
-    public String nearbyAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude,
-                                 @RequestParam(AIRPORT_FILTER_PARAM_NAME) AirportFilter airportFilter,
-                                 @ModelAttribute AirportCodes airportCodes) {
-        LOGGER.debug("nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude);
-        List<Airport> nearbyAirports = new ArrayList<>();
-        switch (airportFilter) {
-            case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,Airline.DELTA));
-            case CIVIL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.CIVIL));
-            case MILITARY -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.MILITARY));
-            case ALL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.CIVIL));
-        }
-        model.addAttribute("airportList",nearbyAirports);
-        return "fragments/options :: limited-iata-code-list";
-    }
-
     @GetMapping("/search")
     public Collection<ModelAndView> search(Model model, @ModelAttribute(SEARCH_TEXT_ATTRIBUTE_NAME) String searchText)  {
         long beforeSearch = System.currentTimeMillis();

@@ -38,7 +38,6 @@
           name="airportCodes"
           th:object="${airportCodes}"></form>
     <datalist id="filtered-list-" th:attrappend="id=${iter.index}"></datalist>
-    <div th:unless="${resultDetails.location}" id="pinned-airports-" th:attrappend="id=${iter.index}"></div>
     <div th:if="${resultDetails.location}" th:id="'saved-pinned-airports-'+${resultDetails.location.id}">
         <div th:each="airport : ${resultDetails.airportList}"
              th:id="'pinned-'+${airport.iata}+'-location-'+${resultDetails.location.id}"
@@ -69,6 +68,7 @@
                 name="airportFilter"
                 style="max-width:150px"
                 hx-get="/nearby-airports"
+                th:hx-include="'#pinned-airport-form-' + ${iter.index}"
                 th:hx-vals="'{&quot;latitude&quot;:'+${resultDetails.resultSearch.latitude}+',&quot;longitude&quot;:'+${resultDetails.resultSearch.longitude}+'}'"
                 th:hx-on::after-request="'setAirportPlaceHolderFromList(\'airport-code-' + ${iter.index} + '\',\'filtered-list-' + ${iter.index} + '\')'"
                 th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iter.index}+'\')'"
