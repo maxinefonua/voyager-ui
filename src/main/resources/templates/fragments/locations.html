@@ -2,8 +2,7 @@
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
 <!--TODO: add pinned airport as parameter -->
 
-
-
+<!--LIST OF SAVED LOCATIONS loaded on SAVED TAB-->
 <div th:fragment="saved-locations"
      id="savedLocations"
      class="accordion list-group">
@@ -52,17 +51,8 @@
         </div>
     </div>
 </div>
-<input th:fragment="airport-details-input"
-       th:if="${airportDisplay}"
-       th:id="${elemId}"
-       th:value="${airportDisplay.iata}"
-       th:data-latitude="${airportDisplay.latitude}"
-       th:data-longitude="${airportDisplay.longitude}"
-       th:data-countryCode="${airportDisplay.countryCode}"
-       th:data-city="${airportDisplay.city}"
-       th:data-subdivision="${airportDisplay.subdivision}"
-       th:data-distance="${airportDisplay.subdivision}"
->
+
+<!--LIST OF SAVED LOCATIONS loaded on call to LOOKUP ENDPOINT-->
 <option th:fragment="saved-locations-options"
         th:each="locationDisplay,iter : ${locations}"
         th:text="${locationDisplay.name} + ', ' + ${locationDisplay.subdivision} + ' | ' + ${locationDisplay.countryCode}"

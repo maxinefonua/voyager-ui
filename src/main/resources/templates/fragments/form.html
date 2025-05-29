@@ -1,5 +1,7 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html"
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
+
+<!--TODO: verify unnecessary-->
 <div th:fragment="airport-form-initial(isStart)"
      class="input-group mt-2">
     <select
@@ -37,6 +39,7 @@
     >
 </div>
 
+<!--TODO: verify unnecessary-->
 <form th:fragment="non-delta-airport-not-trips"
       th:if="${nonDeltaAirportList}"
       th:id="'closer-airports-form-'+${iterIndex}"
@@ -60,6 +63,7 @@
     </div>
 </form>
 
+<!--TODO: verify unnecessary-->
 <div th:fragment="non-delta-hidden"
      th:id="${isStart}?'non-delta-start':'non-delta-end'">
     <span class="input-group-text">Closer Airport</span>
@@ -84,8 +88,8 @@
                th:hx-on::after-request="'addNonDeltaAirportToMap(this.value,'+${isStart}+')'"
                th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
     </div>
-</div>
 
+<!--TODO: verify unnecessary-->
 <div th:fragment="non-delta-airport"
      th:id="${isStart}?'non-delta-start':'non-delta-end'"
      th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
@@ -116,6 +120,8 @@
                th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
     </div>
 </div>
+
+<!--TODO: verify use-->
 <form th:fragment="archive-location-display"
       class="container">
     <div class="row justify-content-center">
@@ -131,11 +137,15 @@
         >Unarchive</button>
     </div>
 </form>
+
+<!--BUTTON RETURNED AFTER SUCCESSFUL ARCHIVE SAVED LOCATION-->
 <button th:fragment="archive-location-success"
         class="btn btn-outline-danger col-md-3 col-lg-2"
         disabled>
     Archived
 </button>
+
+<!--ADD NEW LOCATION loaded in SEARCH RESULTS-->
 <form th:fragment="add-location-form"
       class="d-grid gap-2"
       id="input-group-"
@@ -168,9 +178,13 @@
                 disabled></button>
     </div>
 </form>
+
+<!--BUTTON RETURNED AFTER SUCCESSFUL SAVE NEW LOCATION-->
 <button th:fragment="add-form-success"
         class="btn btn-primary col-8 col-lg-2" disabled>Added
 </button>
+
+<!--BUTTON RETURNED AFTER UNSUCCESSFUL SAVE NEW LOCATION-->
 <button th:fragment="add-form-error"
         class="btn btn-danger col-8 col-lg-2" disabled>Error
 </button>
