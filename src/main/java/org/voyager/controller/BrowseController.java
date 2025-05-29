@@ -103,7 +103,7 @@ public class BrowseController {
     @Cacheable("nearbyAirportsCache")
     public String nearbyAirports(Model model, @RequestParam Integer locationId,
                                  @RequestParam(AIRPORT_FILTER_PARAM_NAME) AirportFilter airportFilter) {
-        LOGGER.info("nearbyAirports called with locationId: "+ locationId);
+        LOGGER.debug("nearbyAirports called with locationId: "+ locationId);
         Location location = voyagerService.getLocation(locationId);
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
