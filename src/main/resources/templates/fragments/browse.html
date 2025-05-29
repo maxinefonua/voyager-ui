@@ -34,9 +34,10 @@
 
 <!-- INITIAL AIRPORT FORM TO ADD PINNED AIRPORT -->
 <div th:fragment="airport-form">
-    <form th:id="'pinned-airport-form-' + ${iter.index}"
+    <form th:unless="${resultDetails.location}" th:id="'pinned-airport-form-' + ${iter.index}"
           name="airportCodes"
-          th:object="${airportCodes}"></form>
+          th:object="${airportCodes}">
+    </form>
     <datalist id="filtered-list-" th:attrappend="id=${iter.index}"></datalist>
     <div th:if="${resultDetails.location}" th:id="'saved-pinned-airports-'+${resultDetails.location.id}">
         <div th:each="airport : ${resultDetails.airportList}"
@@ -64,13 +65,30 @@
         </div>
     </div>
     <div class="input-group mb-4">
-        <select class="form-select"
+        <select th:if="${resultDetails.location}"
+                class="form-select"
+                name="airportFilter"
+                style="max-width:150px"
+                hx-get="/nearby-airports-location"
+                th:hx-vals="'{&quot;locationId&quot;:'+${resultDetails.location.id}+'}'"
+                th:hx-on::after-request="'setPlaceholderToEnabledOption(\'airport-code-' + ${iter.index} + '\',\'filtered-list-' + ${iter.index} + '\')'"
+                th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iter.index}+'\')'"
+                th:hx-target="'#filtered-list-'+${iter.index}"
+                hx-trigger="load,change"
+                hx-swap="innerHTML">
+            <option selected value="DELTA">Delta Airports</option>
+            <hr class="dropdown-divider">
+            <option value="ALL">All Civil</option>
+            <option value="MILITARY">Military</option>
+        </select>
+        <select th:unless="${resultDetails.location}"
+                class="form-select"
                 name="airportFilter"
                 style="max-width:150px"
                 hx-get="/nearby-airports"
                 th:hx-include="'#pinned-airport-form-' + ${iter.index}"
                 th:hx-vals="'{&quot;latitude&quot;:'+${resultDetails.resultSearch.latitude}+',&quot;longitude&quot;:'+${resultDetails.resultSearch.longitude}+'}'"
-                th:hx-on::after-request="'setAirportPlaceHolderFromList(\'airport-code-' + ${iter.index} + '\',\'filtered-list-' + ${iter.index} + '\')'"
+                th:hx-on::after-request="'setPlaceholderToEnabledOption(\'airport-code-' + ${iter.index} + '\',\'filtered-list-' + ${iter.index} + '\')'"
                 th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iter.index}+'\')'"
                 th:hx-target="'#filtered-list-'+${iter.index}"
                 hx-trigger="load,change"

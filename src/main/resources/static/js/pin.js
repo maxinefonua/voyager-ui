@@ -16,6 +16,19 @@ function postPinAirport(inputElemId,filteredListElemId){
     }
 }
 
+function setPlaceholderToEnabledOption(inputElemId,filteredListElemId){
+    const inputElem = document.getElementById(inputElemId);
+    const listElem = document.getElementById(filteredListElemId);
+    if (inputElem && listElem && listElem.options) {
+        for (const option of listElem.options){
+            if (!option.disabled) {
+                inputElem.placeholder = 'Click to Select ' + option.value;
+                break;
+            }
+        }
+    }
+}
+
 function postUnpinAirport(inputElemId,filteredListElemId,airportCode){
     const inputElem = document.getElementById(inputElemId);
     const listElem = document.getElementById(filteredListElemId);

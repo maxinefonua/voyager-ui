@@ -1,7 +1,6 @@
 package org.voyager.controller;
 
 import jakarta.validation.Valid;
-import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +94,28 @@ public class BrowseController {
         }
         model.addAttribute("airportList",nearbyAirports);
         model.addAttribute("pinnedCodeList",airportCodes.getCodes());
+        return "fragments/options :: limited-iata-code-list";
+    }
+
+
+
+    @GetMapping("/nearby-airports-location")
+    @Cacheable("nearbyAirportsCache")
+    public String nearbyAirports(Model model, @RequestParam Integer locationId,
+                                 @RequestParam(AIRPORT_FILTER_PARAM_NAME) AirportFilter airportFilter) {
+        LOGGER.info("nearbyAirports called with locationId: "+ locationId);
+        Location location = voyagerService.getLocation(locationId);
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        List<Airport> nearbyAirports = new ArrayList<>();
+        switch (airportFilter) {
+            case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, Airline.DELTA));
+            case CIVIL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, AirportType.CIVIL));
+            case MILITARY -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.MILITARY));
+            case ALL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.CIVIL));
+        }
+        model.addAttribute("airportList",nearbyAirports);
+        model.addAttribute("pinnedCodeList",location.getAirports());
         return "fragments/options :: limited-iata-code-list";
     }
 }
