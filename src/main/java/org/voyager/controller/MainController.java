@@ -5,11 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
-import org.voyager.model.LocationDetails;
-import org.voyager.model.ResultDetails;
+import org.voyager.model.*;
 import org.voyager.model.airport.Airport;
-import org.voyager.model.AirportFilter;
-import org.voyager.model.Airline;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.Source;
@@ -127,9 +124,10 @@ public class MainController {
 
     @GetMapping("/nearby-airports")
     @Cacheable("nearbyAirportsCache")
-    public String nearbyAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam(AIRPORT_FILTER_PARAM_NAME) Optional<String> filterOptional) {
-        LOGGER.debug("nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude + "airportFilterIsPresent: " + filterOptional.isPresent());
-        AirportFilter airportFilter = ValidationUtils.resolveAirportFilterOptional(filterOptional.map(Option::of).orElse(Option.none()));
+    public String nearbyAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude,
+                                 @RequestParam(AIRPORT_FILTER_PARAM_NAME) AirportFilter airportFilter,
+                                 @ModelAttribute AirportCodes airportCodes) {
+        LOGGER.debug("nearbyAirports called with latitude: " + latitude + ", longitude: " + longitude);
         List<Airport> nearbyAirports = new ArrayList<>();
         switch (airportFilter) {
             case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,Airline.DELTA));
