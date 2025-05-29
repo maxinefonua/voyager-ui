@@ -84,7 +84,7 @@ public class BrowseController {
     public String nearbyAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude,
                                  @RequestParam(AIRPORT_FILTER_PARAM_NAME) AirportFilter airportFilter,
                                  @ModelAttribute AirportCodes airportCodes) {
-        LOGGER.info("nearbyAirports called with airportCodes: "+ airportCodes +" latitude: " + latitude + ", longitude: " + longitude);
+        LOGGER.debug("nearbyAirports called with airportCodes: "+ airportCodes +" latitude: " + latitude + ", longitude: " + longitude);
         List<Airport> nearbyAirports = new ArrayList<>();
         switch (airportFilter) {
             case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, Airline.DELTA));
