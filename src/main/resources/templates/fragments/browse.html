@@ -112,10 +112,10 @@
             <option value="ALL">All Civil</option>
             <option value="MILITARY">Military</option>
         </select>
-        <input th:id="'airport-code-'+${resultDetails.location.id}"
+        <input th:oninput="'debouncedAirportInput(this,'+${iter.index}+')'"
+               th:id="'airport-code-'+${resultDetails.location.id}"
                class="form-control"
                type="text" aria-label="Airport"
-               th:oninput="'debouncedAirportInput(this,'+${iter.index}+')'"
                name="airportCode"
                th:list="'filtered-list-'+${resultDetails.location.id}" required>
         <button hx-get="/pin-airport-location"
