@@ -43,3 +43,7 @@ function postUnpinAirport(inputElemId,filteredListElemId,airportCode){
         }
     }
 }
+
+function switchEngage(switchElement) {
+    switchElement.value = !switchElement.value;
+}

@@ -5,22 +5,16 @@ import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.voyager.model.AirportCodes;
 import org.voyager.model.LocationDetails;
+import org.voyager.model.LocationFilter;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.location.Location;
-import org.voyager.model.location.LocationForm;
 import org.voyager.model.location.LocationPatch;
 import org.voyager.model.location.Status;
 import org.voyager.service.VoyagerService;
-import org.voyager.validate.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,16 +28,38 @@ public class SavedController {
 
     @GetMapping("/saved")
     public String getSaved(Model model) {
+//            // TODO: add country details for airports
+//            List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
+//                    .map(iata -> voyagerService.getAirport(iata)).toList());
+//            locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
+//        });
         List<Location> locations = voyagerService.getLocations();
         List<LocationDetails> locationDetailsList = new ArrayList<>();
-        locations.forEach(location-> {
-            // TODO: add country details for airports
+        locations.forEach(location-> { // TODO: add country details for airports
             List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
                     .map(iata -> voyagerService.getAirport(iata)).toList());
             locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
         });
         model.addAttribute("locationDetailsList",locationDetailsList);
+        model.addAttribute("locationFilter",new LocationFilter());
         return "fragments/tab :: saved-tab";
+    }
+
+    @GetMapping("/saved-locations")
+    public String getSavedLocations(Model model,LocationFilter locationFilter) {
+        List<Location> locations = voyagerService.getLocations();
+        if (locationFilter.getFilterArchive()) {
+            locations = locations.stream().filter(location -> !location.getStatus().equals(Status.ARCHIVED)).toList();
+        }
+        List<LocationDetails> locationDetailsList = new ArrayList<>();
+        locations.forEach(location-> { // TODO: add country details for airports
+            List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
+                    .map(iata -> voyagerService.getAirport(iata)).toList());
+            locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
+        });
+        model.addAttribute("locationFilter",locationFilter);
+        model.addAttribute("locationDetailsList",locationDetailsList);
+        return "fragments/locations :: location-details";
     }
 
     @GetMapping("/lookup")
