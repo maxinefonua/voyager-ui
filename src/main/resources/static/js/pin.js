@@ -41,6 +41,22 @@ function postUnpinAirport(inputElemId,filteredListElemId,airportCode){
                 break;
             }
         }
+        if (airportMarker && airportMarker.getPopup() && airportMarker.getPopup().getElement()
+            && airportMarker.getPopup().getElement().querySelector('strong[data-name]')
+            && airportMarker.getPopup().getElement().querySelector('strong[data-name]').dataset.name === airportCode) {
+            airportMarker.remove();
+            airportMarker = null;
+            if (lookupMarker && lookupMarker.getPopup()) {
+                lookupMarker.togglePopup();
+                const popupElement = lookupMarker.getPopup().getElement();
+                if (popupElement && popupElement.querySelector('strong[data-name]')
+                    && popupElement.querySelector('strong[data-name]').dataset.name) {
+                    const elemName = popupElement.querySelector('strong[data-name]').dataset.name;
+                    const locationElem = getLocationElemByName(elemName);
+                    if (locationElem) fitMapToElementBounds(locationElem);
+                }
+            }
+        }
     }
 }
 

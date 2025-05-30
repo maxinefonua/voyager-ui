@@ -46,6 +46,14 @@ function updateLookupMap(resultButtonElem) {
     }
 };
 
+function getLocationElemByName(locationElementName) {
+    const allLocations = document.getElementById('all-locations');
+    if (allLocations && allLocations.options && allLocations.options.namedItem(locationElementName)) {
+        return allLocations.options.namedItem(locationElementName);
+    }
+    return null;
+}
+
 function zoomToLocationMap(locationName,locationId,clickedButtonElem) {
     if (airportMarker) airportMarker.remove();
     if (lookupMarker) lookupMarker.remove();
@@ -101,6 +109,15 @@ function mapFitToTrip() {
     else if (airportStartMarker && airportEndMarker) mapFitBothMarkers(airportStartMarker,airportEndMarker);
     else recenterMap();
 }
+
+function fitMapToElementBounds(locationElem) {
+    const bounds = locationElem.dataset.bounds
+                .split(',')
+                .map(Number.parseFloat)
+                .filter(n => !isNaN(n));
+    map.fitBounds(bounds);
+}
+
 
 function fitMapToElemWithBounds(elem) {
     const bounds = [elem.dataset.boundsWest,elem.dataset.boundsSouth,elem.dataset.boundsEast,elem.dataset.boundsNorth];

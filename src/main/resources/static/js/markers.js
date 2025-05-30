@@ -87,7 +87,7 @@ function addAirportToMap(airportInputElem,isStart) {
 
 function addAirportMarker(airportOptionElem,isDelta) {
     var airportPopup =  new mapboxgl.Popup({ offset: 16 }) // add popups
-              .setHTML(`<strong>${airportOptionElem.value}</strong> <i>${airportOptionElem.dataset.airport}</i>
+              .setHTML(`<strong data-name='${airportOptionElem.value}'>${airportOptionElem.value}</strong> <i>${airportOptionElem.dataset.airport}</i>
                 in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision}
                  of ${airportOptionElem.dataset.country}`);
 
@@ -103,6 +103,7 @@ function addAirportMarker(airportOptionElem,isDelta) {
 }
 
 function addLookupMarker(locationOptionElem,isSaved) {
+    const nameAttribute = 'name';
     var locationPopup =  new mapboxgl.Popup({ offset:
             {
                 'top': [0, 10],    // When popup appears below marker (anchor: 'top')
@@ -116,7 +117,7 @@ function addLookupMarker(locationOptionElem,isSaved) {
                 // Add other anchor positions as needed
               }
         }) // add popups
-              .setHTML(`<strong>${locationOptionElem.dataset.location}</strong>,
+              .setHTML(`<strong data-name='${locationOptionElem.getAttribute(nameAttribute)}'>${locationOptionElem.dataset.location}</strong>,
                <i>${locationOptionElem.dataset.subdivision}</i>
                of ${locationOptionElem.dataset.country}`);
 
