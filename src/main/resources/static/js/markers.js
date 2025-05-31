@@ -167,22 +167,8 @@ function clearMarkers() {
         airportMarker.remove();
         airportMarker = null;
     }
-    if (startMarker) {
-        startMarker.remove();
-        startMarker = null;
-    }
-    if (airportStartMarker) {
-        airportStartMarker.remove();
-        airportStartMarker = null;
-    }
-    if (endMarker) {
-        endMarker.remove();
-        endMarker = null;
-    }
-    if (airportEndMarker) {
-        airportEndMarker.remove();
-        airportEndMarker = null;
-    }
+    clearStartMarkers();
+    clearEndMarkers();
 }
 
 function clearAirportMarkerFitToElemId(marker,elemIdWithBounds) {

@@ -10,6 +10,7 @@ import java.util.List;
 public class Option {
     String display;
     String value;
+    String elementName;
 
     public static List<Option> getFilterOptions(TripFilter tripFilter) {
         switch (tripFilter) {

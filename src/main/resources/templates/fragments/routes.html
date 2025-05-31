@@ -21,6 +21,8 @@
                        hx-target="#select-start"
                        hx-trigger="change"
                        name="tripFilter"
+                       hx-on::after-request="resetTripMap(true)"
+                       th:attr="checked=${selection == 'LOCATION'}?'checked'"
                        value="LOCATION">
                 <label class="form-check-label" for="select-location-filter">By Location</label>
             </div>
@@ -33,16 +35,13 @@
                        hx-target="#select-start"
                        hx-trigger="change"
                        name="tripFilter"
+                       th:attr="checked=${selection == 'AIRPORT'}?'checked'"
+                       hx-on::after-request="resetTripMap(true)"
                        value="AIRPORT">
                 <label class="form-check-label" for="select-airport-filter">By Airport</label>
             </div>
             <div id="select-start" class="mt-4 d-grid">
-                <div class="input-group row" style="margin-left:.0em;">
-                    <select class="form-select" style="max-width:170px" disabled>
-                        <option selected disabled>Select Start</option>
-                    </select>
-                    <input class="form-control" disabled>
-                </div>
+                <div th:replace="~{fragments/routes :: selected-start-locations(selection=${selection},filterList=${filterList},optionList=${optionList})}"></div>
             </div>
         </div>
     </div>
@@ -56,13 +55,13 @@
     <datalist th:if="${selection == 'AIRPORT'}" id="select-start-options">
         <option th:each="option,iter : ${optionList}" th:value="${option.value}" th:text="${option.display}"></option>
     </datalist>
-<!-- TODO: only allow add to map if matches airport filter -->
     <input th:if="${selection == 'AIRPORT'}" class="form-control"
            placeholder="Enter Airport" list="select-start-options"
-           oninput="debouncedAddAirportToMap(this,true)"
-    >
-    <select th:if="${selection == 'LOCATION'}" class="form-control">
-        <option th:each="option,iter : ${optionList}" th:value="${option.value}" th:text="${option.display}"></option>
+           oninput="debouncedAddAirportToMap(this,true)">
+    <select th:if="${selection == 'LOCATION'}" class="form-control"
+            onchange="addTripLocationToMapNew(this.options[this.selectedIndex].dataset.elementName,true)">
+        <option disabled selected>Select Start</option>
+        <option th:each="option,iter : ${optionList}" th:data-element-name="${option.elementName}" th:value="${option.value}" th:text="${option.display}"></option>
     </select>
 </div>
 </html>

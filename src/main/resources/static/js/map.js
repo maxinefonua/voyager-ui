@@ -54,6 +54,46 @@ function getLocationElemByName(locationElementName) {
     return null;
 }
 
+function mapToLocationByElemName(locationElementName) {
+    const allLocations = document.getElementById('all-locations');
+    if (allLocations && allLocations.options && allLocations.options.namedItem(locationElementName)) {
+        const match = allLocations.options.namedItem(locationElementName);
+        fitMapToElementBounds(match);
+    }
+}
+
+function resetTripMap(isStart) {
+    if (isStart) {
+        clearStartMarkers();
+        recenterMap();
+    } else {
+        clearEndMarkers();
+        recenterMap();
+    }
+}
+
+function clearStartMarkers() {
+    if (startMarker) {
+        startMarker.remove();
+        startMarker = null;
+    }
+    if (airportStartMarker) {
+        airportStartMarker.remove();
+        airportStartMarker = null;
+    }
+}
+
+function clearEndMarkers() {
+    if (endMarker) {
+        endMarker.remove();
+        endMarker = null;
+    }
+    if (airportEndMarker) {
+        airportEndMarker.remove();
+        airportEndMarker = null;
+    }
+}
+
 function zoomToLocationMap(locationName,locationId,clickedButtonElem) {
     if (airportMarker) airportMarker.remove();
     if (lookupMarker) lookupMarker.remove();
@@ -73,15 +113,31 @@ function zoomToLocationMap(locationName,locationId,clickedButtonElem) {
     }
 };
 
+function addTripLocationToMapNew(locationElementName,isStart) {
+    if (isStart) {
+        clearStartMarkers();
+        const locationElem = getLocationElemByName(locationElementName);
+        if (locationElem) {
+            startMarker = addLookupMarker(locationElem,true);
+            if (endMarker) mapFitBothMarkers(startMarker,endMarker);
+            else fitMapToElementBounds(locationElem);
+        }
+    } else {
+        clearEndMarkers();
+        const locationElem = getLocationElemByName(locationElementName);
+        if (locationElem) {
+            endMarker = addLookupMarker(locationElem,true);
+            if (startMarker) mapFitBothMarkers(startMarker,endMarker);
+            else fitMapToElementBounds(locationElem);
+        }
+    }
+};
+
 function addTripLocationToMap(optionSelected,isStart) {
     const longitude = optionSelected.dataset.longitude;
     const latitude = optionSelected.dataset.latitude;
     if (isStart) {
-        if (startMarker) startMarker.remove();
-        if (airportStartMarker) {
-            airportStartMarker.remove();
-            airportStartMarker = null;
-        }
+        clearStartMarkers();
         startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
 
         if (endMarker) mapFitBothMarkers(startMarker,endMarker);
@@ -90,11 +146,7 @@ function addTripLocationToMap(optionSelected,isStart) {
         const airportSelectElement = document.getElementById('airport-filter-select-start');
         airportSelectElement.dispatchEvent(new Event('change'));
     } else {
-        if (endMarker) endMarker.remove();
-        if (airportEndMarker) {
-            airportEndMarker.remove();
-            airportEndMarker = null;
-        }
+        clearEndMarkers();
         endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
         if (startMarker) mapFitBothMarkers(startMarker,endMarker);
         else fitMapToElemWithBounds(optionSelected);
@@ -110,8 +162,8 @@ function mapFitToTrip() {
     else recenterMap();
 }
 
-function fitMapToElementBounds(locationElem) {
-    const bounds = locationElem.dataset.bounds
+function fitMapToElementBounds(elementWithBounds) {
+    const bounds = elementWithBounds.dataset.bounds
                 .split(',')
                 .map(Number.parseFloat)
                 .filter(n => !isNaN(n));

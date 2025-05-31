@@ -16,11 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
-import org.voyager.model.result.ResultSearch;
 import org.voyager.model.route.Path;
 import org.voyager.model.route.Route;
 import org.voyager.service.VoyagerService;
-import org.voyager.validate.ValidationUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,9 +27,13 @@ import static org.voyager.utils.ConstantsUI.*;
 
 @Controller
 public class MainController {
+    private static final DefaultPage DEFAULT_PAGE = DefaultPage.TRIPS;
 
     @Autowired
     private VoyagerService voyagerService;
+
+    @Autowired
+    private TripsController tripsController;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
@@ -46,6 +48,11 @@ public class MainController {
         List<Location> locations = voyagerService.getLocations();
         model.addAttribute("locations",locations);
         model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
+        switch (DEFAULT_PAGE) {
+            case TRIPS -> {
+                tripsController.addDefaultAttributes(model);
+            }
+        }
         return "index";
     }
 
@@ -79,14 +86,6 @@ public class MainController {
         List<Location> locationList = voyagerService.getLocations();
         model.addAttribute("locationList",locationList);
         return "fragments/options :: saved-location-list";
-    }
-
-    @GetMapping("/trips")
-    public String getTrips(Model model) {
-        List<Location> locations = voyagerService.getLocations();
-        model.addAttribute("locations",locations);
-        model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
-        return "fragments/tab :: trips-tab";
     }
 
     @GetMapping("/reverse-trip")
