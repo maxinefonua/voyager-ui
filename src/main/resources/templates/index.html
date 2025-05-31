@@ -18,11 +18,16 @@
         <h1 class="p-4">Oh, the Places to Go!</h1>
         <div id="map" style="min-height:200px;width:100%;"></div>
         <div class="container" id="tabMenu">
-            <ul th:replace="~{fragments/tab :: tab-list}"></ul>
+            <ul th:replace="~{fragments/tab :: tab-list(defaultPage=${defaultPage})}"></ul>
         </div>
-        <div class="container" id="tabContent">
+        <div th:if="${#strings.equalsIgnoreCase(defaultPage, 'TRIPS')}" class="container" id="tabContent">
             <div th:replace="~{fragments/tab :: trips-tab}"></div>
         </div>
+        <div th:if="${#strings.equalsIgnoreCase(defaultPage, 'SAVED')}" class="container" id="tabContent">
+            <div th:replace="~{fragments/tab :: saved-tab}"></div>
+        </div>
+        <div th:if="${#strings.equalsIgnoreCase(defaultPage, 'BROWSE')}" class="container" id="tabContent">
+            <div th:replace="~{fragments/tab :: add-tab}"></div>
         </div>
         <div th:replace="~{fragments/footer :: footer}"></div>
     </div>

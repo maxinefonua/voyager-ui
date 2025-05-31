@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.voyager.model.LocationDetails;
 import org.voyager.model.LocationFilter;
+import org.voyager.model.Option;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationPatch;
@@ -26,13 +27,8 @@ public class SavedController {
     @Autowired
     VoyagerService voyagerService;
 
-    @GetMapping("/saved")
-    public String getSaved(Model model) {
+    void addDefaultAttributes(Model model) {
 //            // TODO: add country details for airports
-//            List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
-//                    .map(iata -> voyagerService.getAirport(iata)).toList());
-//            locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
-//        });
         List<Location> locations = voyagerService.getLocations();
         List<LocationDetails> locationDetailsList = new ArrayList<>();
         locations.forEach(location-> { // TODO: add country details for airports
@@ -42,6 +38,11 @@ public class SavedController {
         });
         model.addAttribute("locationDetailsList",locationDetailsList);
         model.addAttribute("locationFilter",new LocationFilter());
+    }
+
+    @GetMapping("/saved")
+    public String getSaved(Model model) {
+        addDefaultAttributes(model);
         return "fragments/tab :: saved-tab";
     }
 

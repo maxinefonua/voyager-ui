@@ -27,13 +27,16 @@ import static org.voyager.utils.ConstantsUI.*;
 
 @Controller
 public class MainController {
-    private static final DefaultPage DEFAULT_PAGE = DefaultPage.TRIPS;
+    private static final DefaultPage DEFAULT_PAGE = DefaultPage.BROWSE;
 
     @Autowired
     private VoyagerService voyagerService;
 
     @Autowired
     private TripsController tripsController;
+
+    @Autowired
+    private SavedController savedController;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
@@ -47,10 +50,14 @@ public class MainController {
     public String homepage(Model model) {
         List<Location> locations = voyagerService.getLocations();
         model.addAttribute("locations",locations);
+        model.addAttribute("defaultPage",DEFAULT_PAGE);
         model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
         switch (DEFAULT_PAGE) {
             case TRIPS -> {
                 tripsController.addDefaultAttributes(model);
+            }
+            case SAVED -> {
+                savedController.addDefaultAttributes(model);
             }
         }
         return "index";
