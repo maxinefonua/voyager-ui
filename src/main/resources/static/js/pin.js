@@ -54,6 +54,10 @@ function postUnpinAirport(inputElemId,filteredListElemId,airportCode){
                     const elemName = popupElement.querySelector('strong[data-name]').dataset.name;
                     const locationElem = getLocationElemByName(elemName);
                     if (locationElem) fitMapToElementBounds(locationElem);
+                    else if (document.getElementById(elemName)) { // from search
+                        const searchButtonElem = document.getElementById(elemName);
+                        fitMapToElementBounds(searchButtonElem);
+                    }
                 }
             }
         }

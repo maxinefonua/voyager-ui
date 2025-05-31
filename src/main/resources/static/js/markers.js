@@ -146,7 +146,7 @@ function addLookupMarkerFromSearch(searchButtonElem) {
                 // Add other anchor positions as needed
               }
         }) // add popups
-              .setHTML(`<strong>${searchButtonElem.dataset.name}</strong>,
+              .setHTML(`<strong data-name='${searchButtonElem.id}'>${searchButtonElem.dataset.name}</strong>,
                <i>${searchButtonElem.dataset.subdivision}</i> |
                 of ${searchButtonElem.dataset.country}`);
     const el = document.createElement('div');
