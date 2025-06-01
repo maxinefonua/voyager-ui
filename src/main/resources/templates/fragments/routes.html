@@ -1,5 +1,6 @@
 <html lang="en"
       xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+
 <!--TRIPS MAIN PAGE-->
 <div th:fragment="trips" class="container">
     <div id="scrollable-content"
@@ -41,38 +42,56 @@
                 <label class="form-check-label" for="select-airport-filter">By Airport</label>
             </div>
             <div id="select-start" class="mt-4 d-grid">
-                <div th:replace="~{fragments/routes :: selected-start-locations(selection=${selection},filterList=${filterList},optionList=${optionList})}"></div>
+                <div th:replace="~{fragments/routes :: start-by-airport(filterList=${filterList},optionList=${optionList})}"></div>
+                <div th:replace="~{fragments/routes :: start-by-location(filterList=${filterList},optionList=${optionList})}"></div>
             </div>
         </div>
     </div>
 </div>
-<!--Select Start Filter and Options-->
-<div th:fragment="selected-start-locations(selection,filterList,optionList)"
+
+<!--Start By Airports Input -->
+<div th:if="${selection == 'AIRPORT'}" th:fragment="start-by-airport(filterList,optionList)"
     class="input-group row" style="margin-left:.0em;">
     <select class="form-select" style="max-width:170px"
             hx-get="/trip-options"
             hx-trigger="change"
             hx-include="#selection"
             hx-swap="innerHTML transition:true"
-            th:hx-on::after-request="'resetMapAndOptionsPostFilter(\'' + ${selection} + '\')'"
+            hx-on::after-request="clearStartMarkers()"
             name="optionFilter"
             hx-target="#select-start-options">
         <option th:each="filter,iter : ${filterList}" th:value="${filter.value}" th:text="${filter.display}"></option>
     </select>
     <input type="hidden" id="selection" name="selection" th:value="${selection}">
-    <datalist th:if="${selection == 'AIRPORT'}" id="select-start-options">
+    <datalist id="select-start-options">
         <option th:each="option,iter : ${optionList}"
                 th:value="${option.value}"
                 th:text="${option.display}"></option>
     </datalist>
-    <input th:if="${selection == 'AIRPORT'}" id="select-start-airport-input"
+    <input id="select-start-airport-input"
            class="form-control"
-           placeholder="Enter Airport" list="select-start-options"
+           placeholder="Enter Start Airport" list="select-start-options"
            oninput="debouncedAddAirportToMap(this,true)">
+</div>
+
+<!--Start By Location Select -->
+<div th:if="${selection == 'LOCATION'}" th:fragment="start-by-location(filterList,optionList)"
+     class="input-group row" style="margin-left:.0em;">
+    <select class="form-select" style="max-width:170px"
+            hx-get="/trip-options"
+            hx-trigger="change"
+            hx-include="#selection"
+            hx-swap="innerHTML transition:true"
+            hx-on::after-request="resetMapAndOptionsPostFilter('LOCATION')"
+            name="optionFilter"
+            hx-target="#select-start-options">
+        <option th:each="filter,iter : ${filterList}" th:value="${filter.value}" th:text="${filter.display}"></option>
+    </select>
+    <input type="hidden" id="selection" name="selection" th:value="${selection}">
     <select th:if="${selection == 'LOCATION'}" class="form-control"
             id="select-start-location-options"
             onchange="addTripLocationToMapNew(this.options[this.selectedIndex].dataset.elementName,true)">
-        <option disabled selected>Select Start</option>
+        <option disabled selected>Select Start Location</option>
         <div id="select-start-options">
             <option th:each="option,iter : ${optionList}"
                     th:data-element-name="${option.elementName}"

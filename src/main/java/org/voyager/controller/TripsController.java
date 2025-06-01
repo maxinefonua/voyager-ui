@@ -3,10 +3,12 @@ package org.voyager.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.Airline;
 import org.voyager.model.AirportFilter;
 import org.voyager.model.Option;
@@ -42,7 +44,16 @@ public class TripsController {
         model.addAttribute("filterList",Option.getFilterOptions(tripFilter));
         model.addAttribute("optionList",getOptionsList(tripFilter));
         model.addAttribute("selection",tripFilter.name());
-        return "fragments/routes :: selected-start-locations";
+        switch (tripFilter) {
+            case LOCATION -> { return "fragments/routes :: start-by-location"; }
+            case AIRPORT -> { return "fragments/routes :: start-by-airport"; }
+            default -> {
+                LOGGER.error(String.format("/from-selection called w %s - but not yet implemented",
+                        tripFilter.name()));
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Internal error fetching from selection options");
+            }
+        }
     }
 
     @GetMapping("/trips")
