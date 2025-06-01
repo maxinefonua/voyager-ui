@@ -27,7 +27,7 @@ import static org.voyager.utils.ConstantsUI.*;
 
 @Controller
 public class MainController {
-    private static final DefaultPage DEFAULT_PAGE = DefaultPage.BROWSE;
+    private static final DefaultPage DEFAULT_PAGE = DefaultPage.TRIPS;
 
     @Autowired
     private VoyagerService voyagerService;

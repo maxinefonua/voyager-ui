@@ -227,3 +227,15 @@ function mapToFirstLocation(fromSearch) {
         }
     }
 }
+
+function resetMapAndOptionsPostFilter(selection) {
+    clearStartMarkers();
+    if (endMarker == null && airportEndMarker == null) recenterMap();
+    if (selection == 'LOCATION') {
+        selectLocationElem = document.getElementById('select-start-location-options');
+        if (selectLocationElem) selectLocationElem.selectedIndex = 0;
+    } else if (selection == 'AIRPORT') {
+        airportInputElem = document.getElementById('select-start-airport-input');
+        if (airportInputElem) airportInputElem.value = '';
+    }
+}

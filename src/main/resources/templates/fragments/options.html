@@ -33,8 +33,13 @@
         th:data-subdivision="${location.subdivision}"
         th:data-country="${location.countryCode}"
         th:data-bounds="${#strings.arrayJoin(
-    #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),
-    ','
-)}"
+            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}"
         th:text="${location.name}"></option>
+
+<!--FILTERED OPTIONS FOR TRIP SELECT-->
+<option th:fragment="trip-select-options"
+        th:each="option,iter : ${optionList}"
+        th:attr="data-element-name=${option.elementName}?${option.elementName}"
+        th:value="${option.value}"
+        th:text="${option.display}"></option>
 </html>

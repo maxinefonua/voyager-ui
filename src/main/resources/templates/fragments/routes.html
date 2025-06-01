@@ -49,19 +49,36 @@
 <!--Select Start Filter and Options-->
 <div th:fragment="selected-start-locations(selection,filterList,optionList)"
     class="input-group row" style="margin-left:.0em;">
-    <select class="form-select" style="max-width:170px">
+    <select class="form-select" style="max-width:170px"
+            hx-get="/trip-options"
+            hx-trigger="change"
+            hx-include="#selection"
+            hx-swap="innerHTML transition:true"
+            th:hx-on::after-request="'resetMapAndOptionsPostFilter(\'' + ${selection} + '\')'"
+            name="optionFilter"
+            hx-target="#select-start-options">
         <option th:each="filter,iter : ${filterList}" th:value="${filter.value}" th:text="${filter.display}"></option>
     </select>
+    <input type="hidden" id="selection" name="selection" th:value="${selection}">
     <datalist th:if="${selection == 'AIRPORT'}" id="select-start-options">
-        <option th:each="option,iter : ${optionList}" th:value="${option.value}" th:text="${option.display}"></option>
+        <option th:each="option,iter : ${optionList}"
+                th:value="${option.value}"
+                th:text="${option.display}"></option>
     </datalist>
-    <input th:if="${selection == 'AIRPORT'}" class="form-control"
+    <input th:if="${selection == 'AIRPORT'}" id="select-start-airport-input"
+           class="form-control"
            placeholder="Enter Airport" list="select-start-options"
            oninput="debouncedAddAirportToMap(this,true)">
     <select th:if="${selection == 'LOCATION'}" class="form-control"
+            id="select-start-location-options"
             onchange="addTripLocationToMapNew(this.options[this.selectedIndex].dataset.elementName,true)">
         <option disabled selected>Select Start</option>
-        <option th:each="option,iter : ${optionList}" th:data-element-name="${option.elementName}" th:value="${option.value}" th:text="${option.display}"></option>
+        <div id="select-start-options">
+            <option th:each="option,iter : ${optionList}"
+                    th:data-element-name="${option.elementName}"
+                    th:value="${option.value}"
+                    th:text="${option.display}"></option>
+        </div>
     </select>
 </div>
 </html>

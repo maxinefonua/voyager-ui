@@ -48,8 +48,10 @@ function addAirportToMap(airportInputElem,isStart) {
             }
             airportInputElem.value = airportInputElem.value.toUpperCase(); // sets IATA value
         }
-    } else {
-        airportInputElem.classList.add('is-invalid');
+    } else { // if input is empty, remove invalid styling
+        if (airportInputElem && (airportInputElem.value == null || airportInputElem.value.trim().length == 0)) {
+            airportInputElem.classList.remove('is-invalid');
+        } else airportInputElem.classList.add('is-invalid');
         if (isStart && airportStartMarker) {
             airportStartMarker.remove();
             airportStartMarker = null;

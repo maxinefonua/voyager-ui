@@ -1,6 +1,5 @@
 package org.voyager.validate;
 
-import io.vavr.control.Option;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.Airline;
 import org.voyager.model.AirportFilter;
 import org.voyager.model.airport.AirportType;
+import org.voyager.model.location.Status;
 
 import java.util.Optional;
 
@@ -45,18 +45,31 @@ public class ValidationUtils {
         return airline;
     }
 
-    public static AirportFilter resolveAirportFilterOptional(Option<String> filterOptional) {
+    public static AirportFilter getAirportFilterElseDefault(String filterString) {
         AirportFilter airportFilter = AirportFilter.ALL;
-        String filterText = filterOptional.getOrElse("");
-        if (StringUtils.isNotEmpty(filterText)) {
+        if (StringUtils.isNotEmpty(filterString)) {
             try {
-                airportFilter = AirportFilter.valueOf(filterText.toUpperCase());
+                airportFilter = AirportFilter.valueOf(filterString.toUpperCase());
             } catch (IllegalArgumentException e) {
-                LOGGER.error(String.format("Cannot resolve given airport filter: %s\nError message: %s",filterText,e.getMessage()),e);
+                LOGGER.error(String.format("Cannot resolve given airport filter: %s\nError message: %s",filterString,e.getMessage()),e);
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                        String.format("Internal error occurred while resolving airport filter: %s",filterText));
+                        String.format("Internal error occurred while resolving airport filter: %s",filterString));
             }
         }
         return airportFilter;
+    }
+
+    public static Status getLocationStatusElseDefault(String filterString) {
+        Status status = Status.SAVED;
+        if (StringUtils.isNotEmpty(filterString)) {
+            try {
+                status = Status.valueOf(filterString.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                LOGGER.error(String.format("Cannot resolve given airport filter: %s\nError message: %s",filterString,e.getMessage()),e);
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        String.format("Internal error occurred while resolving airport filter: %s",filterString));
+            }
+        }
+        return status;
     }
 }
