@@ -113,6 +113,8 @@ function zoomToLocationMap(locationName,locationId,clickedButtonElem) {
     }
 };
 
+
+
 function addTripLocationToMapNew(locationElementName,isStart) {
     if (isStart) {
         clearStartMarkers();
@@ -121,7 +123,7 @@ function addTripLocationToMapNew(locationElementName,isStart) {
             startMarker = addLookupMarker(locationElem,true);
             if (endMarker) mapFitBothMarkers(startMarker,endMarker);
             else fitMapToElementBounds(locationElem);
-        }
+        } else clearStartMarkers();
     } else {
         clearEndMarkers();
         const locationElem = getLocationElemByName(locationElementName);
@@ -129,7 +131,7 @@ function addTripLocationToMapNew(locationElementName,isStart) {
             endMarker = addLookupMarker(locationElem,true);
             if (startMarker) mapFitBothMarkers(startMarker,endMarker);
             else fitMapToElementBounds(locationElem);
-        }
+        } else clearStartMarkers();
     }
 };
 
@@ -228,14 +230,29 @@ function mapToFirstLocation(fromSearch) {
     }
 }
 
+function addSelectedLocationToMap(selectLocationElemId,isStart) {
+    const selectLocationElem = document.getElementById(selectLocationElemId);
+    if (selectLocationElem && selectLocationElem.options && selectLocationElem.options[0]
+        && selectLocationElem.options[0].dataset.elementName) {
+        addTripLocationToMapNew(selectLocationElem.options[0].dataset.elementName,isStart)
+    }
+}
+
 function resetMapAndOptionsPostFilter(selection) {
     clearStartMarkers();
     if (endMarker == null && airportEndMarker == null) recenterMap();
     if (selection == 'LOCATION') {
-        selectLocationElem = document.getElementById('select-start-location-options');
-        if (selectLocationElem) selectLocationElem.selectedIndex = 0;
+        selectLocationElem = document.getElementById('select-start-options');
     } else if (selection == 'AIRPORT') {
         airportInputElem = document.getElementById('select-start-airport-input');
         if (airportInputElem) airportInputElem.value = '';
+    }
+}
+
+function locationSelectSwapped(selectLocationElem,isStart) {
+    if (selectLocationElem && selectLocationElem.options && selectLocationElem.options[0]
+        && selectLocationElem.options[0].dataset.elementName) {
+        addTripLocationToMapNew(selectLocationElem.options[0].dataset.elementName,isStart);
+        selectLocationElem.dispatchEvent(new Event('change'));
     }
 }

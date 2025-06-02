@@ -43,7 +43,7 @@
             </div>
             <div id="select-start" class="mt-4 d-grid">
                 <div th:replace="~{fragments/routes :: start-by-airport(filterList=${filterList},optionList=${optionList})}"></div>
-                <div th:replace="~{fragments/routes :: start-by-location(filterList=${filterList},optionList=${optionList})}"></div>
+                <div th:replace="~{fragments/routes :: start-by-location(filterList=${filterList},optionList=${optionList},airportOptionList=${airportOptionList})}"></div>
             </div>
         </div>
     </div>
@@ -75,29 +75,79 @@
 </div>
 
 <!--Start By Location Select -->
-<div th:if="${selection == 'LOCATION'}" th:fragment="start-by-location(filterList,optionList)"
-     class="input-group row" style="margin-left:.0em;">
-    <select class="form-select" style="max-width:170px"
-            hx-get="/trip-options"
-            hx-trigger="change"
-            hx-include="#selection"
-            hx-swap="innerHTML transition:true"
-            hx-on::after-request="resetMapAndOptionsPostFilter('LOCATION')"
-            name="optionFilter"
-            hx-target="#select-start-options">
-        <option th:each="filter,iter : ${filterList}" th:value="${filter.value}" th:text="${filter.display}"></option>
-    </select>
-    <input type="hidden" id="selection" name="selection" th:value="${selection}">
-    <select th:if="${selection == 'LOCATION'}" class="form-control"
-            id="select-start-location-options"
-            onchange="addTripLocationToMapNew(this.options[this.selectedIndex].dataset.elementName,true)">
-        <option disabled selected>Select Start Location</option>
-        <div id="select-start-options">
+<!--TODO: fetch data-name of first location option to add it to airport after hx request,
+    TODO: use it to populate pinned airports select elem (selected location input) -->
+<div th:if="${selection == 'LOCATION'}" th:fragment="start-by-location(filterList,optionList,airportOptionList)">
+<!--    Select LOCATION -->
+    <div class="input-group row" style="margin-left:.0em;">
+        <select class="form-select" style="max-width:170px"
+                hx-get="/trip-options"
+                hx-trigger="change"
+                hx-include="#selection"
+                hx-swap="innerHTML transition:true"
+                hx-on::after-settle="addSelectedLocationToMap('select-start-options',true)"
+                name="optionFilter"
+                hx-target="#select-start-options">
+            <option th:each="filter,iter : ${filterList}" th:value="${filter.value}" th:text="${filter.display}"></option>
+        </select>
+        <input type="hidden" id="selection" name="selection" th:value="${selection}">
+        <select class="form-control"
+                id="select-start-options"
+                hx-get="/trips/nearby-airports-location"
+                name="locationId"
+                hx-include="#airportFilter"
+                hx-target="#select-start-location-airport-options"
+                hx-trigger="change"
+                hx-swap="outerHTML transition:true"
+                onchange="addTripLocationToMapNew(this.options[this.selectedIndex].dataset.elementName,true)"
+                hx-on::after-swap="locationSelectSwapped(event.detail.target,true)">
+            <option disabled selected value="0">Select Start</option>
             <option th:each="option,iter : ${optionList}"
                     th:data-element-name="${option.elementName}"
                     th:value="${option.value}"
                     th:text="${option.display}"></option>
-        </div>
-    </select>
+        </select>
+    </div>
+<!--    SELECT location AIRPORTS -->
+    <div class="input-group row mt-4" style="margin-left:.0em;">
+        <!--        TODO: change to hx-get with this filter to reload airportOptionList-->
+        <select class="form-select" style="max-width:170px"
+                id="airportFilter"
+                hx-get="/trips/nearby-airports-location"
+                hx-trigger="change"
+                hx-include="#select-start-options"
+                hx-swap="outerHTML transition:true"
+                name="airportFilter"
+                hx-on::after-request="removeAirportMarkerFitToLocationMarker(airportStartMarker,startMarker)"
+                hx-target="#select-start-location-airport-options">
+            <option selected value="PINNED">Pinned Airports</option>
+            <option value="CIVIL">Nearby Civil</option>
+            <option value="DELTA">Nearby Delta</option>
+            <option value="MILITARY">Nearby Military</option>
+        </select>
+        <!--TODO: change to hx-get with this selection to update review section?
+        TODO: this would allow for an hx-get on load to update review?-->
+        <select class="form-control"
+                id="select-airport-code-for-location" required
+                onchange="addAirportFromSelect(this,true)">
+            <div id="select-start-location-airport-options">
+                <option selected disabled>Select Start to Enable</option>
+            </div>
+        </select>
+    </div>
 </div>
+
+<!--SELECT airport options for LOCATION-->
+<div th:fragment="airport-select-options-for-location"
+     id="select-start-location-airport-options">
+    <option th:if="${#lists.isEmpty(optionList)}" selected disabled>Select Start to Enable</option>
+    <div th:unless="${#lists.isEmpty(optionList)}">
+        <option selected disabled>Select Start Airport</option>
+        <option th:each="option,iter : ${optionList}"
+                th:attr="data-element-name=${option.elementName}?${option.elementName}"
+                th:value="${option.value}"
+                th:text="${option.display}"></option>
+    </div>
+</div>
+
 </html>

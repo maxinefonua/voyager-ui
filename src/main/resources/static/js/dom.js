@@ -27,6 +27,33 @@ function swapSelectionsAndInputs(selectStartElemId,selectEndElemId,startIataElem
     }
 }
 
+function addAirportFromSelect(selectElem,isStart) {
+    if (selectElem && selectElem.options && selectElem.options[selectElem.selectedIndex] &&
+        selectElem.options[selectElem.selectedIndex].value) {
+        selectedAirportCode = selectElem.options[selectElem.selectedIndex].value;
+        if (regexIata.test(selectedAirportCode)) {
+            const allAirports = document.getElementById('all-airports');
+            const deltaAirports = document.getElementById('delta-airports');
+            if (allAirports && allAirports.options && allAirports.options.namedItem(selectedAirportCode)) {
+                const airportMatch = allAirports.options.namedItem(selectedAirportCode);
+                const deltaMatch = deltaAirports.options.namedItem(selectedAirportCode);
+                const isDelta = (deltaMatch != null);
+                if (isStart) {
+                    if (airportStartMarker) airportStartMarker.remove();
+                    if (startMarker && startMarker.getPopup()) startMarker.getPopup().remove();
+                    airportStartMarker = addAirportMarker(airportMatch,isDelta);
+                    mapFitBothMarkers(startMarker,airportStartMarker);
+                } else {
+                    if (airportEndMarker) airportEndMarker.remove();
+                    if (endMarker && endMarker.getPopup()) endMarker.getPopup().remove();
+                    airportEndMarker = addAirportMarker(airportMatch,isDelta);
+                    mapFitBothMarkers(endMarker,airportEndMarker);
+                }
+            }
+        }
+    }
+}
+
 function addAirportToMap(airportInputElem,isStart) {
     if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
         const allAirports = document.getElementById('all-airports');
@@ -140,4 +167,12 @@ function reloadTrips(scrollingId) {
     recenterMap();
     const el = document.getElementById(scrollingId);
     if (el) bootstrap.ScrollSpy.getOrCreateInstance(el).refresh();
+}
+
+function reenableThisSelect(selectElem) {
+    if (selectElem && selectElem.options && selectElem.options.length
+        && selectElem.options.length > 1) {
+        selectElem.disabled = false;
+    }
+    selectElem.disabled = true;
 }

@@ -64,6 +64,27 @@ function postUnpinAirport(inputElemId,filteredListElemId,airportCode){
     }
 }
 
+function removeAirportMarkerFitToLocationMarker(removeAirportMarker,locationMarker) {
+    if (removeAirportMarker) {
+        removeAirportMarker.remove();
+        removeAirportMarker = null;
+    }
+    if (locationMarker && locationMarker.getPopup()) {
+        locationMarker.togglePopup();
+        const popupElement = locationMarker.getPopup().getElement();
+        if (popupElement && popupElement.querySelector('strong[data-name]')
+            && popupElement.querySelector('strong[data-name]').dataset.name) {
+            const elemName = popupElement.querySelector('strong[data-name]').dataset.name;
+            const locationElem = getLocationElemByName(elemName);
+            if (locationElem) fitMapToElementBounds(locationElem);
+            else if (document.getElementById(elemName)) { // from search
+                const searchButtonElem = document.getElementById(elemName);
+                fitMapToElementBounds(searchButtonElem);
+            }
+        }
+    }
+}
+
 function switchEngage(switchElement) {
     switchElement.value = !switchElement.value;
 }

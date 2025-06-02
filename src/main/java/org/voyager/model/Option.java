@@ -38,7 +38,6 @@ public class Option {
         List<Option> locationFilters = new ArrayList<>();
         locationFilters.add(Option.builder().display("Saved Locations").value("SAVED").build());
         locationFilters.add(Option.builder().display("Archived").value("ARCHIVED").build());
-        locationFilters.add(Option.builder().display("Add New").value("NEW").build());
         return locationFilters;
     }
 }
