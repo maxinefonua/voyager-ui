@@ -238,15 +238,12 @@ function addSelectedLocationToMap(selectLocationElemId,isStart) {
     }
 }
 
-function resetMapAndOptionsPostFilter(selection) {
-    clearStartMarkers();
-    if (endMarker == null && airportEndMarker == null) recenterMap();
-    if (selection == 'LOCATION') {
-        selectLocationElem = document.getElementById('select-start-options');
-    } else if (selection == 'AIRPORT') {
-        airportInputElem = document.getElementById('select-start-airport-input');
-        if (airportInputElem) airportInputElem.value = '';
-    }
+function resetMapAndAirportInput(airportInputElemId,isStart) {
+    const airportInputElem = document.getElementById(airportInputElemId);
+    if (airportInputElem) airportInputElem.value = '';
+    if (isStart && airportStartMarker) airportStartMarker.remove();
+    else if (!isStart && airportEndMarker) airportEndMarker.remove();
+    recenterMap();
 }
 
 function locationSelectSwapped(selectLocationElem,isStart) {

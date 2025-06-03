@@ -52,8 +52,9 @@ public class TripsController {
         }
     }
 
-    @GetMapping("/from-selection")
-    public String selectFrom(Model model, @RequestParam TripFilter tripFilter) {
+    @GetMapping("/radio-selection")
+    public String selectFrom(Model model, @RequestParam(required = false) TripFilter tripFilterStart, @RequestParam(required = false) TripFilter tripFilterEnd, @RequestParam Boolean isStart) {
+        TripFilter tripFilter = tripFilterStart != null ? tripFilterStart : tripFilterEnd;
         model.addAttribute("filterList",Option.getFilterOptions(tripFilter));
         model.addAttribute("selection",tripFilter.name());
         switch (tripFilter) {
@@ -62,11 +63,12 @@ public class TripsController {
                 return "fragments/routes :: start-by-location";
             }
             case AIRPORT -> {
+                model.addAttribute("isStart",tripFilterStart != null);
                 model.addAttribute("optionList", getDefaultAirportOptionListForInput());
-                return "fragments/routes :: start-by-airport";
+                return "fragments/routes :: by-airport";
             }
             default -> {
-                LOGGER.error(String.format("/from-selection called w %s - but not yet implemented",
+                LOGGER.error(String.format("/radio-selection called w %s - but not yet implemented",
                         tripFilter.name()));
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                         "Internal error fetching from selection options");
