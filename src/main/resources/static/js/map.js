@@ -70,6 +70,7 @@ function resetTripMap(isStart) {
         clearEndMarkers();
         recenterMap();
     }
+    closeTripMarkerPopups();
 }
 
 function clearStartMarkers() {
@@ -120,6 +121,7 @@ function addTripLocationToMapNew(locationElementName,isStart) {
         clearStartMarkers();
         const locationElem = getLocationElemByName(locationElementName);
         if (locationElem) {
+            closeTripMarkerPopups();
             startMarker = addLookupMarker(locationElem,true);
             if (endMarker) mapFitBothMarkers(startMarker,endMarker);
             else fitMapToElementBounds(locationElem);
@@ -128,6 +130,7 @@ function addTripLocationToMapNew(locationElementName,isStart) {
         clearEndMarkers();
         const locationElem = getLocationElemByName(locationElementName);
         if (locationElem) {
+            closeTripMarkerPopups();
             endMarker = addLookupMarker(locationElem,true);
             if (startMarker) mapFitBothMarkers(startMarker,endMarker);
             else fitMapToElementBounds(locationElem);

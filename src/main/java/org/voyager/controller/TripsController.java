@@ -57,10 +57,11 @@ public class TripsController {
         TripFilter tripFilter = tripFilterStart != null ? tripFilterStart : tripFilterEnd;
         model.addAttribute("filterList",Option.getFilterOptions(tripFilter));
         model.addAttribute("selection",tripFilter.name());
+        model.addAttribute("isStart",isStart);
         switch (tripFilter) {
             case LOCATION -> {
                 populateLocationDefaults(model);
-                return "fragments/routes :: start-by-location";
+                return "fragments/routes :: by-location";
             }
             case AIRPORT -> {
                 model.addAttribute("isStart",tripFilterStart != null);
@@ -86,7 +87,7 @@ public class TripsController {
     }
 
     @GetMapping("/trips/nearby-airports-location")
-    public String nearbyAirports(Model model, @RequestParam Integer locationId,
+    public String nearbyAirports(Model model, @RequestParam Integer locationId,@RequestParam Boolean isStart,
                                  @RequestParam(AIRPORT_FILTER_PARAM_NAME) AirportFilter airportFilter) {
         LOGGER.info("nearbyAirports called with locationId: "+ locationId);
         List<Airport> nearbyAirports = new ArrayList<>();
@@ -111,11 +112,12 @@ public class TripsController {
         }
         List<Option> optionList = nearbyAirports.stream().map(airport -> buildAirportOption(airport,true)).toList();
         model.addAttribute("optionList",optionList);
+        model.addAttribute("isStart",isStart);
         return "fragments/routes :: airport-select-options-for-location";
     }
 
     @GetMapping("/trip-options")
-    public String getTripOptions(Model model, TripFilter selection, String optionFilter){
+    public String getTripOptions(Model model, TripFilter selection, String optionFilter, Boolean isStart){
         LOGGER.debug(String.format("/trip-options called with tripfilter selection: %s, optionFilter %s",
                 selection.name(),optionFilter));
         List<Option> optionList = new ArrayList<>();
@@ -137,6 +139,7 @@ public class TripsController {
                 optionList.addAll(getAirportOptionsListForInput(airportFilter));
             }
         }
+        model.addAttribute("isStart",isStart);
         model.addAttribute("optionList",optionList);
         return "fragments/options :: trip-select-options";
     }

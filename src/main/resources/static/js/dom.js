@@ -40,18 +40,30 @@ function addAirportFromSelect(selectElem,isStart) {
                 const isDelta = (deltaMatch != null);
                 if (isStart) {
                     if (airportStartMarker) airportStartMarker.remove();
-                    if (startMarker && startMarker.getPopup()) startMarker.getPopup().remove();
+                    closeTripMarkerPopups();
                     airportStartMarker = addAirportMarker(airportMatch,isDelta);
                     mapFitBothMarkers(startMarker,airportStartMarker);
                 } else {
                     if (airportEndMarker) airportEndMarker.remove();
-                    if (endMarker && endMarker.getPopup()) endMarker.getPopup().remove();
+                    closeTripMarkerPopups();
                     airportEndMarker = addAirportMarker(airportMatch,isDelta);
                     mapFitBothMarkers(endMarker,airportEndMarker);
                 }
             }
         }
     }
+}
+
+function closeTripMarkerPopups() {
+    if (airportStartMarker && airportStartMarker.getPopup()
+        && airportStartMarker.getPopup().isOpen()) airportStartMarker.getPopup().remove();
+    if (startMarker && startMarker.getPopup()
+        && startMarker.getPopup().isOpen()) startMarker.getPopup().remove();
+    if (airportEndMarker && airportEndMarker.getPopup()
+        && airportEndMarker.getPopup().isOpen()) airportEndMarker.getPopup().remove();
+    if (endMarker && endMarker.getPopup()
+        && endMarker.getPopup().isOpen()) endMarker.getPopup().remove();
+
 }
 
 function addAirportToMap(airportInputElem,isStart) {
