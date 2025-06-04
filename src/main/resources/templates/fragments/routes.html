@@ -32,7 +32,41 @@
         <div id="review-summary"
              style="height:200px"
              class="overflow-auto p-2">
-            <div th:replace="~{fragments/routes :: review-path(startLocation=null,nonDeltaStartAirport=null,startAirport=null,endLocation=null,nonDeltaEndAirport=null,endAirport=null)}"></div>
+            <div id="review-path"
+                 class="container text-center">
+                <div class="row justify-content-center">
+                    <div class="col-5">
+                        <figure>
+                            <blockquote class="blockquote" style="font-size:large">
+                                <i th:if="${selection == 'LOCATION'}">Select Start Location</i>
+                                <i th:if="${selection == 'AIRPORT'}">Enter Start Airport</i>
+                            </blockquote>
+                            <figcaption class="blockquote-footer">
+                                <i th:if="${selection == 'LOCATION'}">Select Start Airport</i>
+                                <i th:if="${selection == 'AIRPORT'}">IATA Airport Code</i>
+                            </figcaption>
+                        </figure>
+                    </div>
+                    <button class="vr btn-reverse container" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             viewBox="1.13991 3.51996 122.8 148.6">
+                            <path d="M 59.87 16.15 C 59.87 0.57 58.86 0.32 72.46 10.4 L 97.15 28.53 C 107.48 34.83 109.12 34.05 97.91 43.4 L 69.36 66.17 C 60.75 73.02 60.3 73.76 60.43 62.13 V 46.74 C 40.31 47.99 24.23 51.55 6.19 62.77 C 0.9 67.22 0.5 67.62 1.7 62.38 C 15.6 26.92 51.23 24.79 60.02 25.86 Z M 64 107.2 V 89.08 C 63.75 83.25 62 84.98 58.68 87.29 L 21.37 113.03 C 15.5 117.86 15.5 117.86 21.46 122.11 L 60.51 151.03 C 63.09 152.84 64.02 152.49 64.02 148.67 V 129.26 C 97.53 130.95 112.47 113.44 123.37 94.06 C 124.66 89.3 124.55 89.41 116.75 93.42 C 94.19 105.92 76.32 107.31 64 107.32 Z"/>
+                        </svg>
+                    </button>
+                    <div class="col-5">
+                        <figure>
+                            <blockquote class="blockquote" style="font-size:large">
+                                <i th:if="${selection == 'LOCATION'}">Select End Location</i>
+                                <i th:if="${selection == 'AIRPORT'}">Enter End Airport</i>
+                            </blockquote>
+                            <figcaption class="blockquote-footer">
+                                <i th:if="${selection == 'LOCATION'}">Select End Airport</i>
+                                <i th:if="${selection == 'AIRPORT'}">IATA Airport Code</i>
+                            </figcaption>
+                        </figure>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -62,7 +96,7 @@
                     </div>
                     <span th:text="${nonDeltaStartAirport}?'Delta Check-In: ':'Check-In: '"></span>
                     <strong th:if="${startAirport}" th:text="${startAirport.iata}"></strong>
-                    <i th:if="${startAirport == nulll && tripFilterStart == 'LOCATION'}">Select Start Airport</i>
+                    <i th:if="${startAirport == null && tripFilterStart == 'LOCATION'}">Select Start Airport</i>
                     <i th:if="${startAirport == null && tripFilterStart == 'AIRPORT'}">IATA Airport Code</i>
                 </figcaption>
             </figure>
@@ -104,7 +138,7 @@
             </figure>
         </div>
     </div>
-    <div th:if="${startAirport != null or endAirport != null}" class="row justify-content-center">
+    <div th:if="${startAirport != null && endAirport != null}" class="row justify-content-center">
         <div class="col-5">
             <h5>Delta Route</h5>
             <div class="m-2">
