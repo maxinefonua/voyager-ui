@@ -36,6 +36,8 @@ public class TripsController {
     void addDefaultAttributes(Model model) {
         model.addAttribute("selection",DEFAULT_TRIP_FILTER.name());
         model.addAttribute("filterList",Option.getFilterOptions(DEFAULT_TRIP_FILTER));
+        model.addAttribute("tripFilterStart",DEFAULT_TRIP_FILTER.name());
+        model.addAttribute("tripFilterEnd",DEFAULT_TRIP_FILTER.name());
         if (DEFAULT_TRIP_FILTER.equals(TripFilter.LOCATION)) {
             populateLocationDefaults(model);
         } else if (DEFAULT_TRIP_FILTER.equals(TripFilter.AIRPORT)) {
@@ -50,38 +52,46 @@ public class TripsController {
 
     @GetMapping("/build-path")
     public String buildPath(Model model, Integer startLocationId, Integer endLocationId,
-                            String startAirport, String endAirport) {
+                            String startAirport, String endAirport,
+                            TripFilter tripFilterStart, TripFilter tripFilterEnd) {
         if (startLocationId != null && startLocationId != 0)
             model.addAttribute("startLocation",voyagerService.getLocation(startLocationId));
         if (endLocationId != null && endLocationId != 0)
             model.addAttribute("endLocation",voyagerService.getLocation(endLocationId));
-        if (voyagerService.isValidIataCode(startAirport))
-            model.addAttribute("startAirport",voyagerService.getAirport(startAirport));
-        if (voyagerService.isValidIataCode(endAirport))
-            model.addAttribute("endAirport",voyagerService.getAirport(endAirport));
+        // toUpperCase added to allow firing from airport input (doesn't change to uppercase until after valid match found)
+        if (voyagerService.isValidIataCode(startAirport.toUpperCase()))
+            model.addAttribute("startAirport",voyagerService.getAirport(startAirport.toUpperCase()));
+        if (voyagerService.isValidIataCode(endAirport.toUpperCase()))
+            model.addAttribute("endAirport",voyagerService.getAirport(endAirport.toUpperCase()));
+        model.addAttribute("tripFilterStart",tripFilterStart.name());
+        model.addAttribute("tripFilterEnd",tripFilterEnd.name());
         return "fragments/routes :: review-path";
     }
 
     @GetMapping("/radio-selection")
     public Collection<ModelAndView> selectFrom(Model model,
-                             @RequestParam(required = false) TripFilter tripFilterStart,
-                             @RequestParam(required = false) TripFilter tripFilterEnd,
+                                               TripFilter tripFilterStart, TripFilter tripFilterEnd,
                                                Integer startLocationId, Integer endLocationId,
-                             String startAirport, String endAirport,
-                             @RequestParam Boolean isStart) {
-        TripFilter tripFilter = tripFilterStart != null ? tripFilterStart : tripFilterEnd;
+                                               String startAirport, String endAirport,
+                                               @RequestParam Boolean isStart) {
+        TripFilter tripFilter = isStart ? tripFilterStart : tripFilterEnd;
         model.addAttribute("filterList",Option.getFilterOptions(tripFilter));
         model.addAttribute("selection",tripFilter.name());
         model.addAttribute("isStart",isStart);
 
-        Map<String,Object> reviewPathAttributes = new HashMap<>();
-        if (!isStart && voyagerService.isValidIataCode(startAirport))
-            reviewPathAttributes.put("startAirport",voyagerService.getAirport(startAirport));
-        if (isStart && voyagerService.isValidIataCode(endAirport))
-            reviewPathAttributes.put("endAirport",voyagerService.getAirport(endAirport));
 
-        if (isStart && endLocationId != 0) reviewPathAttributes.put("endLocation",voyagerService.getLocation(endLocationId));
-        else if (!isStart && startLocationId != 0) reviewPathAttributes.put("startLocation",voyagerService.getLocation(startLocationId));
+        Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
+                startAirport,endAirport);
+        if (isStart) {
+            reviewPathAttributes.put("tripFilterStart",tripFilter.name());
+            reviewPathAttributes.remove("startLocation");
+            reviewPathAttributes.remove("startAirport");
+        } else {
+            reviewPathAttributes.put("tripFilterEnd",tripFilter.name());
+            reviewPathAttributes.remove("endLocation");
+            reviewPathAttributes.remove("endAirport");
+        }
+
         switch (tripFilter) {
             case LOCATION -> {
                 populateLocationDefaults(model);
@@ -120,28 +130,12 @@ public class TripsController {
                                  @RequestParam(AIRPORT_FILTER_PARAM_NAME) AirportFilter airportFilter) {
         LOGGER.info("nearbyAirports called with startLocationId: "+ startLocationId + ", endLocationId: " + endLocationId);
 
-        Map<String,Object> reviewPathAttributes = new HashMap<>();
-        Location location = null;
+        Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
+                startAirport,endAirport);
 
-        if (isStart) {
-            if (startLocationId != 0) {
-                location = voyagerService.getLocation(startLocationId);
-                reviewPathAttributes.put("startLocation", location);
-            }
-            if (endLocationId != 0)
-                reviewPathAttributes.put("endLocation",voyagerService.getLocation(endLocationId));
-            if (voyagerService.isValidIataCode(endAirport))
-                reviewPathAttributes.put("endAirport",voyagerService.getAirport(endAirport));
-        } else {
-            if (endLocationId != 0) {
-                location = voyagerService.getLocation(endLocationId);
-                reviewPathAttributes.put("endLocation",location);
-            }
-            if (startLocationId != 0)
-                reviewPathAttributes.put("startLocation", voyagerService.getLocation(startLocationId));
-            if (voyagerService.isValidIataCode(startAirport))
-                reviewPathAttributes.put("startAirport", voyagerService.getAirport(startAirport));
-        }
+        Location location = null;
+        if (isStart) location = voyagerService.getLocation(startLocationId);
+        else location = voyagerService.getLocation(endLocationId);
 
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
@@ -175,20 +169,8 @@ public class TripsController {
         LOGGER.debug(String.format("/trip-options called with tripfilter selection: %s, optionFilter %s",
                 selection.name(),optionFilter));
         List<Option> optionList = new ArrayList<>();
-        Map<String,Object> reviewPathAttributes = new HashMap<>();
-        if (isStart) {
-            if (endLocationId != 0) {
-                reviewPathAttributes.put("endLocation",voyagerService.getLocation(endLocationId));
-                if (voyagerService.isValidIataCode(endAirport))
-                    reviewPathAttributes.put("endAirport",voyagerService.getAirport(endAirport));
-            }
-        } else {
-            if (startLocationId != 0) {
-                reviewPathAttributes.put("startLocation",voyagerService.getLocation(startLocationId));
-                if (voyagerService.isValidIataCode(startAirport))
-                    reviewPathAttributes.put("startAirport",voyagerService.getAirport(startAirport));
-            }
-        }
+        Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
+                startAirport,endAirport);
 
         switch (selection) {
             case LOCATION -> {
@@ -202,11 +184,11 @@ public class TripsController {
                     });
                     if (isStart) {
                         reviewPathAttributes.put("startLocation", first);
-                        reviewPathAttributes.put("startAirport", null);
+                        reviewPathAttributes.remove("startAirport");
                     }
                     else {
                         reviewPathAttributes.put("endLocation",first);
-                        reviewPathAttributes.put("endAirport", null);
+                        reviewPathAttributes.remove("endAirport");
                     }
                 }
                 optionList.addAll(getLocationOptionsList(status));
@@ -302,4 +284,32 @@ public class TripsController {
             airportOptionList.add(buildAirportOption(voyagerService.getAirport(iata),true));
         return airportOptionList;
     }
+
+    private Map<String,Object> populateReviewPathAttributes(Integer startLocationId, Integer endLocationId,
+                                                            String startAirport, String endAirport) {
+        Map<String,Object> reviewPathAttributes = new HashMap<>();
+        if (startLocationId == null) {
+            reviewPathAttributes.put("tripFilterStart", TripFilter.AIRPORT.name());
+        } else {
+            reviewPathAttributes.put("tripFilterStart",TripFilter.LOCATION.name());
+            if (startLocationId != 0)
+                reviewPathAttributes.put("startLocation",voyagerService.getLocation(startLocationId));
+        }
+
+        if (endLocationId == null) {
+            reviewPathAttributes.put("tripFilterEnd",TripFilter.AIRPORT.name());
+        } else {
+            reviewPathAttributes.put("tripFilterEnd",TripFilter.LOCATION.name());
+            if (endLocationId != 0)
+                reviewPathAttributes.put("endLocation",voyagerService.getLocation(endLocationId));
+        }
+
+        if (voyagerService.isValidIataCode(startAirport))
+            reviewPathAttributes.put("startAirport",voyagerService.getAirport(startAirport));
+        if (voyagerService.isValidIataCode(endAirport))
+            reviewPathAttributes.put("endAirport",voyagerService.getAirport(endAirport));
+        return reviewPathAttributes;
+    }
+
+
 }
