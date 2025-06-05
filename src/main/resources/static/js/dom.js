@@ -2,14 +2,41 @@
 
 const regexIata = /^[a-zA-Z]{3}$/;
 
-function reverseTripOnDom() {
+function reverseTripMarkers() {
     // swap start and end markers
-    var tempStart =
-    const startCheckLocation = document.getElementById('select-start-location-check');
-    const startCheckAirport = document.getElementById('select-start-airport-check');
+    var tempStartMarker = startMarker;
+    var tempAirportStartMarker = airportStartMarker;
 
-    const endCheckLocation = document.getElementById('select-end-location-check');
-    const endCheckAirport = document.getElementById('select-end-airport-check');
+    startMarker = endMarker;
+    airportStartMarker = airportEndMarker;
+
+    endMarker = tempStartMarker;
+    airportEndMarker = tempAirportStartMarker;
+    closeTripMarkerPopups();
+    recenterMap();
+}
+
+function deepCopyMarker(marker) {
+    if (marker == null) return marker;
+    const element = marker.getElement().cloneNode(true);
+    const lngLat = marker.getLngLat();
+    const options = {
+        element: element,
+        offset: marker.getOffset(),
+        draggable: marker.isDraggable(),
+        rotation: marker.getRotation(),
+        pitchAlignment: marker.getPitchAlignment(),
+        rotationAlignment: marker.getRotationAlignment()
+    };
+
+    const newMarker = new mapboxgl.Marker(options)
+        .setLngLat(lngLat);
+
+    if (marker.getPopup()) {
+        newMarker.setPopup(new mapboxgl.Popup().setText(marker.getPopup().getText()));
+    }
+
+    return newMarker;
 }
 
 function swapSelectionsAndInputs(selectStartElemId,selectEndElemId,startIataElemId,endIataElemId,startNonDeltaElemId,endNonDeltaElemId) {

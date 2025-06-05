@@ -37,7 +37,8 @@
              style="height:200px"
              class="overflow-auto p-2">
             <div id="review-path" class="container text-center">
-                <div class="row justify-content-center">
+                <div name="from-and-to"
+                        class="row justify-content-center">
                     <div class="col-5">
                         <figure>
                             <blockquote class="blockquote" style="font-size:large">
@@ -70,7 +71,7 @@
                                 #select-end-airport-check,#select-end-location-check,
                                 #select-airport-end-code-for-location,#select-airport-start-code-for-location,
                                 #start-airport-filter,#end-airport-filter"
-                            hx-on::after-request="swapSelectionsAndInputs(`select-start-location`,`select-end-location`,`airport-start-code`,`airport-end-code`,`non-delta-start-code`,`non-delta-end-code`)"
+                            hx-on::after-request="reverseTripMarkers()"
                             th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              viewBox="1.13991 3.51996 122.8 148.6">
@@ -101,7 +102,8 @@
                         </figure>
                     </div>
                 </div>
-                <div th:if="${startAirport != null && endAirport != null}" class="row justify-content-center">
+                <div name="routes"
+                        th:if="${startAirport != null && endAirport != null}" class="row justify-content-center">
                     <div class="col-5">
                         <h5>Delta Route</h5>
                         <div class="m-2">
@@ -176,9 +178,7 @@
                     <i th:if="${tripFilterStart == 'AIRPORT' && startAirport == null && nonDeltaStartAirport == null}">Enter Start Airport</i>
                 </blockquote>
                 <figcaption class="blockquote-footer">
-                    <div th:if="${nonDeltaStartAirport}">
-                        Initial Check-In: <strong th:text="${nonDeltaStartAirport.iata}"></strong>
-                    </div>
+                    <span th:if="${nonDeltaStartAirport}">Initial Check-In: <strong th:text="${nonDeltaStartAirport.iata}"></strong><br></span>
                     <span th:text="${nonDeltaStartAirport}?'Delta Check-In: ':'Check-In: '"></span>
                     <strong th:if="${startAirport}" th:text="${startAirport.iata}"></strong>
                     <i th:if="${startAirport == null && tripFilterStart == 'LOCATION'}">Select Start Airport</i>
@@ -186,7 +186,6 @@
                 </figcaption>
             </figure>
         </div>
-        <!--        TODO: implement reverse flights/trip, needs an API, swap all values, return same review-path -->
         <button class="vr btn-reverse container"
                 hx-get="/reverse-path"
                 hx-target="#review-path"
@@ -197,7 +196,7 @@
                     #select-end-airport-check,#select-end-location-check,
                     #select-airport-end-code-for-location,#select-airport-start-code-for-location,
                     #start-airport-filter,#end-airport-filter"
-                hx-on::after-request="swapSelectionsAndInputs(`select-start-location`,`select-end-location`,`airport-start-code`,`airport-end-code`,`non-delta-start-code`,`non-delta-end-code`)"
+                hx-on::after-request="reverseTripMarkers()"
                 th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
             <svg xmlns="http://www.w3.org/2000/svg"
                  viewBox="1.13991 3.51996 122.8 148.6">

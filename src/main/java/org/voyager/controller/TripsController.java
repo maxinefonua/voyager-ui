@@ -122,10 +122,14 @@ public class TripsController {
         if (endLocationId != null && endLocationId != 0)
             model.addAttribute("endLocation",voyagerService.getLocation(endLocationId));
         // toUpperCase added to allow firing from airport input (doesn't change to uppercase until after valid match found)
-        if (voyagerService.isValidIataCode(startAirport.toUpperCase()))
+        if (voyagerService.isDeltaIataCode(startAirport.toUpperCase()))
             model.addAttribute("startAirport",voyagerService.getAirport(startAirport.toUpperCase()));
-        if (voyagerService.isValidIataCode(endAirport.toUpperCase()))
+        else if (voyagerService.isValidIataCode(startAirport.toUpperCase()))
+            model.addAttribute("nonDeltaStartAirport",voyagerService.getAirport(startAirport.toUpperCase()));
+        if (voyagerService.isDeltaIataCode(endAirport.toUpperCase()))
             model.addAttribute("endAirport",voyagerService.getAirport(endAirport.toUpperCase()));
+        else if (voyagerService.isValidIataCode(endAirport.toUpperCase()))
+            model.addAttribute("nonDeltaEndAirport",voyagerService.getAirport(endAirport.toUpperCase()));
         model.addAttribute("tripFilterStart",tripFilterStart.name());
         model.addAttribute("tripFilterEnd",tripFilterEnd.name());
         return "fragments/routes :: review-path";
@@ -409,10 +413,7 @@ public class TripsController {
                                 location.getName(),location.getSubdivision(), location.getCountryCode()))
                         .value(String.valueOf(location.getId().intValue())).build())
                 .toList();
-        List<Option> airportOptionList = new ArrayList<>();
-        if (!locations.isEmpty()) airportOptionList.addAll(addAirportsFromLocation(locations.get(0)));
         model.addAttribute("optionList",optionList);
-        model.addAttribute("airportOptionList",airportOptionList);
     }
 
     private List<Option> addAirportsFromLocation(Location location) {
