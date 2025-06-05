@@ -276,7 +276,7 @@
             <option th:attr="selected=${locationFilter == null or locationFilter == 'SAVED'}" value="SAVED">Saved Locations</option>
             <option th:attr="selected=${locationFilter != null and locationFilter == 'ARCHIVED'}" value="ARCHIVED">Archived</option>
         </select>
-        <select hx-get="/trips/nearby-airports-location"
+        <select hx-get="/trips/location-selected"
                 th:hx-vals="'{&quot;isStart&quot;:'+${isStart}+'}'"
                 class="form-control"
                 th:id="${isStart}?'select-start-options':'select-end-options'"
@@ -308,11 +308,10 @@
                 name="airportFilter"
                 th:hx-on::after-request="${isStart}?'removeAirportMarkerFitToLocationMarker(airportStartMarker,startMarker)':'removeAirportMarkerFitToLocationMarker(airportEndMarker,endMarker)'"
                 th:hx-target="${isStart}?'#select-start-location-airport-options':'#select-end-location-airport-options'">
-            <option th:attr="selected=${airportFilter == null or airportFilter == 'DELTA'}" value="PINNED">Pinned Airports</option>
+            <option th:attr="selected=${airportFilter == null or airportFilter == 'DELTA'}" value="DELTA">Nearby Delta</option>
+            <option th:attr="selected=${airportFilter != null and airportFilter == 'PINNED_DELTA'}" value="PINNED_DELTA">Pinned Delta</option>
             <hr class="dropdown-divider">
-            <option th:attr="selected=${airportFilter != null and airportFilter == 'CIVIL'}" value="CIVIL">Nearby Civil</option>
-            <option th:attr="selected=${airportFilter != null and airportFilter == 'DELTA'}" value="DELTA">Nearby Delta</option>
-            <option th:attr="selected=${airportFilter != null and airportFilter == 'MILITARY'}" value="DELTA">Nearby Military</option>
+            <option disabled>Additional Airlines Coming Soon</option>
         </select>
         <select class="form-control"
                 hx-get="/build-path"
@@ -332,6 +331,14 @@
             </div>
         </select>
     </div>
+    <div th:id="${isStart}?'nondelta-start-input':'nondelta-end-input'"></div>
+</div>
+
+<!--returning updating NONDELTA-->
+<div th:fragment="nondelta-input(isStart)"
+     th:hx-swap-oob="${isStart}?'outerHTML:#nondelta-start-input':'outerHTML:#nondelta-end-input'"
+     th:id="${isStart}?'nondelta-start-input':'nondelta-end-input'">
+    <span th:text="'NonDelta isStart: ' + ${isStart} + 'swapped in'"></span>
 </div>
 
 <!--UPDATING SELECT airport options for START/END LOCATION-->
