@@ -3,6 +3,7 @@ package org.voyager.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +19,7 @@ import org.voyager.model.location.Status;
 import org.voyager.service.VoyagerService;
 import org.voyager.validate.ValidationUtils;
 
+import javax.xml.crypto.dsig.spec.XSLTTransformParameterSpec;
 import java.util.*;
 
 import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
@@ -34,8 +36,6 @@ public class TripsController {
     private VoyagerService voyagerService;
 
     void addDefaultAttributes(Model model) {
-        model.addAttribute("selection",DEFAULT_TRIP_FILTER.name());
-        model.addAttribute("filterList",Option.getFilterOptions(DEFAULT_TRIP_FILTER));
         model.addAttribute("tripFilterStart",DEFAULT_TRIP_FILTER.name());
         model.addAttribute("tripFilterEnd",DEFAULT_TRIP_FILTER.name());
         if (DEFAULT_TRIP_FILTER.equals(TripFilter.LOCATION)) {
@@ -48,6 +48,69 @@ public class TripsController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal error fetching from selection options");
         }
+    }
+
+    @GetMapping("/reverse-path")
+    @Cacheable("reverseCache")
+    public Collection<ModelAndView> reversePath(Model model, Integer startLocationId, Integer endLocationId,
+                                                String startAirport, String endAirport,
+                                                @RequestParam(name = "airportFilter") List<AirportFilter> airportFilters,
+                                                @RequestParam(name = "locationFilter",required = false) List<Status> locationFilters,
+                                                TripFilter tripFilterStart, TripFilter tripFilterEnd) {
+        ModelAndView reversedPathMav = new ModelAndView(
+                buildPath(model,endLocationId,startLocationId,endAirport,startAirport,tripFilterEnd,tripFilterStart),
+                model.asMap());
+
+        Map<String,Object> startAttributes = new HashMap<>();
+        startAttributes.put("tripFilterStart",tripFilterEnd.name());
+        startAttributes.put("airportFilterStart",airportFilters.get(1).name()); // swapped
+        if (voyagerService.isValidIataCode(endAirport))
+            startAttributes.put("startAirportCode",endAirport);
+        if (tripFilterEnd.equals(TripFilter.LOCATION)) {
+            startAttributes.put("optionList",getLocationOptionsListSelectId(locationFilters.get(locationFilters.size()-1),endLocationId));
+            startAttributes.put("startLocationId", endLocationId);
+            startAttributes.put("locationFilter",locationFilters.get(locationFilters.size()-1).name());
+            if (endLocationId != 0) {
+                Location location = voyagerService.getLocation(endLocationId);
+                List<Airport> airports = getAirports(location,airportFilters.get(1));
+                List<Option> airportOptionList = airports.stream()
+                        .map(airport -> {
+                            if (airport.getIata().equals(endAirport))
+                                return buildAirportOptionForSelect(airport, true);
+                            return buildAirportOption(airport, true);
+                        }).toList();
+                startAttributes.put("airportOptionList",airportOptionList);
+            }
+        }
+        ModelAndView startMav = new ModelAndView(
+                "fragments/routes :: trip-input-start",
+                startAttributes);
+
+        Map<String,Object> endAttributes = new HashMap<>();
+        endAttributes.put("tripFilterEnd",tripFilterStart.name());
+        endAttributes.put("airportFilterEnd",airportFilters.get(0).name()); // swapped
+        if (voyagerService.isValidIataCode(startAirport))
+            endAttributes.put("endAirportCode",startAirport);
+        if (tripFilterStart.equals(TripFilter.LOCATION)) {
+            endAttributes.put("optionList",getLocationOptionsListSelectId(locationFilters.get(0),startLocationId));
+            endAttributes.put("endLocationId", startLocationId);
+            endAttributes.put("locationFilter",locationFilters.get(0).name());
+            if (startLocationId != 0) {
+                Location location = voyagerService.getLocation(startLocationId);
+                List<Airport> airports = getAirports(location,airportFilters.get(0));
+                List<Option> airportOptionList = airports.stream()
+                        .map(airport -> {
+                            if (airport.getIata().equals(startAirport))
+                                return buildAirportOptionForSelect(airport, true);
+                            return buildAirportOption(airport, true);
+                        }).toList();
+                endAttributes.put("airportOptionList",airportOptionList);
+            }
+        }
+        ModelAndView endMav = new ModelAndView(
+                "fragments/routes :: trip-input-end",
+                endAttributes);
+        return List.of(reversedPathMav,startMav,endMav);
     }
 
     @GetMapping("/build-path")
@@ -75,11 +138,8 @@ public class TripsController {
                                                String startAirport, String endAirport,
                                                @RequestParam Boolean isStart) {
         TripFilter tripFilter = isStart ? tripFilterStart : tripFilterEnd;
-        model.addAttribute("filterList",Option.getFilterOptions(tripFilter));
         model.addAttribute("selection",tripFilter.name());
         model.addAttribute("isStart",isStart);
-
-
         Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
                 startAirport,endAirport);
         if (isStart) {
@@ -133,48 +193,105 @@ public class TripsController {
         Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
                 startAirport,endAirport);
 
-        Location location = null;
-        if (isStart) location = voyagerService.getLocation(startLocationId);
-        else location = voyagerService.getLocation(endLocationId);
+        if ((isStart && startLocationId != 0) || (!isStart && endLocationId != 0)) {
+            Location location = null;
+            if (isStart) location = voyagerService.getLocation(startLocationId);
+            else location = voyagerService.getLocation(endLocationId);
 
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
-        List<Airport> nearbyAirports = new ArrayList<>();
-        switch (airportFilter) {
-            case PINNED -> {
-                for (String iata : location.getAirports())
-                    nearbyAirports.add(voyagerService.getAirport(iata));
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            List<Airport> nearbyAirports = new ArrayList<>();
+            switch (airportFilter) {
+                case PINNED -> {
+                    for (String iata : location.getAirports())
+                        nearbyAirports.add(voyagerService.getAirport(iata));
+                }
+                case DELTA ->
+                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, Airline.DELTA));
+                case CIVIL ->
+                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL));
+                case MILITARY ->
+                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.MILITARY));
+                case ALL ->
+                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL));
             }
-            case DELTA ->
-                    nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, Airline.DELTA));
-            case CIVIL ->
-                    nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL));
-            case MILITARY ->
-                    nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.MILITARY));
-            case ALL ->
-                    nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL));
+            List<Option> optionList = nearbyAirports.stream().map(airport -> buildAirportOption(airport, true)).toList();
+            model.addAttribute("optionList", optionList);
         }
-        List<Option> optionList = nearbyAirports.stream().map(airport -> buildAirportOption(airport,true)).toList();
-        model.addAttribute("optionList",optionList);
         model.addAttribute("isStart",isStart);
         return List.of(new ModelAndView("fragments/routes :: airport-select-options-for-location",model.asMap()),
                 new ModelAndView("fragments/routes :: review-path",reviewPathAttributes));
     }
 
+    @GetMapping("/airport-options")
+    public Collection<ModelAndView> getAirportOptions(Model model,
+                                                      Integer startLocationId, Integer endLocationId,
+                                                      String startAirport, String endAirport,
+                                                      AirportFilter airportFilter,
+                                                      Boolean isStart){
+        LOGGER.debug(String.format("/airport-options called with airportFilter %s",
+                airportFilter.name()));
+        List<Option> optionList = new ArrayList<>();
+        Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
+                startAirport,endAirport);
+        optionList.addAll(getAirportOptionsListForInput(airportFilter));
+        model.addAttribute("isStart",isStart);
+        model.addAttribute("optionList",optionList);
+        return List.of(new ModelAndView("fragments/options :: trip-select-options",model.asMap()),
+                new ModelAndView("fragments/routes :: review-path",reviewPathAttributes));
+    }
+
+    @GetMapping("/location-options")
+    public Collection<ModelAndView> getLocationOptions(Model model,
+                                                       Integer startLocationId, Integer endLocationId,
+                                                       String startAirport, String endAirport,
+                                                       Status locationFilter, Boolean isStart){
+        LOGGER.debug(String.format("/location-options called with locationFilter: %s",
+                locationFilter));
+        Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
+                startAirport,endAirport);
+
+        List<Location> locationList = voyagerService.getLocations(locationFilter);
+        List<Option> airportOptionList = new ArrayList<>();
+        if (!locationList.isEmpty()) {
+            Location first = locationList.get(0);
+            first.getAirports().forEach(iata -> {
+                airportOptionList.add(buildAirportOption(voyagerService.getAirport(iata),true));
+            });
+            if (isStart) {
+                reviewPathAttributes.put("startLocation", first);
+                reviewPathAttributes.remove("startAirport");
+            } else {
+                reviewPathAttributes.put("endLocation",first);
+                reviewPathAttributes.remove("endAirport");
+            }
+        }
+        model.addAttribute("isStart",isStart);
+        model.addAttribute("optionList",getLocationOptionsList(locationFilter));
+        model.addAttribute("airportOptionList",airportOptionList);
+        return List.of(new ModelAndView("fragments/options :: trip-select-options",model.asMap()),
+                new ModelAndView("fragments/routes :: review-path",reviewPathAttributes));
+    }
+
     @GetMapping("/trip-options")
-    public Collection<ModelAndView> getTripOptions(Model model, TripFilter selection,
+    public Collection<ModelAndView> getTripOptions(Model model,
+                                                   @RequestParam(name = "tripFilterStart") List<TripFilter> tripFilterStartList,
+                                                   @RequestParam(name = "tripFilterEnd") TripFilter tripFilterEndList,
                                                    Integer startLocationId, Integer endLocationId,
                                                    String startAirport, String endAirport,
-                                                   String optionFilter, Boolean isStart){
-        LOGGER.debug(String.format("/trip-options called with tripfilter selection: %s, optionFilter %s",
-                selection.name(),optionFilter));
+                                                   String locationFilter, Boolean isStart){
+        TripFilter selection = null;
+        if (isStart) selection = tripFilterStartList.get(0);
+        else selection = tripFilterStartList.get(1);
+        LOGGER.debug(String.format("/trip-options called with tripfilter selection: %s, locationFilter %s",
+                selection.name(),locationFilter));
         List<Option> optionList = new ArrayList<>();
         Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
                 startAirport,endAirport);
 
         switch (selection) {
             case LOCATION -> {
-                Status status = ValidationUtils.getLocationStatusElseDefault(optionFilter);
+                Status status = ValidationUtils.getLocationStatusElseDefault(locationFilter);
                 List<Location> locationList = voyagerService.getLocations(status);
                 List<Option> airportOptionList = new ArrayList<>();
                 if (!locationList.isEmpty()) {
@@ -194,7 +311,7 @@ public class TripsController {
                 optionList.addAll(getLocationOptionsList(status));
             }
             case AIRPORT -> {
-                AirportFilter airportFilter = ValidationUtils.getAirportFilterElseDefault(optionFilter);
+                AirportFilter airportFilter = ValidationUtils.getAirportFilterElseDefault(locationFilter);
                 optionList.addAll(getAirportOptionsListForInput(airportFilter));
             }
         }
@@ -231,6 +348,14 @@ public class TripsController {
                 .value(airport.getIata()).build();
     }
 
+    private Option buildAirportOptionForSelect(Airport airport, boolean selected) {
+        return Option.builder()
+                .elementName(airport.getIata())
+                .selected(selected)
+                .display(String.format("%s | %s", airport.getIata(), airport.getName()))
+                .value(airport.getIata()).build();
+    }
+
     private List<Option> getLocationOptionsList(Status status) {
         return voyagerService.getLocations(status).stream().map(location -> Option.builder()
                         .elementName(String.format("%s-%s", location.getName(),location.getId()))
@@ -238,6 +363,18 @@ public class TripsController {
                                 location.getSubdivision(),location.getCountryCode()))
                         .value(String.valueOf(location.getId().intValue())).build())
                 .toList();
+    }
+
+    private List<Option> getLocationOptionsListSelectId(Status status,Integer selectId) {
+        return voyagerService.getLocations(status).stream().map(location -> {
+            Option option = Option.builder()
+                    .elementName(String.format("%s-%s", location.getName(), location.getId()))
+                    .display(String.format("%s, %s in %s", location.getName(),
+                            location.getSubdivision(), location.getCountryCode()))
+                    .value(String.valueOf(location.getId().intValue())).build();
+            if (location.getId().equals(selectId)) option.setSelected(true);
+            return option;
+        }).toList();
     }
 
     private List<Option> getDefaultAirportOptionListForInput() {
@@ -311,5 +448,28 @@ public class TripsController {
         return reviewPathAttributes;
     }
 
+    private List<Airport> getAirports(Location location, AirportFilter airportFilter) {
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+        switch (airportFilter) {
+            case PINNED -> {
+                List<Airport> pinnedAirports = new ArrayList<>();
+                for (String iata : location.getAirports())
+                    pinnedAirports.add(voyagerService.getAirport(iata));
+                return pinnedAirports;
+            }
+            case DELTA -> {
+                return voyagerService.nearbyAirports(latitude, longitude, 5, Airline.DELTA);
+            }
+            case CIVIL, ALL -> {
+                    return voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL);
+            }
+            case MILITARY -> {
+                    return voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.MILITARY);
+            }
+            default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    String.format("airportFilter '%s' not yet implemented for fetching with location",airportFilter));
+        }
+    }
 
 }

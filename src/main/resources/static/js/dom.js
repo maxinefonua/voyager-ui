@@ -1,6 +1,17 @@
 // TODO: implement loading data into the DOM https://docs.mapbox.com/help/tutorials/custom-markers-gl-js/?step=4
 
 const regexIata = /^[a-zA-Z]{3}$/;
+
+function reverseTripOnDom() {
+    // swap start and end markers
+    var tempStart =
+    const startCheckLocation = document.getElementById('select-start-location-check');
+    const startCheckAirport = document.getElementById('select-start-airport-check');
+
+    const endCheckLocation = document.getElementById('select-end-location-check');
+    const endCheckAirport = document.getElementById('select-end-airport-check');
+}
+
 function swapSelectionsAndInputs(selectStartElemId,selectEndElemId,startIataElemId,endIataElemId,startNonDeltaElemId,endNonDeltaElemId) {
     const selectStartElem = document.getElementById(selectStartElemId);
     const selectEndElem = document.getElementById(selectEndElemId);
