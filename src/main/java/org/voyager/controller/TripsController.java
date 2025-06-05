@@ -203,32 +203,7 @@ public class TripsController {
             Location location = null;
             if (isStart) location = voyagerService.getLocation(startLocationId);
             else location = voyagerService.getLocation(endLocationId);
-
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            List<Airport> nearbyAirports = new ArrayList<>();
-            switch (airportFilter) {
-                case PINNED_DELTA -> {
-                    for (String iata : location.getAirports()) {
-                        if (voyagerService.isDeltaIataCode(iata))
-                            nearbyAirports.add(voyagerService.getAirport(iata));
-                    }
-                }
-                case PINNED_NONDELTA -> {
-                    for (String iata : location.getAirports()) {
-                        if (!voyagerService.isDeltaIataCode(iata))
-                            nearbyAirports.add(voyagerService.getAirport(iata));
-                    }
-                }
-                case DELTA ->
-                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, Airline.DELTA));
-                case CIVIL ->
-                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL));
-                case MILITARY ->
-                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.MILITARY));
-                case ALL ->
-                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL));
-            }
+            List<Airport> nearbyAirports = getAirports(location,airportFilter);
             List<Option> optionList = nearbyAirports.stream().map(airport -> buildAirportOption(airport, true)).toList();
             model.addAttribute("optionList", optionList);
         }
@@ -252,32 +227,7 @@ public class TripsController {
             Location location = null;
             if (isStart) location = voyagerService.getLocation(startLocationId);
             else location = voyagerService.getLocation(endLocationId);
-
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            List<Airport> nearbyAirports = new ArrayList<>();
-            switch (airportFilter) {
-                case PINNED_DELTA -> {
-                    for (String iata : location.getAirports()) {
-                        if (voyagerService.isDeltaIataCode(iata))
-                            nearbyAirports.add(voyagerService.getAirport(iata));
-                    }
-                }
-                case PINNED_NONDELTA -> {
-                    for (String iata : location.getAirports()) {
-                        if (!voyagerService.isDeltaIataCode(iata))
-                            nearbyAirports.add(voyagerService.getAirport(iata));
-                    }
-                }
-                case DELTA ->
-                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, Airline.DELTA));
-                case CIVIL ->
-                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL));
-                case MILITARY ->
-                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.MILITARY));
-                case ALL ->
-                        nearbyAirports.addAll(voyagerService.nearbyAirports(latitude, longitude, 5, AirportType.CIVIL));
-            }
+            List<Airport> nearbyAirports = getAirports(location,airportFilter);
             List<Option> optionList = nearbyAirports.stream().map(airport -> buildAirportOption(airport, true)).toList();
             model.addAttribute("optionList", optionList);
         }

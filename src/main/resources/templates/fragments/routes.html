@@ -338,6 +338,7 @@
 <div th:fragment="nondelta-input(isStart)"
      th:hx-swap-oob="${isStart}?'outerHTML:#nondelta-start-input':'outerHTML:#nondelta-end-input'"
      th:id="${isStart}?'nondelta-start-input':'nondelta-end-input'">
+    <span>Closer nonDelta Airports exist!</span>
     <span th:text="'NonDelta isStart: ' + ${isStart} + 'swapped in'"></span>
 </div>
 
