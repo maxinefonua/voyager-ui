@@ -358,7 +358,48 @@
             </div>
         </select>
     </div>
-    <div th:replace="~{fragments/routes :: closer-airports(isStart=${isStart},closerAirportOptionList=${closerAirportOptionList},closerFilter=${closerFilter})}"></div>
+    <div name="closerAirportsSection"
+         th:id="${isStart}?'closer-airports-start':'closer-airports-end'"
+         class="input-group row mt-2" style="margin-left:.0em;">
+        <select th:if="${closerAirportOptionList}"
+                class="form-select" style="max-width:170px"
+                th:id="${isStart}?'closer-start-airport-filter':'closer-end-airport-filter'"
+                hx-get="/trips/closer-airports-location"
+                th:hx-vals="'{&quot;isStart&quot;:'+${isStart}+'}'"
+                hx-trigger="change"
+                hx-include="#select-start-options,#select-end-options,
+                #select-airport-end-code-for-location,#select-airport-start-code-for-location,"
+                th:attrappend="hx-include=${isStart}?'#start-airport-filter,#closer-airport-end-code-for-location':'#end-airport-filter,#closer-airport-start-code-for-location'"
+                hx-swap="outerHTML transition:true"
+                name="closerFilter"
+                th:hx-on::after-request="${isStart}?'removeAirportMarkerFitToLocationMarker(airportStartMarker,startMarker)':'removeAirportMarkerFitToLocationMarker(airportEndMarker,endMarker)'"
+                th:hx-target="${isStart}?'#closer-start-location-airport-options':'#closer-end-location-airport-options'">
+            <option th:attr="selected=${closerFilter == null or closerFilter == 'CIVIL'}" value="CIVIL">Closer Airports</option>
+            <option th:attr="selected=${closerFilter != null and closerFilter == 'MILITARY'}" value="MILITARY">Closer Military</option>
+            <option th:attr="selected=${closerFilter != null and closerFilter == 'PINNED_NONDELTA'}" value="PINNED_NONDELTA">Pinned Other</option>
+        </select>
+        <select th:if="${closerAirportOptionList}"
+                class="form-control"
+                hx-get="/build-path"
+                th:id="${isStart}?'closer-airport-start-code-for-location':'closer-airport-end-code-for-location'" required
+                th:name="${isStart}?'closerStartAirport':'closerEndAirport'"
+                hx-include="#select-start-options,#select-end-options,
+                #select-start-airport-check,#select-start-location-check,
+                #select-end-airport-check,#select-end-location-check,
+                #select-airport-start-code-for-location,#select-airport-end-code-for-location,"
+                hx-target="#review-path"
+                th:attrappend="hx-include=${isStart}?'#closer-airport-end-code-for-location':'#closer-airport-start-code-for-location'"
+                th:onchange="'addAirportFromSelect(this,' + ${isStart} + ')'">
+            <div th:id="${isStart}?'closer-start-location-airport-options':'closer-end-location-airport-options'">
+                <option th:if="${#lists.isEmpty(closerAirportOptionList)}" selected disabled>No Closer Airports of Selected Filter</option>
+                <option th:unless="${#lists.isEmpty(closerAirportOptionList)}" selected disabled>Select Closer Airport</option>
+                <option th:each="option,iter : ${closerAirportOptionList}"
+                        th:attr="data-element-name=${option.elementName}?${option.elementName},selected=${option.selected}"
+                        th:value="${option.value}"
+                        th:text="${option.display}"></option>
+            </div>
+        </select>
+    </div>
 </div>
 
 <!--returning updating closer nearby-->
