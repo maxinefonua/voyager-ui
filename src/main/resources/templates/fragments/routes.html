@@ -15,7 +15,7 @@
              class="overflow-auto ps-4 pe-4">
             <div id="trip-input-start">
                 <div th:replace="~{fragments/routes :: radio-trip-selection(isStart=true)}"></div>
-                <div id="select-start" class="mt-4 d-grid">
+                <div id="select-start" class="mt-2 d-grid">
                     <div th:replace="~{fragments/routes :: by-airport(airportFilter=${airportFilterStart},selection=${tripFilterStart},isStart=true,optionList=${optionList})}"></div>
                     <div th:replace="~{fragments/routes :: by-location(airportFilter=${airportFilterStart},locationFilter=${locationFilter},selection=${tripFilterStart},isStart=true,optionList=${optionList},airportOptionList=${airportOptionList},closerAirportOptionList=${closerAirportOptionList},closerFilter=${closerFilter})}"></div>
                 </div>
@@ -26,7 +26,7 @@
              class="overflow-auto ps-4 pe-4">
             <div id="trip-input-end">
                 <div th:replace="~{fragments/routes :: radio-trip-selection(isStart=false)}"></div>
-                <div id="select-end" class="mt-4 d-grid">
+                <div id="select-end" class="mt-2 d-grid">
                     <div th:replace="~{fragments/routes :: by-airport(airportFilter=${airportFilterEnd},selection=${tripFilterEnd},isStart=false,optionList=${optionList})}"></div>
                     <div th:replace="~{fragments/routes :: by-location(airportFilter=${airportFilterEnd},locationFilter=${locationFilter},selection=${tripFilterEnd},isStart=false,optionList=${optionList},airportOptionList=${airportOptionList},closerAirportOptionList=${closerAirportOptionList},closerFilter=${closerFilter})}"></div>
                 </div>
@@ -144,7 +144,7 @@
      hx-swap-oob="outerHTML:#trip-input-start"
      id="trip-input-start">
     <div th:replace="~{fragments/routes :: radio-trip-selection(isStart=true)}"></div>
-    <div id="select-start" class="mt-4 d-grid">
+    <div id="select-start" class="mt-2 d-grid">
         <div th:replace="~{fragments/routes :: by-airport(airportFilter=${airportFilterStart},selection=${tripFilterStart},isStart=true,optionList=${optionList})}"></div>
         <div th:replace="~{fragments/routes :: by-location(airportFilter=${airportFilterStart},locationFilter=${locationFilter},selection=${tripFilterStart},isStart=true,optionList=${optionList},airportOptionList=${airportOptionList},closerAirportOptionList=${closerAirportOptionList},closerFilter=${closerFilter})}"></div>
     </div>
@@ -155,7 +155,7 @@
      hx-swap-oob="outerHTML:#trip-input-end"
      id="trip-input-end">
     <div th:replace="~{fragments/routes :: radio-trip-selection(isStart=false)}"></div>
-    <div id="select-end" class="mt-4 d-grid">
+    <div id="select-end" class="mt-2 d-grid">
         <div th:replace="~{fragments/routes :: by-airport(airportFilter=${airportFilterEnd},selection=${tripFilterEnd},isStart=false,optionList=${optionList})}"></div>
         <div th:replace="~{fragments/routes :: by-location(airportFilter=${airportFilterEnd},locationFilter=${locationFilter},selection=${tripFilterEnd},isStart=false,optionList=${optionList},airportOptionList=${airportOptionList},closerAirportOptionList=${closerAirportOptionList},closerFilter=${closerFilter})}"></div>
     </div>
