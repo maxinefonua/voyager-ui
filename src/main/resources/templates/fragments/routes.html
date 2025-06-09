@@ -217,30 +217,113 @@
         </div>
     </div>
     <div th:if="${startAirport != null && endAirport != null}" class="row justify-content-center">
-        <div class="col-5">
-            <h5>Delta Route</h5>
-            <div class="m-2">
-                <span th:text="${startAirport}?${startAirport.iata}:'?'"></span>
-                <span th:if="${middleAirports}" th:each="iata,iter : ${middleAirports}" th:text="' -> ' + ${iata}"></span>
-                <span th:text="${endAirport}?' -> ' + ${endAirport.iata}:' -> ?'"></span>
+        <h5>Delta Route</h5>
+        <div id="route-update">
+            <div th:each="routeDisplay,iter : ${routeDisplayList}" class="m-2">
+                <button type="button" class="col-sm-3 col-10 btn btn-outline-primary"
+                        data-bs-toggle="collapse"
+                        th:data-bs-target="'#route-info-'+${iter.index}"
+                        aria-expanded="false"
+                        th:aria-controls="'route-info-'+${iter.index}">
+                    <strong th:text="${routeDisplay[0]}"></strong> :
+                    <strong th:text="${routeDisplay[2]}"></strong>
+                </button>
+                <div class="collapse" th:id="'route-info-'+${iter.index}">
+                    <div class="card card-body mt-2">
+                        <div class="float-start">
+                            <span th:utext="'<strong>Origin: </strong>' + ${routeDisplay[1]}"></span>
+                        </div>
+                        <span th:utext="'<strong>Destination: </strong>' + ${routeDisplay[3]}"></span>
+                        <div class="mt-2">
+                            <div class="form-check form-check-reverse float-end">
+                                <button
+                                        type="button"
+                                        class="btn btn-outline-danger">Disable (full flight)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${disabledFlightList}">
+                <h6>Disabled Flights</h6>
+                <div th:each="${disabledRoute,iter : ${disabledFlightList}">
+                    <button type="button" class="col-sm-3 col-10 btn btn-outline-danger"
+                            data-bs-toggle="collapse"
+                            th:data-bs-target="'#disabled-info-'+${iter.index}"
+                            aria-expanded="false"
+                            th:aria-controls="'disabled-info-'+${iter.index}">
+                        <strong th:text="${disabledRoute[0]}"></strong> :
+                        <strong th:text="${disabledRoute[2]}"></strong>
+                    </button>
+                    <div class="collapse" th:id="'disabled-info-'+${iter.index}">
+                        <div class="card card-body mt-2">
+                            <div class="float-start">
+                                <span th:utext="'<strong>Origin: </strong>' + ${disabledRoute[1]}"></span>
+                                <span th:utext="'<strong>Destination: </strong>' + ${disabledRoute[3]}"></span>
+                            </div>
+                            <div class="mt-2">
+                                <div class="float-end">
+                                    <button type="button" class="btn btn-success">Re-enable</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <button class="vr btn-primary container" disabled></button>
-        <div class="col-5">
-            <h5 th:if="${middleAirports}">Allowed Airports</h5>
-            <div th:if="${middleAirports}"
-                 class="hstack gap-5 form-check m-2 justify-content-center">
-                <div>
-                    <input class="form-check-input" type="checkbox" value="" id="start-checked" checked disabled>
-                    <label class="form-check-label" for="checkChecked" th:text="${startAirport.iata}"></label>
+    </div>
+</div>
+
+<!--updating ROUTE-->
+<div id="route-update"
+    hx-swap-oob="outerHTML:#route-update">
+    <div th:each="routeDisplay,iter : ${routeDisplayList}" class="m-2">
+        <button type="button" class="col-sm-3 col-10 btn btn-outline-primary"
+                data-bs-toggle="collapse"
+                th:data-bs-target="'#route-info-'+${iter.index}"
+                aria-expanded="false"
+                th:aria-controls="'route-info-'+${iter.index}">
+            <strong th:text="${routeDisplay[0]}"></strong> :
+            <strong th:text="${routeDisplay[2]}"></strong>
+        </button>
+        <div class="collapse" th:id="'route-info-'+${iter.index}">
+            <div class="card card-body mt-2">
+                <div class="float-start">
+                    <span th:utext="'<strong>Origin: </strong>' + ${routeDisplay[1]}"></span>
+                    <span th:utext="'<strong>Destination: </strong>' + ${routeDisplay[3]}"></span>
                 </div>
-                <div th:each="iata,iter : ${middleAirports}">
-                    <input class="form-check-input" type="checkbox" th:value="${iata}" checked>
-                    <label class="form-check-label" for="checkChecked" th:text="${iata}"></label>
+                <div class="mt-2">
+                    <div class="form-check form-check-reverse float-end">
+                        <button
+                                type="button"
+                                class="btn btn-outline-danger">Disable (full flight)</button>
+                    </div>
                 </div>
-                <div>
-                    <input class="form-check-input" type="checkbox" value="" id="checkChecked" checked disabled>
-                    <label class="form-check-label" for="checkChecked" th:text="${endAirport.iata}"></label>
+            </div>
+        </div>
+    </div>
+    <div th:if="${disabledFlightList}">
+        <h6>Disabled Flights</h6>
+        <div th:each="${disabledRoute,iter : ${disabledFlightList}">
+            <button type="button" class="col-sm-3 col-10 btn btn-outline-danger"
+                    data-bs-toggle="collapse"
+                    th:data-bs-target="'#disabled-info-'+${iter.index}"
+                    aria-expanded="false"
+                    th:aria-controls="'disabled-info-'+${iter.index}">
+                <strong th:text="${disabledRoute[0]}"></strong> :
+                <strong th:text="${disabledRoute[2]}"></strong>
+            </button>
+            <div class="collapse" th:id="'disabled-info-'+${iter.index}">
+                <div class="card card-body mt-2">
+                    <div class="float-start">
+                        <span th:utext="'<strong>Origin: </strong>' + ${disabledRoute[1]}"></span>
+                        <span th:utext="'<strong>Destination: </strong>' + ${disabledRoute[3]}"></span>
+                    </div>
+                    <div class="mt-2">
+                        <div class="float-end">
+                            <button type="button" class="btn btn-success">Re-enable</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

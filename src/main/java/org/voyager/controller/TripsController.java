@@ -16,6 +16,8 @@ import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.Status;
+import org.voyager.model.route.Path;
+import org.voyager.model.route.Route;
 import org.voyager.service.VoyagerService;
 
 import java.util.*;
@@ -47,6 +49,12 @@ public class TripsController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Internal error fetching from selection options");
         }
+    }
+
+    // TODO: implement disable route endpoint
+    @GetMapping("/disable-route")
+    public String disableRoute(String startAirport, String endAirport, String routeId) {
+        return "";
     }
 
     @GetMapping("/reverse-path")
@@ -85,7 +93,9 @@ public class TripsController {
     public String buildPath(Model model, Integer startLocationId, Integer endLocationId,
                             String startAirport, String endAirport,
                             String closerStartAirport, String closerEndAirport) {
-        model.addAllAttributes(populateReviewPathAttributes(startLocationId,endLocationId,startAirport,endAirport,closerStartAirport,closerEndAirport));
+        Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,startAirport,endAirport,closerStartAirport,closerEndAirport);
+        populateDeltaRoute(reviewPathAttributes,startAirport,endAirport);
+        model.addAllAttributes(reviewPathAttributes);
         return "fragments/routes :: review-path";
     }
 
@@ -149,8 +159,6 @@ public class TripsController {
                                                  String closerStartAirport, String closerEndAirport,
                                                  @RequestParam Boolean isStart) {
         LOGGER.debug("airportInput called with startAirportCode: "+ startAirportCode + ", endAirportCode: " + endAirportCode);
-        // returns updated input section
-
         String airportCode = null;
         String nonDeltaCode = null;
         AirportFilter closerFilter = null;
@@ -195,6 +203,7 @@ public class TripsController {
 
         Map<String,Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId,endLocationId,
                 startAirport,endAirport,closerStartAirport,closerEndAirport);
+        populateDeltaRoute(reviewPathAttributes,startAirport,endAirport);
 
         return List.of(
                 new ModelAndView("fragments/routes :: update-airport-input",model.asMap()),
@@ -579,10 +588,17 @@ public class TripsController {
                 reviewPathAttributes.put("endLocation",voyagerService.getLocation(endLocationId));
         }
 
-        if (voyagerService.isDeltaIataCode(startAirport))
-            reviewPathAttributes.put("startAirport",voyagerService.getAirport(startAirport));
-        if (voyagerService.isDeltaIataCode(endAirport))
-            reviewPathAttributes.put("endAirport",voyagerService.getAirport(endAirport));
+        Airport deltaStart = null;
+        Airport deltaEnd = null;
+
+        if (voyagerService.isDeltaIataCode(startAirport)) {
+            deltaStart = voyagerService.getAirport(startAirport);
+            reviewPathAttributes.put("startAirport", deltaStart);
+        }
+        if (voyagerService.isDeltaIataCode(endAirport)) {
+            deltaEnd = voyagerService.getAirport(endAirport);
+            reviewPathAttributes.put("endAirport", deltaEnd);
+        }
         if (voyagerService.isValidIataCode(closerStartAirport))
             reviewPathAttributes.put("nonDeltaStartAirport",voyagerService.getAirport(closerStartAirport));
         if (voyagerService.isValidIataCode(closerEndAirport))
@@ -650,6 +666,24 @@ public class TripsController {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                         String.format("airportFilter '%s' not yet implemented for fetching with location",airportFilter));
             }
+        }
+    }
+
+    private void populateDeltaRoute(Map<String,Object> reviewPathAttributes,
+                                    String startAirport,String endAirport) {
+        String deltaStart = null;
+        String deltaEnd = null;
+        if (voyagerService.isDeltaIataCode(startAirport)) deltaStart = startAirport;
+        if (voyagerService.isDeltaIataCode(endAirport)) deltaEnd = endAirport;
+        if (deltaStart != null && deltaEnd != null) {
+            List<String[]> routeDisplayList = new ArrayList<>();
+            Path path = voyagerService.getPath(deltaStart,deltaEnd);
+            for (Route route : path.getRouteList()) {
+                Airport origin = voyagerService.getAirport(route.getOrigin());
+                Airport destination = voyagerService.getAirport(route.getDestination());
+                routeDisplayList.add(new String[]{origin.getIata(),origin.getName(),destination.getIata(),destination.getName()});
+            }
+            reviewPathAttributes.put("routeDisplayList",routeDisplayList);
         }
     }
 }
