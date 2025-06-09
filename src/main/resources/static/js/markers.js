@@ -4,8 +4,10 @@ var lookupMarker = null;
 var airportMarker = null;
 var startMarker = null;
 var airportStartMarker = null;
+var nonDeltaStartMarker = null;
 var endMarker = null;
 var airportEndMarker = null;
+var nonDeltaEndMarker = null;
 
 function setAirportPlaceHolder(iterIndex) {
     if (airportMarker) airportMarker.remove();
@@ -58,19 +60,38 @@ function addAirportToMap(airportInputElem,isStart) {
         const allAirports = document.getElementById('all-airports');
         const deltaAirports = document.getElementById('delta-airports');
         if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
+            airportInputElem.classList.remove('is-invalid');
             const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
             const deltaMatch = deltaAirports.options.namedItem(airportInputElem.value.toUpperCase());
             const isDelta = (deltaMatch != null);
             if (isStart) {
-                if (airportStartMarker) airportStartMarker.remove();
-                airportStartMarker = addAirportMarker(airportMatch,isDelta);
-                airportInputElem.classList.remove('is-invalid');
-                mapFitBothMarkers(startMarker,airportStartMarker);
+                if (isDelta) {
+                    if (airportStartMarker) airportStartMarker.remove();
+                    airportStartMarker = addAirportMarker(airportMatch,isDelta);
+                    if (startMarker) mapFitBothMarkers(startMarker,airportStartMarker);
+                    else if (nonDeltaStartMarker) mapFitBothMarkers(nonDeltaStartMarker,airportStartMarker);
+                    else centerMapOnMarker(airportStartMarker);
+                } else {
+                    if (nonDeltaStartMarker) nonDeltaStartMarker.remove();
+                    nonDeltaStartMarker = addAirportMarker(airportMatch,isDelta);
+                    if (startMarker) mapFitBothMarkers(startMarker,nonDeltaStartMarker);
+                    else if (airportStartMarker) mapFitBothMarkers(nonDeltaStartMarker,airportStartMarker);
+                    else centerMapOnMarker(nonDeltaStartMarker);
+                }
             } else {
-                if (airportEndMarker) airportEndMarker.remove();
-                airportEndMarker = addAirportMarker(airportMatch,isDelta);
-                airportInputElem.classList.remove('is-invalid');
-                mapFitBothMarkers(endMarker,airportEndMarker);
+                if (isDelta) {
+                    if (airportEndMarker) airportEndMarker.remove();
+                    airportEndMarker = addAirportMarker(airportMatch,isDelta);
+                    if (endMarker) mapFitBothMarkers(endMarker,airportEndMarker);
+                    else if (nonDeltaEndMarker) mapFitBothMarkers(nonDeltaEndMarker,airportEndMarker);
+                    else centerMapOnMarker(airportEndMarker);
+                } else {
+                    if (nonDeltaEndMarker) nonDeltaEndMarker.remove();
+                    nonDeltaEndMarker = addAirportMarker(airportMatch,isDelta);
+                    if (endMarker) mapFitBothMarkers(endMarker,nonDeltaEndMarker);
+                    else if (airportEndMarker) mapFitBothMarkers(nonDeltaEndMarker,airportEndMarker);
+                    else centerMapOnMarker(nonDeltaEndMarker);
+                }
             }
         }
     } else {
@@ -78,9 +99,13 @@ function addAirportToMap(airportInputElem,isStart) {
         if (isStart && airportStartMarker) {
             airportStartMarker.remove();
             airportStartMarker = null;
+            nonDeltaStartMarker.remove();
+            nonDeltaStartMarker = null;
         } else if (!isStart && airportEndMarker) {
             airportEndMarker.remove();
             airportEndMarker = null;
+            nonDeltaEndMarker.remove();
+            nonDeltaEndMarker = null;
         }
     }
 };
@@ -177,6 +202,48 @@ function clearAirportMarkerFitToElemId(marker,elemIdWithBounds) {
         marker = null;
         const elem = document.getElementById(elemIdWithBounds);
         if (elem) fitMapToElemWithBounds(elem);
+    }
+}
+
+
+function resetTripMap(isStart) {
+    if (isStart) {
+        clearStartMarkers();
+        recenterMap();
+    } else {
+        clearEndMarkers();
+        recenterMap();
+    }
+    closeTripMarkerPopups();
+}
+
+function clearStartMarkers() {
+    if (startMarker) {
+        startMarker.remove();
+        startMarker = null;
+    }
+    if (airportStartMarker) {
+        airportStartMarker.remove();
+        airportStartMarker = null;
+    }
+    if (nonDeltaStartMarker) {
+        nonDeltaStartMarker.remove();
+        nonDeltaStartMarker = null;
+    }
+}
+
+function clearEndMarkers() {
+    if (endMarker) {
+        endMarker.remove();
+        endMarker = null;
+    }
+    if (airportEndMarker) {
+        airportEndMarker.remove();
+        airportEndMarker = null;
+    }
+    if (nonDeltaEndMarker) {
+        nonDeltaEndMarker.remove();
+        nonDeltaEndMarker = null;
     }
 }
 

@@ -64,12 +64,34 @@ function postUnpinAirport(inputElemId,filteredListElemId,airportCode){
     }
 }
 
-function removeAirportMarkerFitToLocationMarker(removeAirportMarker,locationMarker) {
-    if (removeAirportMarker) {
-        removeAirportMarker.remove();
-        removeAirportMarker = null;
+function removeAirportMarker(removeAirportMarker,isStart) {
+    if (removeAirportMarker == null) return;
+    closeTripMarkerPopups();
+    var locationMarker = null;
+    if (isStart) {
+        locationMarker = startMarker;
+        if (nonDeltaStartMarker && nonDeltaStartMarker == removeAirportMarker) {
+            nonDeltaStartMarker.remove();
+            nonDeltaStartMarker = null;
+            if (airportStartMarker) return;
+        } else if (airportStartMarker && airportStartMarker == removeAirportMarker) {
+            airportStartMarker.remove();
+            airportStartMarker = null;
+            if (nonDeltaStartMarker) return;
+        }
+    } else {
+        locationMarker = endMarker;
+        if (nonDeltaEndMarker && nonDeltaEndMarker == removeAirportMarker) {
+            nonDeltaEndMarker.remove();
+            nonDeltaEndMarker = null;
+            if (airportEndMarker) return;
+        } else if (airportEndMarker && airportEndMarker == removeAirportMarker) {
+            airportEndMarker.remove();
+            airportEndMarker = null;
+            if (nonDeltaEndMarker) return;
+        }
     }
-    if (locationMarker && locationMarker.getPopup()) {
+    if (locationMarker) {
         locationMarker.togglePopup();
         const popupElement = locationMarker.getPopup().getElement();
         if (popupElement && popupElement.querySelector('strong[data-name]')

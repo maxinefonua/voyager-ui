@@ -62,39 +62,6 @@ function mapToLocationByElemName(locationElementName) {
     }
 }
 
-function resetTripMap(isStart) {
-    if (isStart) {
-        clearStartMarkers();
-        recenterMap();
-    } else {
-        clearEndMarkers();
-        recenterMap();
-    }
-    closeTripMarkerPopups();
-}
-
-function clearStartMarkers() {
-    if (startMarker) {
-        startMarker.remove();
-        startMarker = null;
-    }
-    if (airportStartMarker) {
-        airportStartMarker.remove();
-        airportStartMarker = null;
-    }
-}
-
-function clearEndMarkers() {
-    if (endMarker) {
-        endMarker.remove();
-        endMarker = null;
-    }
-    if (airportEndMarker) {
-        airportEndMarker.remove();
-        airportEndMarker = null;
-    }
-}
-
 function zoomToLocationMap(locationName,locationId,clickedButtonElem) {
     if (airportMarker) airportMarker.remove();
     if (lookupMarker) lookupMarker.remove();
@@ -244,8 +211,13 @@ function addSelectedLocationToMap(selectLocationElemId,isStart) {
 function resetMapAndAirportInput(airportInputElemId,isStart) {
     const airportInputElem = document.getElementById(airportInputElemId);
     if (airportInputElem) airportInputElem.value = '';
-    if (isStart && airportStartMarker) airportStartMarker.remove();
-    else if (!isStart && airportEndMarker) airportEndMarker.remove();
+    if (isStart) {
+        if (airportStartMarker) airportStartMarker.remove();
+        if (nonDeltaStartMarker) nonDeltaStartMarker.remove();
+    } else {
+        if (airportEndMarker) airportEndMarker.remove();
+        if (nonDeltaEndMarker) nonDeltaEndMarker.remove();
+    }
     recenterMap();
 }
 
