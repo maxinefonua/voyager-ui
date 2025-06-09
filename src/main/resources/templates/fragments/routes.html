@@ -67,8 +67,6 @@
                             hx-swap="innerHTML transition:true"
                             hx-include="#location-filter-start,#location-filter-end,
                                 #select-start-options,#select-end-options,
-                                #select-start-airport-check,#select-start-location-check,
-                                #select-end-airport-check,#select-end-location-check,
                                 #select-airport-end-code-for-location,#select-airport-start-code-for-location,
                                 #closer-airport-end-code-for-location,#closer-airport-start-code-for-location,
                                 #start-airport-filter,#end-airport-filter,
@@ -183,8 +181,6 @@
                 hx-swap="innerHTML transition:true"
                 hx-include="#location-filter-start,#location-filter-end,
                     #select-start-options,#select-end-options,
-                    #select-start-airport-check,#select-start-location-check,
-                    #select-end-airport-check,#select-end-location-check,
                     #select-airport-end-code-for-location,#select-airport-start-code-for-location,
                     #closer-airport-end-code-for-location,#closer-airport-start-code-for-location,
                     #start-airport-filter,#end-airport-filter,
@@ -328,8 +324,6 @@
                 hx-get="/build-path"
                 th:name="${isStart}?'startAirport':'endAirport'"
                 hx-include="#select-start-options,#select-end-options,
-                    #select-start-airport-check,#select-start-location-check,
-                    #select-end-airport-check,#select-end-location-check,
                     #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,"
                 hx-target="#review-path"
                 th:attrappend="hx-include=${isStart}?
@@ -373,8 +367,6 @@
                 th:id="${isStart}?'closer-airport-start-code-for-location':'closer-airport-end-code-for-location'" required
                 th:name="${isStart}?'closerStartAirport':'closerEndAirport'"
                 hx-include="#select-start-options,#select-end-options,
-                #select-start-airport-check,#select-start-location-check,
-                #select-end-airport-check,#select-end-location-check,
                 #select-airport-start-code-for-location,#select-airport-end-code-for-location,"
                 hx-target="#review-path"
                 th:attrappend="hx-include=${isStart}?'#closer-airport-end-code-for-location':'#closer-airport-start-code-for-location'"
@@ -419,8 +411,6 @@
             th:id="${isStart}?'closer-airport-start-code-for-location':'closer-airport-end-code-for-location'" required
             th:name="${isStart}?'closerStartAirport':'closerEndAirport'"
             hx-include="#select-start-options,#select-end-options,
-                #select-start-airport-check,#select-start-location-check,
-                #select-end-airport-check,#select-end-location-check,
                 #select-airport-start-code-for-location,#select-airport-end-code-for-location,"
             hx-target="#review-path"
             th:attrappend="hx-include=${isStart}?'#closer-airport-end-code-for-location':'#closer-airport-start-code-for-location'"
@@ -530,8 +520,6 @@
                     th:id="${isStart}?'select-airport-start-code-for-location':'select-airport-end-code-for-location'" required
                     th:name="${isStart}?'startAirport':'endAirport'"
                     hx-include="#select-start-options,#select-end-options,
-                #select-start-airport-check,#select-start-location-check,
-                #select-end-airport-check,#select-end-location-check,
                 #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,"
                     hx-target="#review-path"
                     th:attrappend="hx-include=${isStart}?'#select-airport-end-code-for-location':'#select-airport-start-code-for-location'"
@@ -569,8 +557,6 @@
                 th:id="${isStart}?'select-airport-start-code-for-location':'select-airport-end-code-for-location'" required
                 th:name="${isStart}?'startAirport':'endAirport'"
                 hx-include="#select-start-options,#select-end-options,
-                #select-start-airport-check,#select-start-location-check,
-                #select-end-airport-check,#select-end-location-check,
                 #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,"
                 hx-target="#review-path"
                 th:attrappend="hx-include=${isStart}?'#select-airport-end-code-for-location':'#select-airport-start-code-for-location'"

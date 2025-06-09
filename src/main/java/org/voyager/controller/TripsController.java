@@ -56,16 +56,23 @@ public class TripsController {
                                                 String closerStartAirport, String closerEndAirport,
                                                 @RequestParam(name = "airportFilter") List<AirportFilter> airportFilters,
                                                 AirportFilter closerFilterStart, AirportFilter closerFilterEnd,
-                                                @RequestParam(name = "locationFilter",required = false) List<Status> locationFilters,
-                                                TripFilter tripFilterStart, TripFilter tripFilterEnd) {
+                                                @RequestParam(name = "locationFilter",required = false) List<Status> locationFilters) {
         ModelAndView reversedPathMav = new ModelAndView(
-                buildPath(model,endLocationId,startLocationId,endAirport,startAirport,closerEndAirport,closerStartAirport,tripFilterEnd,tripFilterStart),
+                buildPath(model,endLocationId,startLocationId,endAirport,startAirport,closerEndAirport,closerStartAirport),
                 model.asMap());
 
         Status locationFilterStart = null;
         Status locationFilterEnd = null;
-        if (tripFilterStart.equals(TripFilter.LOCATION)) locationFilterStart = locationFilters.get(0);
-        if (tripFilterEnd.equals(TripFilter.LOCATION)) locationFilterEnd = locationFilters.get(locationFilters.size()-1);
+        TripFilter tripFilterEnd = null;
+        TripFilter tripFilterStart = null;
+        if (startLocationId != null) {
+            tripFilterStart = TripFilter.LOCATION;
+            locationFilterStart = locationFilters.get(0);
+        } else tripFilterStart = TripFilter.AIRPORT;
+        if (endLocationId != null) {
+            tripFilterEnd = TripFilter.LOCATION;
+            locationFilterEnd = locationFilters.get(locationFilters.size()-1);
+        } else tripFilterEnd = TripFilter.AIRPORT;
 
         ModelAndView startMav = reverseTrip(true,tripFilterEnd,locationFilterEnd,endLocationId,
                 airportFilters.get(airportFilters.size()-1),endAirport,closerFilterEnd,closerEndAirport);
@@ -77,36 +84,8 @@ public class TripsController {
     @GetMapping("/build-path")
     public String buildPath(Model model, Integer startLocationId, Integer endLocationId,
                             String startAirport, String endAirport,
-                            String closerStartAirport, String closerEndAirport,
-                            TripFilter tripFilterStart, TripFilter tripFilterEnd) {
-        // TODO: check if works with populateReviewPathAttributes -> then get rid of tripfilters
-        if (startLocationId != null && startLocationId != 0)
-            model.addAttribute("startLocation",voyagerService.getLocation(startLocationId));
-        if (endLocationId != null && endLocationId != 0)
-            model.addAttribute("endLocation",voyagerService.getLocation(endLocationId));
-        // toUpperCase added to allow firing from airport input (doesn't change to uppercase until after valid match found)
-        if (startAirport != null) {
-            startAirport = startAirport.toUpperCase();
-            if (voyagerService.isDeltaIataCode(startAirport))
-                model.addAttribute("startAirport", voyagerService.getAirport(startAirport.toUpperCase()));
-            else if (voyagerService.isValidIataCode(startAirport))
-                model.addAttribute("nonDeltaStartAirport", voyagerService.getAirport(startAirport.toUpperCase()));
-        }
-        if (endAirport != null) {
-            endAirport = endAirport.toUpperCase();
-            if (voyagerService.isDeltaIataCode(endAirport))
-                model.addAttribute("endAirport",voyagerService.getAirport(endAirport.toUpperCase()));
-            else if (voyagerService.isValidIataCode(endAirport.toUpperCase()))
-                model.addAttribute("nonDeltaEndAirport",voyagerService.getAirport(endAirport.toUpperCase()));
-        }
-
-        if (voyagerService.isValidIataCode(closerStartAirport))
-            model.addAttribute("nonDeltaStartAirport",voyagerService.getAirport(closerStartAirport));
-        if (voyagerService.isValidIataCode(closerEndAirport))
-            model.addAttribute("nonDeltaEndAirport",voyagerService.getAirport(closerEndAirport));
-
-        model.addAttribute("tripFilterStart",tripFilterStart.name());
-        model.addAttribute("tripFilterEnd",tripFilterEnd.name());
+                            String closerStartAirport, String closerEndAirport) {
+        model.addAllAttributes(populateReviewPathAttributes(startLocationId,endLocationId,startAirport,endAirport,closerStartAirport,closerEndAirport));
         return "fragments/routes :: review-path";
     }
 
@@ -570,14 +549,8 @@ public class TripsController {
                                      AirportFilter airportFilter, String airportCode,
                                      AirportFilter closerFilter, String closerAirportCode) {
         Map<String,Object> mavAttributes = new HashMap<>();
-        switch (tripFilter) {
-            case LOCATION -> {
-                addLocationAttributes(mavAttributes,isStart,locationFilter,locationId,airportCode,airportFilter,closerFilter,closerAirportCode);
-            }
-            case AIRPORT -> {
-                addAirportInputAttributes(mavAttributes,airportFilter,airportCode,isStart,closerAirportCode);
-            }
-        }
+        if (locationId != null) addLocationAttributes(mavAttributes,isStart,locationFilter,locationId,airportCode,airportFilter,closerFilter,closerAirportCode);
+        else addAirportInputAttributes(mavAttributes,airportFilter,airportCode,isStart,closerAirportCode);
         mavAttributes.put("isStart", isStart);
         mavAttributes.put("tripFilter", tripFilter.name());
         mavAttributes.put("airportFilter", airportFilter.name());
