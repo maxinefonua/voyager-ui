@@ -1,0 +1,88 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:hx-get="http://www.w3.org/1999/xhtml"
+      xmlns:hx-on="http://www.w3.org/1999/xhtml">
+
+<!--SAVED LOCATION PIN AIRPORT FORM INITIAL -->
+<div th:fragment="pin-airport-form-initial(locationDetail)">
+    <datalist id="filtered-list-" th:attrappend="id=${locationDetail.location.id}"></datalist>
+    <div th:id="'saved-pinned-airports-'+${locationDetail.location.id}">
+        <div th:each="airport : ${locationDetail.airportList}"
+             th:id="'pinned-'+${airport.iata}+'-location-'+${locationDetail.location.id}"
+             class="d-flex input-group justify-content-center mb-2">
+            <button th:attr="onclick='addAirportToMapFromCode(\'' + ${airport.iata} + '\');'"
+                    class="add-airport-button col col-lg-8 btn btn-outline-primary text-truncate input-group-text">
+                <strong th:text="${airport.iata}"></strong>
+                <i th:text="' ' + ${airport.name} + ' '"></i>
+                <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
+            </button>
+            <button hx-get="/unpin-airport-location"
+                    class="col-3 col-lg-1 btn-sm btn btn-secondary"
+                    th:hx-vals="'{&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
+                    th:hx-target="'#pinned-'+${airport.iata}+'-location-'+${locationDetail.location.id}"
+                    hx-swap="outerHTML transition:true"
+                    th:hx-on::after-request="'postUnpinAirport(\'' + 'airport-code-' + ${locationDetail.location.id} + '\',\'' + 'filtered-list-' + ${locationDetail.location.id} + '\', \'' + ${airport.iata} + '\')'"
+                    name="airportCode"
+                    th:value="${airport.iata}"
+            >Unpin</button>
+        </div>
+    </div>
+    <div class="input-group mb-4">
+        <select th:replace="~{fragments/pinned :: select-airport-filter}"></select>
+        <input th:oninput="'debouncedAirportInput(this,'+${locationDetail.location.id}+')'"
+               th:id="'airport-code-'+${locationDetail.location.id}"
+               class="form-control"
+               type="text" aria-label="Airport"
+               name="airportCode"
+               th:list="'filtered-list-'+${locationDetail.location.id}" required>
+        <button hx-get="/pin-airport-location"
+                class="col-2 btn btn-sm btn-outline-secondary"
+                th:hx-include="'#airport-code-'+${locationDetail.location.id}"
+                th:hx-vals="'{&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
+                th:hx-target="'#saved-pinned-airports-'+${locationDetail.location.id}"
+                hx-swap="beforeend transition:true"
+                th:hx-on::after-request="'debouncedPostPinAirport(\'airport-code-' + ${locationDetail.location.id} + '\',\'filtered-list-'+ ${locationDetail.location.id} + '\')'"
+        >Pin</button>
+    </div>
+</div>
+
+<!-- PINNED AIRPORT TO SAVED LOCATION -->
+<div th:fragment="pinned-airport"
+     th:if="${airport}"
+     th:id="'pinned-'+${airport.iata}+'-location-'+${location.id}"
+     class="d-flex input-group justify-content-center mb-2">
+    <button th:attr="onclick='addAirportToMapFromCode(\'' + ${airport.iata} + '\');'"
+            class="col col-lg-8 btn btn-outline-primary text-truncate input-group-text">
+        <strong th:text="${airport.iata}"></strong>
+        <i th:text="' ' + ${airport.name} + ' '"></i>
+        <span th:text="' | ' + ${airport.city} + ', ' + ${airport.subdivision} + ' of ' + ${airport.countryCode}"></span>
+    </button>
+    <button hx-get="/unpin-airport-location"
+            class="col-3 col-lg-1 btn-sm btn btn-secondary"
+            th:hx-vals="'{&quot;locationId&quot;:'+${location.id}+'}'"
+            th:hx-target="'#pinned-'+${airport.iata}+'-location-'+${location.id}"
+            hx-swap="outerHTML transition:true"
+            th:hx-on::after-request="'postUnpinAirport(\'' + 'airport-code-' + ${location.id} + '\',\'' + 'filtered-list-' + ${location.id} + '\', \'' + ${airport.iata} + '\')'"
+            name="airportCode"
+            th:value="${airport.iata}"
+    >Unpin</button>
+</div>
+
+<!--SELECT for AIRPORT FILTER to load FILTERED LIST-->
+<select th:fragment="select-airport-filter"
+        class="form-select"
+        name="airportFilter"
+        style="max-width:150px"
+        hx-get="/nearby-airports-location"
+        th:hx-vals="'{&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
+        th:hx-on::after-request="'setPlaceholderToEnabledOption(\'airport-code-' + ${locationDetail.location.id} + '\',\'filtered-list-' + ${locationDetail.location.id} + '\')'"
+        th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${locationDetail.location.id}+'\')'"
+        th:hx-target="'#filtered-list-'+${locationDetail.location.id}"
+        hx-trigger="load,change"
+        hx-swap="innerHTML">
+    <option selected value="DELTA">Delta Airports</option>
+    <hr class="dropdown-divider">
+    <option value="ALL">All Civil</option>
+    <option value="MILITARY">Military</option>
+</select>
+
+</html>
+

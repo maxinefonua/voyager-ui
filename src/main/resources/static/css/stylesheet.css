@@ -1,0 +1,52 @@
+.btn-reverse:hover:enabled {
+    opacity: 1.0;
+}
+
+.btn-reverse {
+    border: 0px;
+    background: none;
+    transition: all 0.2s;
+    opacity: 0.50;
+}
+
+.btn-reverse:disabled svg path {
+    fill: black;
+    opacity: 0.25;
+    filter: none;
+}
+
+.btn-reverse svg {
+    transform:translate(-17px,-10px);
+    width:30px;
+    height:30px;
+    filter: drop-shadow( 1px 1px 1px rgba(0, 0, 0, .3));
+}
+
+.airport-marker {
+  background-image: url(../images/delta-marker.svg);
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+}
+
+.delta-marker {
+  background-image: url(../images/airport-marker.svg);
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  filter: drop-shadow(rgb(173, 181, 189) 3px 5px 1px);
+}
+
+svg path {
+    fill: #0d6efd
+}
+
+.airport-marker-non-delta {
+  background-image: url(../images/airport-marker.svg);
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 0px;
+}

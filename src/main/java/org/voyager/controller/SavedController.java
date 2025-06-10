@@ -1,0 +1,121 @@
+package org.voyager.controller;
+
+import jakarta.validation.Valid;
+import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.voyager.model.LocationDetails;
+import org.voyager.model.LocationFilter;
+import org.voyager.model.Option;
+import org.voyager.model.airport.Airport;
+import org.voyager.model.location.Location;
+import org.voyager.model.location.LocationPatch;
+import org.voyager.model.location.Status;
+import org.voyager.service.VoyagerService;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
+public class SavedController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SavedController.class);
+
+    @Autowired
+    VoyagerService voyagerService;
+
+    void addDefaultAttributes(Model model) {
+//            // TODO: add country details for airports
+        List<Location> locations = voyagerService.getLocations();
+        List<LocationDetails> locationDetailsList = new ArrayList<>();
+        locations.forEach(location-> { // TODO: add country details for airports
+            List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
+                    .map(iata -> voyagerService.getAirport(iata)).toList());
+            locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
+        });
+        model.addAttribute("locationDetailsList",locationDetailsList);
+        model.addAttribute("locationFilter",new LocationFilter());
+    }
+
+    @GetMapping("/saved")
+    public String getSaved(Model model) {
+        addDefaultAttributes(model);
+        return "fragments/tab :: saved-tab";
+    }
+
+    @GetMapping("/saved-locations")
+    public String getSavedLocations(Model model,LocationFilter locationFilter) {
+        List<Location> locations = voyagerService.getLocations();
+        if (locationFilter.getFilterArchive()) {
+            locations = locations.stream().filter(location -> !location.getStatus().equals(Status.ARCHIVED)).toList();
+        }
+        List<LocationDetails> locationDetailsList = new ArrayList<>();
+        locations.forEach(location-> { // TODO: add country details for airports
+            List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
+                    .map(iata -> voyagerService.getAirport(iata)).toList());
+            locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
+        });
+        model.addAttribute("locationFilter",locationFilter);
+        model.addAttribute("locationDetailsList",locationDetailsList);
+        return "fragments/locations :: location-details";
+    }
+
+    @GetMapping("/lookup")
+    public String getSavedLocationOptions(Model model, @RequestParam Boolean isStart) {
+        List<Location> locations = voyagerService.getLocations();
+        model.addAttribute("locations", locations);
+        model.addAttribute("isStart", isStart);
+        return "fragments/locations :: saved-locations-options";
+    }
+
+    @GetMapping("/unpin-airport-location")
+    public String unpinAirport(Model model, @NonNull String airportCode, @NonNull Integer locationId) {
+        LOGGER.debug(String.format("/unpin-airport-location called from locationId %d and airportCode %s",
+                locationId, airportCode));
+        Location location = voyagerService.getLocation(locationId);
+        if (voyagerService.isValidIataCode(airportCode) && location.hasAirport(airportCode)) {
+            location.removeAirport(airportCode);
+            LocationPatch locationPatch = LocationPatch.builder().airports(location.getAirports()).build();
+            LOGGER.debug(String.format("patch request %s to location %s", locationPatch, location));
+            Location patched = voyagerService.patchLocation(locationId, locationPatch);
+            model.addAttribute("location", patched);
+        } else
+            model.addAttribute("location", location);
+        return "fragments/pinned :: pinned-airport";
+    }
+
+    @GetMapping("/pin-airport-location")
+    public String pinAirportToLocation(Model model, @NonNull String airportCode, @NonNull Integer locationId) {
+        airportCode = airportCode.toUpperCase();
+        LOGGER.debug(String.format("/pin-airport-location called from locationId %d and airportCode %s",
+                locationId,airportCode));
+        Location location = voyagerService.getLocation(locationId);
+        if (voyagerService.isValidIataCode(airportCode) && !location.hasAirport(airportCode)) {
+            location.addAirport(airportCode);
+            LocationPatch locationPatch = LocationPatch.builder().airports(location.getAirports()).build();
+            LOGGER.debug(String.format("patch request %s to location %s",locationPatch,location));
+            Location patched = voyagerService.patchLocation(locationId,locationPatch);
+            model.addAttribute("location",patched);
+            Airport airport = voyagerService.getAirport(airportCode);
+            model.addAttribute("airport",airport);
+        } else
+            model.addAttribute("location",location);
+        return "fragments/pinned :: pinned-airport";
+    }
+
+    @GetMapping("/location-status")
+    public String pinAirportToLocation(Model model, @NonNull Status status, @NonNull Integer locationId) {
+        Location location = voyagerService.getLocation(locationId);
+        if (!location.getStatus().equals(status)) {
+            LocationPatch locationPatch = LocationPatch.builder().status(status.name()).build();
+            LOGGER.debug(String.format("patch request %s to location %s",locationPatch,location));
+            Location patched = voyagerService.patchLocation(locationId,locationPatch);
+            LOGGER.info(String.format("patched location %s",patched));
+        }
+        model.addAttribute("status",location.getStatus());
+        return "fragments/form :: archive-location-success";
+    }
+}

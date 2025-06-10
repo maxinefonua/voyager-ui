@@ -10,10 +10,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.voyager.model.Airline;
-import org.voyager.model.AirportType;
+import org.voyager.model.airport.AirportType;
 import org.voyager.utils.ConstantsUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.voyager.utils.ConstantsUtils.*;
@@ -26,6 +27,7 @@ public class VoyagerAPIConfig {
     String protocol;
     String host;
     Integer port;
+    Integer maxThreads;
     String authToken;
 
     @Value("/search")
@@ -37,8 +39,17 @@ public class VoyagerAPIConfig {
     @Value("/locations")
     String locationsPath;
 
+    @Value("/locations/{id}")
+    String locationByIdPath;
+
     @Value("/towns")
     String townPath;
+
+    @Value("/delta")
+    String deltaPath;
+
+    @Value("/delta/{iata}")
+    String deltaWithIataPath;
 
     @Value("/iata")
     String iataPath;
@@ -48,6 +59,12 @@ public class VoyagerAPIConfig {
 
     @Value("/airports")
     String airportsPath;
+
+    @Value("/airports/{iata}")
+    String airportByIataPath;
+
+    @Value("/path/{origin}/to/{destination}")
+    String pathPath;
 
     private HttpEntity<String> httpEntityWithHeaders;
     private UriComponentsBuilder nearbyAirportsURI;
@@ -95,6 +112,15 @@ public class VoyagerAPIConfig {
                 .toUriString();
     }
 
+    public String buildLocationByIdURL(Integer id) {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(locationByIdPath).buildAndExpand(id)
+                .toUriString();
+    }
+
     public String buildIataCodesURL() {
         return UriComponentsBuilder
                 .newInstance().scheme(protocol)
@@ -129,6 +155,28 @@ public class VoyagerAPIConfig {
         return airportsURL.toUriString();
     }
 
+    public String buildPathURL(String originIata, String destinationIata) {
+        UriComponentsBuilder pathURL = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(pathPath);
+        return pathURL.buildAndExpand(Map.of(
+                "origin",originIata,
+                "destination",destinationIata
+        )).toUriString();
+    }
+
+
+    public String buildAirportByIataURL(String iata) {
+        return UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(airportByIataPath).buildAndExpand(iata)
+                .toUriString();
+    }
+
     public String buildLookupAttributionURL() {
         return UriComponentsBuilder
                 .newInstance().scheme(protocol)
@@ -136,5 +184,16 @@ public class VoyagerAPIConfig {
                 .port(port)
                 .path(lookupAttributionPath)
                 .toUriString();
+    }
+
+    public String buildDeltaWithIataUrl(String iata) {
+        UriComponentsBuilder pathURL = UriComponentsBuilder
+                .newInstance().scheme(protocol)
+                .host(host)
+                .port(port)
+                .path(deltaWithIataPath);
+        return pathURL.buildAndExpand(Map.of(
+                "iata",iata
+        )).toUriString();
     }
 }

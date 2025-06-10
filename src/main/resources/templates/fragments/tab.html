@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <title>Tab Content</title>
 </head>
-<ul th:fragment="tab-list"
+<ul th:fragment="tab-list(defaultPage)"
     id="tabList"
     class="nav nav-underline">
     <li class="nav-item">
-        <a class="nav-link tab-btn active"
+        <a class="nav-link tab-btn"
+           th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'TRIPS')} ? 'active' : ''"
            id="trips-tab-link"
            hx-get="/trips"
            hx-target="#tabContent"
@@ -21,24 +22,26 @@
     </li>
     <li class="nav-item">
         <a class="nav-link tab-btn"
-                id="saved-tab-link"
+           th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'SAVED')} ? 'active' : ''"
+           id="saved-tab-link"
                 hx-get="/saved"
                 hx-target="#tabContent"
                 hx-on::before-request="activate(this)"
-                hx-on::after-request="mapToFirst('location-display-0',false)"
+                hx-on::after-request="mapToFirstLocation(false)"
                 hx-swap="innerHTML">
             Saved
         </a>
     </li>
     <li class="nav-item">
         <a class="nav-link tab-btn"
-                id="add-tab-link"
+           th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'BROWSE')} ? 'active' : ''"
+           id="add-tab-link"
                 hx-get="/add"
                 hx-target="#tabContent"
                 hx-on::before-request="activate(this)"
                 hx-on::after-request="recenterMap()"
                 hx-swap="innerHTML">
-            Add
+            Browse
         </a>
     </li>
 </ul>
@@ -48,7 +51,7 @@
 <div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>
 </div>
-<div th:fragment="trips-tab" class="container m-2">
-    <div th:replace="~{fragments/trips :: trips}"></div>
+<div th:fragment="trips-tab" class="container mt-2">
+    <div th:replace="~{fragments/routes :: trips}"></div>
 </div>
 </html>

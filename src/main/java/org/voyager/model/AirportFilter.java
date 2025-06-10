@@ -4,5 +4,8 @@ public enum AirportFilter {
     ALL,
     MILITARY,
     CIVIL,
-    DELTA
+    DELTA,
+    PINNED,
+    PINNED_DELTA,
+    PINNED_NONDELTA
 }

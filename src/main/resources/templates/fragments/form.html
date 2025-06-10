@@ -1,77 +1,191 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html"
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
-<div th:fragment="airport-form-initial(isStart)" class="container mt-4">
-    <datalist th:id="${isStart}?'filtered-airports-start':'filtered-airports-end'"></datalist>
-    <div class="input-group">
-        <select
-                id="airport-filter-select-"
-                th:attrappend="id=${isStart}?'start':'end'"
-                class="form-select"
-                style="max-width:150px"
-                name="airportFilter"
-                hx-get="/nearby-airports"
-                th:hx-vals="${isStart}?'js:{latitude:startMarker.getLngLat().lat,longitude:startMarker.getLngLat().lng}':'js:{latitude:endMarker.getLngLat().lat,longitude:endMarker.getLngLat().lng}'"
-                th:hx-target="${isStart}?'#filtered-airports-start':'#filtered-airports-end'"
-                hx-trigger="change"
-                th:hx-on::after-request="${isStart}?'setAirportPlaceHolderFromList(\'airport-start-code\',\'filtered-airports-start\')':'setAirportPlaceHolderFromList(\'airport-end-code\',\'filtered-airports-end\')'"
-                th:hx-on::before-request="'clearAirportMarkerMapFitToLocation('+${isStart}+')'"
-                hx-swap="innerHTML"
-                disabled
+
+<!--TODO: verify unnecessary-->
+<div th:fragment="airport-form-initial(isStart)"
+     class="input-group mt-2">
+    <select
+            id="airport-filter-select-"
+            th:attrappend="id=${isStart}?'start':'end'"
+            class="form-select"
+            style="max-width:150px"
+            name="airportFilter"
+            hx-get="/nearby-airports"
+            th:hx-vals="${isStart}?'js:{latitude:startMarker.getLngLat().lat,longitude:startMarker.getLngLat().lng}':'js:{latitude:endMarker.getLngLat().lat,longitude:endMarker.getLngLat().lng}'"
+            th:hx-target="${isStart}?'#filtered-airports-start':'#filtered-airports-end'"
+            hx-trigger="change"
+            th:hx-on::after-request="${isStart}?'setAirportPlaceHolderFromList(\'airport-start-code\',\'filtered-airports-start\')':'setAirportPlaceHolderFromList(\'airport-end-code\',\'filtered-airports-end\')'"
+            th:hx-on::before-request="'clearAirportMarkerMapFitToLocation('+${isStart}+')'"
+            hx-swap="innerHTML"
+    >
+        <option selected value="DELTA">Delta Airports</option>
+        <hr class="dropdown-divider">
+        <option disabled>Additional Airline Support Under Development</option>
+    </select>
+    <input th:id="${isStart}?'airport-start-code':'airport-end-code'"
+           class="form-control"
+           th:placeholder="${isStart}?'Start Airport':'End Airport'"
+           type="text" aria-label="Airport"
+           hx-swap="innerHTML transition:true"
+           hx-get="/review-airport-reset"
+           hx-trigger="input"
+           hx-target="#review-summary"
+           th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
+           hx-include="#select-start-location,#select-end-location,#non-delta-start-code,#non-delta-end-code,"
+           th:attrappend="hx-include=${isStart}?'#airport-end-code':'#airport-start-code'"
+           th:hx-on::after-request="'debouncedAddAirportToMap(this,' + ${isStart} + ')'"
+           th:name="${isStart}?startAirportCode:endAirportCode"
+           th:list="${isStart}?'filtered-airports-start':'filtered-airports-end'" required
+    >
+</div>
+
+<!--TODO: verify unnecessary-->
+<form th:fragment="non-delta-airport-not-trips"
+      th:if="${nonDeltaAirportList}"
+      th:id="'closer-airports-form-'+${iterIndex}"
+>
+    <div class="input-group mt-4 mb-4"
+         th:if="${nonDeltaAirportList}"
+    >
+        <span class="input-group-text">Closer Non-Delta Airports</span>
+        <datalist th:id="'closer-non-delta-airports-' + ${iterIndex}"
         >
-            <option selected value="DELTA">Delta Airports</option>
-            <hr class="dropdown-divider">
-            <option value="CIVIL">Civil</option>
-            <option value="MILITARY">Military</option>
-            <option value="ALL">All</option>
-        </select>
-        <input th:id="${isStart}?'airport-start-code':'airport-end-code'"
-               class="form-control"
-               th:placeholder="${isStart}?'Start Airport':'End Airport'"
-               disabled
-               type="text" aria-label="Airport"
-               th:oninput="${isStart}?'checkAirportInputWithList(this,' + ${isStart} + ',\'filtered-airports-start\')':'checkAirportInputWithList(this,' + ${isStart} + ',\'filtered-airports-end\')'"
-               name="airport-start-code"
-               th:list="${isStart}?'filtered-airports-start':'filtered-airports-end'" required
-        >
+            <!--        TODO: change country codes to country -->
+            <option th:each="airportDisplay : ${nonDeltaAirportList}"
+                    th:value="${airportDisplay.iata}"
+                    th:text="${airportDisplay.name} + ' in ' + ${airportDisplay.subdivision} +'. '+ ${airportDisplay.countryCode}"
+            ></option>
+        </datalist>
+        <input class="form-control"
+               th:placeholder="'Click to Add ' + ${closestAirportIata}"
+               th:oninput="addNonDeltaAirportToMapNotTrips(this.value)"
+               th:list="'closer-non-delta-airports-' + ${iterIndex}">
     </div>
-    <div id="airport-disabled-text-"
-         th:attrappend="id=${isStart}?'start':'end'"
-         th:text="${isStart}?'Select start location to enable airport selection':'Select end location to enable airport selection'">
+</form>
+
+<!--TODO: verify unnecessary-->
+<div th:fragment="non-delta-hidden"
+     th:id="${isStart}?'non-delta-start':'non-delta-end'">
+    <span class="input-group-text">Closer Airport</span>
+    <datalist th:id="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
+            <!--        TODO: change country codes to country -->
+            <option th:each="airportDisplay : ${nonDeltaAirportList}"
+                    th:value="${airportDisplay.iata}"
+                    th:text="${airportDisplay.name} + ' in ' + ${airportDisplay.subdivision} +'. '+ ${airportDisplay.countryCode}"
+            ></option>
+        </datalist>
+        <input class="form-control"
+               th:id="${isStart}?'non-delta-start-code':'non-delta-end-code'"
+               th:name="${isStart}?'nonDeltaStartCode':'nonDeltaEndCode'"
+               th:placeholder="'Click to Add ' + ${closestAirportIata}"
+               hx-swap="innerHTML transition:true"
+               hx-get="/review-airport-reset"
+               hx-trigger="input"
+               hx-target="#review-summary"
+               th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
+               hx-include="#select-start-location,#select-end-location,#airport-end-code,#airport-start-code,"
+               th:attrappend="hx-include=${isStart}?'#non-delta-end-code':'#non-delta-start-code'"
+               th:hx-on::after-request="'addNonDeltaAirportToMap(this.value,'+${isStart}+')'"
+               th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
+    </div>
+
+<!--TODO: verify unnecessary-->
+<div th:fragment="non-delta-airport"
+     th:id="${isStart}?'non-delta-start':'non-delta-end'"
+     th:hx-swap-oob="${isStart}?'outerHTML:#non-delta-start':'outerHTML:#non-delta-end'"
+>
+    <div class="input-group mt-2"
+         th:if="${nonDeltaAirportList}"
+    >
+        <span class="input-group-text">Closer Airport</span>
+        <datalist th:id="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
+            <!--        TODO: change country codes to country -->
+            <option th:each="airportDisplay : ${nonDeltaAirportList}"
+                    th:value="${airportDisplay.iata}"
+                    th:text="${airportDisplay.name} + ' in ' + ${airportDisplay.subdivision} +'. '+ ${airportDisplay.countryCode}"
+            ></option>
+        </datalist>
+        <input class="form-control"
+               th:id="${isStart}?'non-delta-start-code':'non-delta-end-code'"
+               th:name="${isStart}?'nonDeltaStartCode':'nonDeltaEndCode'"
+               th:placeholder="'Click to Add ' + ${closestAirportIata}"
+               hx-swap="innerHTML transition:true"
+               hx-get="/review-airport-reset"
+               hx-trigger="input"
+               hx-target="#review-summary"
+               th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
+               hx-include="#select-start-location,#select-end-location,#airport-end-code,#airport-start-code,"
+               th:attrappend="hx-include=${isStart}?'#non-delta-end-code':'#non-delta-start-code'"
+               th:hx-on::after-request="'addNonDeltaAirportToMap(this.value,'+${isStart}+')'"
+               th:list="${isStart}?'closer-non-delta-airports-start':'closer-non-delta-airports-end'">
     </div>
 </div>
+
+<!--TODO: verify use-->
+<form th:fragment="archive-location-display"
+      class="container">
+    <div class="row justify-content-center">
+        <button th:if="${locationDetail.location.status.name == 'SAVED'}" class="btn btn-outline-danger col-md-3 col-lg-2"
+                hx-get="/location-status"
+                hx-swap="outerHTML transition:true"
+                th:hx-vals="'{&quot;status&quot;:&quot;ARCHIVED&quot;,&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
+        >Archive</button>
+        <button th:if="${locationDetail.location.status.name == 'ARCHIVED'}" class="btn btn-outline-danger col-md-3 col-lg-2"
+                hx-get="/location-status"
+                hx-swap="outerHTML transition:true"
+                th:hx-vals="'{&quot;status&quot;:&quot;SAVED&quot;,&quot;locationId&quot;:'+${locationDetail.location.id}+'}'"
+        >Unarchive</button>
+    </div>
+</form>
+
+<!--BUTTON RETURNED AFTER SUCCESSFUL ARCHIVE SAVED LOCATION-->
+<button th:fragment="archive-location-success"
+        class="btn btn-outline-danger col-md-3 col-lg-2"
+        disabled>
+    Archived
+</button>
+
+<!--ADD NEW LOCATION loaded in SEARCH RESULTS-->
 <form th:fragment="add-location-form"
+      class="d-grid gap-2"
       id="input-group-"
       th:attrappend="id=${iter.index}"
       th:object="${locationForm}">
-    <div th:if="${resultSearch.status.name() == 'NEW'}">
-        <input type="hidden" id="source" name="source" th:value="${resultSearch.source}" />
-        <input type="hidden" id="sourceId" name="sourceId" th:value="${resultSearch.sourceId}" />
-        <input type="hidden" id="name" name="name" th:value="${resultSearch.name}" />
-        <input type="hidden" id="subdivision" name="subdivision" th:value="${resultSearch.subdivision}" />
-        <input type="hidden" id="countryCode" name="countryCode" th:value="${resultSearch.countryCode}" />
-        <input type="hidden" id="latitude" name="latitude" th:value="${resultSearch.latitude}" />
-        <input type="hidden" id="longitude" name="longitude" th:value="${resultSearch.longitude}" />
-        <input type="hidden" id="west" name="west" th:value="${resultSearch.bounds[0]}" />
-        <input type="hidden" id="south" name="south" th:value="${resultSearch.bounds[1]}" />
-        <input type="hidden" id="east" name="east" th:value="${resultSearch.bounds[2]}" />
-        <input type="hidden" id="north" name="north" th:value="${resultSearch.bounds[3]}" />
+    <div th:if="${resultDetails.resultSearch.status.name() == 'NEW'}">
+        <input type="hidden" id="source" name="source" th:value="${resultDetails.resultSearch.source}" />
+        <input type="hidden" id="sourceId" name="sourceId" th:value="${resultDetails.resultSearch.sourceId}" />
+        <input type="hidden" id="name" name="name" th:value="${resultDetails.resultSearch.name}" />
+        <input type="hidden" id="subdivision" name="subdivision" th:value="${resultDetails.resultSearch.subdivision}" />
+        <input type="hidden" id="countryCode" name="countryCode" th:value="${resultDetails.resultSearch.countryCode}" />
+        <input type="hidden" id="latitude" name="latitude" th:value="${resultDetails.resultSearch.latitude}" />
+        <input type="hidden" id="longitude" name="longitude" th:value="${resultDetails.resultSearch.longitude}" />
+        <input type="hidden" id="west" name="west" th:value="${resultDetails.resultSearch.bounds[0]}" />
+        <input type="hidden" id="south" name="south" th:value="${resultDetails.resultSearch.bounds[1]}" />
+        <input type="hidden" id="east" name="east" th:value="${resultDetails.resultSearch.bounds[2]}" />
+        <input type="hidden" id="north" name="north" th:value="${resultDetails.resultSearch.bounds[3]}" />
     </div>
-    <div class="d-grid gap-2">
-        <button th:if="${resultSearch.status.name() == 'NEW'}"
-                class="btn btn-primary"
+    <div class="row justify-content-center">
+        <button th:if="${resultDetails.resultSearch.status.name() == 'NEW'}"
+                class="btn btn-primary col-8 col-lg-2"
                 hx-post="/locations"
                 hx-swap="outerHTML transition:true"
                 type="submit"
-                th:text="${resultSearch.status.display}"></button>
-        <button th:unless="${resultSearch.status.name() == 'NEW'}"
-                class="btn btn-outline-primary"
-                th:text="${resultSearch.status.display}"
+                th:hx-include="'#pinned-airport-form-' + ${iter.index}"
+                th:text="${resultDetails.resultSearch.status.display}"></button>
+        <button th:unless="${resultDetails.resultSearch.status.name() == 'NEW'}"
+                class="btn btn-outline-primary col-8 col-lg-2"
+                th:text="${resultDetails.resultSearch.status.display}"
                 disabled></button>
     </div>
 </form>
+
+<!--BUTTON RETURNED AFTER SUCCESSFUL SAVE NEW LOCATION-->
 <button th:fragment="add-form-success"
-        class="btn btn-primary" disabled>Added
+        class="btn btn-primary col-8 col-lg-2" disabled>Added
 </button>
+
+<!--BUTTON RETURNED AFTER UNSUCCESSFUL SAVE NEW LOCATION-->
 <button th:fragment="add-form-error"
-        class="btn btn-danger" disabled>Error
+        class="btn btn-danger col-8 col-lg-2" disabled>Error
 </button>
+</html>

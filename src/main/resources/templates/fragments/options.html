@@ -1,0 +1,45 @@
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html">
+<!--ALL AIRPORT OPTIONS-->
+<option th:fragment="iata-code-list"
+        th:each="airportDisplay,iter : ${airportList}"
+        th:name="${airportDisplay.iata}"
+        th:value="${airportDisplay.iata}"
+        th:data-airport="${airportDisplay.name}"
+        th:data-longitude="${airportDisplay.longitude}"
+        th:data-latitude="${airportDisplay.latitude}"
+        th:data-city="${airportDisplay.city}"
+        th:data-subdivision="${airportDisplay.subdivision}"
+        th:data-country="${airportDisplay.countryCode}"
+        th:data-type="${airportDisplay.type.name}"
+        th:data-distance="${airportDisplay.distance}"
+        th:text="${airportDisplay.name}"></option>
+
+<!--AIRPORT OPTION DISPLAY-->
+<option th:fragment="limited-iata-code-list"
+        th:each="airport,iter : ${airportList}"
+        th:name="${airport.iata}"
+        th:value="${airport.iata}"
+        th:disabled="${pinnedCodeList}?${#lists.contains(pinnedCodeList, airport.iata)}"
+        th:text="${airport.name}"></option>
+
+<!--ALL LOCATION OPTIONS-->
+<option th:fragment="saved-location-list"
+        th:each="location : ${locationList}"
+        th:name="${location.name}+'-'+${location.id}"
+        th:value="${location.id}"
+        th:data-location="${location.name}"
+        th:data-longitude="${location.longitude}"
+        th:data-latitude="${location.latitude}"
+        th:data-subdivision="${location.subdivision}"
+        th:data-country="${location.countryCode}"
+        th:data-bounds="${#strings.arrayJoin(
+            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}"
+        th:text="${location.name}"></option>
+
+<!--FILTERED OPTIONS FOR TRIP SELECT-->
+<option th:fragment="trip-select-options"
+        th:each="option,iter : ${optionList}"
+        th:attr="data-element-name=${option.elementName}?${option.elementName}"
+        th:value="${option.value}"
+        th:text="${option.display}"></option>
+</html>
