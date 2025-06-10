@@ -70,7 +70,8 @@
                                 #select-airport-end-code-for-location,#select-airport-start-code-for-location,
                                 #closer-airport-end-code-for-location,#closer-airport-start-code-for-location,
                                 #start-airport-filter,#end-airport-filter,
-                                #closer-start-airport-filter,#closer-end-airport-filter"
+                                #route-exclusion-form,
+                                #closer-start-airport-filter,#closer-end-airport-filter,#route-exclusion-form"
                             hx-on::after-request="reverseTripMarkers()"
                             th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -184,6 +185,7 @@
                     #select-airport-end-code-for-location,#select-airport-start-code-for-location,
                     #closer-airport-end-code-for-location,#closer-airport-start-code-for-location,
                     #start-airport-filter,#end-airport-filter,
+                    #route-exclusion-form,
                     #closer-start-airport-filter,#closer-end-airport-filter"
                 hx-on::after-request="reverseTripMarkers()"
                 th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
@@ -216,54 +218,83 @@
             </figure>
         </div>
     </div>
-    <div th:if="${startAirport != null && endAirport != null}" class="row justify-content-center">
+    <form th:if="${routeList}"
+          id="route-exclusion-form"
+          class="row justify-content-center"
+          name="pathExclusions"
+          th:object="${pathExclusions}">
         <h5>Delta Route</h5>
-        <div id="route-update">
-            <div th:each="routeDisplay,iter : ${routeDisplayList}" class="m-2">
-                <button type="button" class="col-sm-3 col-10 btn btn-outline-primary"
+        <div id="route-update"
+             class="accordion list-group">
+            <div th:unless="${routeList?.size() > 0}"
+                 class="list-group-item list-group-item-dark">
+                <span th:text="'No active Delta route from origin ' + ${startAirport.iata} + ' to destination ' + ${endAirport.iata}"></span>
+            </div>
+            <div th:if="${routeList?.size() > 0}" th:each="route,iter : ${routeList}"
+                 class="accordion-item">
+                <button type="button"
+                        class="accordion-button collapsed list-group-item list-group-item-action"
                         data-bs-toggle="collapse"
                         th:data-bs-target="'#route-info-'+${iter.index}"
                         aria-expanded="false"
                         th:aria-controls="'route-info-'+${iter.index}">
-                    <strong th:text="${routeDisplay[0]}"></strong> :
-                    <strong th:text="${routeDisplay[2]}"></strong>
+                    <i th:text="${route.origin} + ' → ' + ${route.destination}"></i>
                 </button>
-                <div class="collapse" th:id="'route-info-'+${iter.index}">
-                    <div class="card card-body mt-2">
-                        <div class="float-start">
-                            <span th:utext="'<strong>Origin: </strong>' + ${routeDisplay[1]}"></span>
-                        </div>
-                        <span th:utext="'<strong>Destination: </strong>' + ${routeDisplay[3]}"></span>
-                        <div class="mt-2">
-                            <div class="form-check form-check-reverse float-end">
-                                <button
-                                        type="button"
-                                        class="btn btn-outline-danger">Disable (full flight)</button>
+                <div class="accordion-collapse collapse"
+                     th:id="'route-info-'+${iter.index}">
+                    <div class="accordion-body">
+                        <div class="row justify-content-center">
+                            <div class="col-6 col-lg-4">
+                                <span th:utext="'<strong>Origin: </strong>' + ${airportNames[iter.index][0]}"></span>
                             </div>
+                            <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${airportNames[iter.index][1]}"></div>
                         </div>
+                        <button hx-get="/exclude-route" name="routeId"
+                                hx-swap="outerHTML transition:true"
+                                type="button" class="btn btn-outline-danger col-lg-5 col-sm-4 mt-4"
+                                hx-include="#route-exclusion-form,
+                                        #select-airport-start-code-for-location,
+                                        #select-airport-end-code-for-location"
+                                hx-target="#route-exclusion-form"
+                                th:value="${route.id}">Exclude Flight</button>
                     </div>
                 </div>
             </div>
-            <div th:if="${disabledFlightList}">
-                <h6>Disabled Flights</h6>
-                <div th:each="${disabledRoute,iter : ${disabledFlightList}">
-                    <button type="button" class="col-sm-3 col-10 btn btn-outline-danger"
+        </div>
+        <div class="mt-4" th:if="${excludedRouteList}">
+            <h6>Excluded Flights</h6>
+            <div class="accordion list-group">
+                <div th:each="route,iter : ${excludedRouteList}"
+                     class="accordion-item">
+                    <input type="hidden"
+                           th:field="*{routeIds[__${iter.index}__]}"
+                           th:value="route.id">
+                    <button type="button"
+                            class="accordion-button collapsed list-group-item list-group-item-action list-group-item-danger"
                             data-bs-toggle="collapse"
-                            th:data-bs-target="'#disabled-info-'+${iter.index}"
+                            th:data-bs-target="'#excluded-info-'+${iter.index}"
                             aria-expanded="false"
-                            th:aria-controls="'disabled-info-'+${iter.index}">
-                        <strong th:text="${disabledRoute[0]}"></strong> :
-                        <strong th:text="${disabledRoute[2]}"></strong>
+                            th:aria-controls="'excluded-info-'+${iter.index}">
+                        <i th:text="${route.origin} + ' → ' + ${route.destination}"></i>
                     </button>
-                    <div class="collapse" th:id="'disabled-info-'+${iter.index}">
-                        <div class="card card-body mt-2">
-                            <div class="float-start">
-                                <span th:utext="'<strong>Origin: </strong>' + ${disabledRoute[1]}"></span>
-                                <span th:utext="'<strong>Destination: </strong>' + ${disabledRoute[3]}"></span>
+                    <div class="accordion-collapse collapse"
+                         th:id="'excluded-info-'+${iter.index}">
+                        <div class="accordion-body">
+                            <div class="row justify-content-center">
+                                <span class="col-6" th:utext="'<strong>Origin: </strong>' + ${route.origin}"></span>
+                                <span class="col-6" th:utext="'<strong>Destination: </strong>' + ${route.destination}"></span>
                             </div>
-                            <div class="mt-2">
+                            <div class="row mt-2">
                                 <div class="float-end">
-                                    <button type="button" class="btn btn-success">Re-enable</button>
+                                    <button type="button" class="btn btn-success"
+                                            hx-get="/enable-route"
+                                            name="routeId"
+                                            hx-swap="outerHTML transition:true"
+                                            hx-include="#route-exclusion-form,
+                                    #select-airport-start-code-for-location,
+                                    #select-airport-end-code-for-location"
+                                            hx-target="#route-exclusion-form"
+                                            th:value="${route.id}">Enable Flight</button>
                                 </div>
                             </div>
                         </div>
@@ -271,64 +302,95 @@
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <!--updating ROUTE-->
-<div id="route-update"
-    hx-swap-oob="outerHTML:#route-update">
-    <div th:each="routeDisplay,iter : ${routeDisplayList}" class="m-2">
-        <button type="button" class="col-sm-3 col-10 btn btn-outline-primary"
-                data-bs-toggle="collapse"
-                th:data-bs-target="'#route-info-'+${iter.index}"
-                aria-expanded="false"
-                th:aria-controls="'route-info-'+${iter.index}">
-            <strong th:text="${routeDisplay[0]}"></strong> :
-            <strong th:text="${routeDisplay[2]}"></strong>
-        </button>
-        <div class="collapse" th:id="'route-info-'+${iter.index}">
-            <div class="card card-body mt-2">
-                <div class="float-start">
-                    <span th:utext="'<strong>Origin: </strong>' + ${routeDisplay[1]}"></span>
-                    <span th:utext="'<strong>Destination: </strong>' + ${routeDisplay[3]}"></span>
-                </div>
-                <div class="mt-2">
-                    <div class="form-check form-check-reverse float-end">
-                        <button
-                                type="button"
-                                class="btn btn-outline-danger">Disable (full flight)</button>
+<form th:fragment="delta-route" id="route-exclusion-form"
+      th:if="${routeList}"
+      class="row justify-content-center"
+      name="pathExclusions"
+      th:object="${pathExclusions}">
+    <h5>Delta Route</h5>
+    <div id="route-update"
+         class="accordion list-group">
+        <div th:unless="${routeList?.size() > 0}"
+             class="list-group-item list-group-item-dark">
+            <span th:text="'No active Delta route from origin ' + ${startAirport.iata} + ' to destination ' + ${endAirport.iata}"></span>
+        </div>
+        <div th:if="${routeList?.size() > 0}" th:each="route,iter : ${routeList}"
+             class="accordion-item">
+            <button type="button"
+                    class="accordion-button collapsed list-group-item list-group-item-action"
+                    data-bs-toggle="collapse"
+                    th:data-bs-target="'#route-info-'+${iter.index}"
+                    aria-expanded="false"
+                    th:aria-controls="'route-info-'+${iter.index}">
+                <i th:text="${route.origin} + ' → ' + ${route.destination}"></i>
+            </button>
+            <div class="accordion-collapse collapse"
+                 th:id="'route-info-'+${iter.index}">
+                <div class="accordion-body">
+                    <div class="row justify-content-center">
+                        <div class="col-6 col-lg-4">
+                            <span th:utext="'<strong>Origin: </strong>' + ${airportNames[iter.index][0]}"></span>
+                        </div>
+                        <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${airportNames[iter.index][1]}"></div>
                     </div>
+                    <button hx-get="/exclude-route" name="routeId"
+                            hx-swap="outerHTML transition:true"
+                            type="button" class="btn btn-outline-danger col-lg-5 col-sm-4 mt-4"
+                            hx-include="#route-exclusion-form,
+                                        #select-airport-start-code-for-location,
+                                        #select-airport-end-code-for-location"
+                            hx-target="#route-exclusion-form"
+                            th:value="${route.id}">Exclude Flight</button>
                 </div>
             </div>
         </div>
     </div>
-    <div th:if="${disabledFlightList}">
-        <h6>Disabled Flights</h6>
-        <div th:each="${disabledRoute,iter : ${disabledFlightList}">
-            <button type="button" class="col-sm-3 col-10 btn btn-outline-danger"
-                    data-bs-toggle="collapse"
-                    th:data-bs-target="'#disabled-info-'+${iter.index}"
-                    aria-expanded="false"
-                    th:aria-controls="'disabled-info-'+${iter.index}">
-                <strong th:text="${disabledRoute[0]}"></strong> :
-                <strong th:text="${disabledRoute[2]}"></strong>
-            </button>
-            <div class="collapse" th:id="'disabled-info-'+${iter.index}">
-                <div class="card card-body mt-2">
-                    <div class="float-start">
-                        <span th:utext="'<strong>Origin: </strong>' + ${disabledRoute[1]}"></span>
-                        <span th:utext="'<strong>Destination: </strong>' + ${disabledRoute[3]}"></span>
-                    </div>
-                    <div class="mt-2">
-                        <div class="float-end">
-                            <button type="button" class="btn btn-success">Re-enable</button>
+    <div class="mt-4" th:if="${excludedRouteList}">
+        <h6>Excluded Flights</h6>
+        <div class="accordion list-group">
+            <div th:each="route,iter : ${excludedRouteList}"
+                 class="accordion-item">
+                <input type="hidden"
+                       th:field="*{routeIds[__${iter.index}__]}"
+                       th:value="route.id">
+                <button type="button"
+                        class="accordion-button collapsed list-group-item list-group-item-action list-group-item-danger"
+                        data-bs-toggle="collapse"
+                        th:data-bs-target="'#excluded-info-'+${iter.index}"
+                        aria-expanded="false"
+                        th:aria-controls="'excluded-info-'+${iter.index}">
+                    <i th:text="${route.origin} + ' → ' + ${route.destination}"></i>
+                </button>
+                <div class="accordion-collapse collapse"
+                     th:id="'excluded-info-'+${iter.index}">
+                    <div class="accordion-body">
+                        <div class="row justify-content-center">
+                            <span class="col-6" th:utext="'<strong>Origin: </strong>' + ${route.origin}"></span>
+                            <span class="col-6" th:utext="'<strong>Destination: </strong>' + ${route.destination}"></span>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="float-end">
+                                <button type="button" class="btn btn-success"
+                                        hx-get="/enable-route"
+                                        name="routeId"
+                                        hx-swap="outerHTML transition:true"
+                                        hx-include="#route-exclusion-form,
+                                    #select-airport-start-code-for-location,
+                                    #select-airport-end-code-for-location"
+                                        hx-target="#route-exclusion-form"
+                                        th:value="${route.id}">Enable Flight</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</form>
 
 <!--BY LOCATION SELECTIONS for START/END-->
 <div th:if="${selection == 'LOCATION'}"
@@ -407,7 +469,8 @@
                 hx-get="/build-path"
                 th:name="${isStart}?'startAirport':'endAirport'"
                 hx-include="#select-start-options,#select-end-options,
-                    #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,"
+                    #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,
+                    #route-exclusion-form,"
                 hx-target="#review-path"
                 th:attrappend="hx-include=${isStart}?
                     '#select-airport-end-code-for-location'
@@ -450,7 +513,8 @@
                 th:id="${isStart}?'closer-airport-start-code-for-location':'closer-airport-end-code-for-location'" required
                 th:name="${isStart}?'closerStartAirport':'closerEndAirport'"
                 hx-include="#select-start-options,#select-end-options,
-                #select-airport-start-code-for-location,#select-airport-end-code-for-location,"
+                #select-airport-start-code-for-location,#select-airport-end-code-for-location,
+                #route-exclusion-form,"
                 hx-target="#review-path"
                 th:attrappend="hx-include=${isStart}?'#closer-airport-end-code-for-location':'#closer-airport-start-code-for-location'"
                 th:onchange="'addAirportFromSelect(this,' + ${isStart} + ')'">
@@ -494,7 +558,8 @@
             th:id="${isStart}?'closer-airport-start-code-for-location':'closer-airport-end-code-for-location'" required
             th:name="${isStart}?'closerStartAirport':'closerEndAirport'"
             hx-include="#select-start-options,#select-end-options,
-                #select-airport-start-code-for-location,#select-airport-end-code-for-location,"
+                #select-airport-start-code-for-location,#select-airport-end-code-for-location,
+                #route-exclusion-form,"
             hx-target="#review-path"
             th:attrappend="hx-include=${isStart}?'#closer-airport-end-code-for-location':'#closer-airport-start-code-for-location'"
             th:onchange="'addAirportFromSelect(this,' + ${isStart} + ')'">
@@ -573,10 +638,12 @@
                th:name="${isStart}?'startAirportCode':'endAirportCode'"
                th:hx-include="${isStart}?
                '#select-end-options,#select-airport-end-code-for-location,
-               #closer-airport-end-code-for-location,#airport-input-end'
+               #closer-airport-end-code-for-location,#airport-input-end,
+               #route-exclusion-form'
                :
                '#select-start-options,#select-airport-start-code-for-location,
-               #closer-airport-start-code-for-location,#airport-input-start'"
+               #closer-airport-start-code-for-location,#airport-input-start,
+               #route-exclusion-form'"
                th:placeholder="${isStart}?'Enter Start Airport':'Enter End Airport'"
                th:list="${isStart}?'select-start-options':'select-end-options'"
                th:value="${isStart}?${startAirportInput}:${endAirportInput}"
@@ -603,7 +670,8 @@
                     th:id="${isStart}?'select-airport-start-code-for-location':'select-airport-end-code-for-location'" required
                     th:name="${isStart}?'startAirport':'endAirport'"
                     hx-include="#select-start-options,#select-end-options,
-                #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,"
+                #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,
+                #route-exclusion-form,"
                     hx-target="#review-path"
                     th:attrappend="hx-include=${isStart}?'#select-airport-end-code-for-location':'#select-airport-start-code-for-location'"
                     th:onchange="'addAirportFromSelect(this,' + ${isStart} + ')'">
@@ -640,7 +708,8 @@
                 th:id="${isStart}?'select-airport-start-code-for-location':'select-airport-end-code-for-location'" required
                 th:name="${isStart}?'startAirport':'endAirport'"
                 hx-include="#select-start-options,#select-end-options,
-                #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,"
+                #closer-airport-start-code-for-location,#closer-airport-end-code-for-location,
+                #route-exclusion-form,"
                 hx-target="#review-path"
                 th:attrappend="hx-include=${isStart}?'#select-airport-end-code-for-location':'#select-airport-start-code-for-location'"
                 th:onchange="'addAirportFromSelect(this,' + ${isStart} + ')'">

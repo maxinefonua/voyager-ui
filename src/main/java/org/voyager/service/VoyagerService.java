@@ -9,9 +9,9 @@ import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.model.route.Path;
+import org.voyager.model.route.Route;
 
 import java.util.List;
-import java.util.Set;
 
 public interface VoyagerService {
     SearchResult<ResultSearch> lookup(String query, int skipRows, int limit);
@@ -34,5 +34,6 @@ public interface VoyagerService {
     Boolean isDeltaIataCode(String airportCode);
     Airport getAirport(String iata);
     Path getPath(String origin, String destination);
-    Path getPath(String origin, String destination, Set<String> exclusions);
+    Path getPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList);
+    Route getRoute(Integer id);
 }

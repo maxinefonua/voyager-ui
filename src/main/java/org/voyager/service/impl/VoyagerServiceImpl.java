@@ -15,7 +15,6 @@ import org.voyager.config.VoyagerAPIConfig;
 import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
-import org.voyager.error.ServiceException;
 import org.voyager.model.Airline;
 import org.voyager.model.ResultDetails;
 import org.voyager.model.airport.Airport;
@@ -25,6 +24,7 @@ import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.model.route.Path;
+import org.voyager.model.route.Route;
 import org.voyager.service.*;
 
 import java.util.*;
@@ -182,8 +182,13 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
-    public Path getPath(String origin, String destination, Set<String> exclusions) {
-        return fetchPath(origin,destination,exclusions);
+    public Path getPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
+        return fetchPath(origin,destination, excludeAirportList,excludeRouteIdList);
+    }
+
+    @Override
+    public Route getRoute(Integer id) {
+        return fetchRoute(id);
     }
 
     private Location createLocation(LocationForm locationForm) {
@@ -273,14 +278,20 @@ public class VoyagerServiceImpl implements VoyagerService {
         return resultDetail;
     }
 
-    private Path fetchPath(String origin, String destination, Set<String> exclusions) {
-        Either<ServiceError,Path> either = routeService.getPath(origin,destination,exclusions);
+    private Path fetchPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
+        Either<ServiceError,Path> either = routeService.getPath(origin,destination,excludeAirportList,excludeRouteIdList);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
 
     private Path fetchPath(String origin, String destination) {
         Either<ServiceError,Path> either = routeService.getPath(origin,destination);
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        return either.get();
+    }
+
+    private Route fetchRoute(Integer id) {
+        Either<ServiceError,Route> either = routeService.getRoute(id);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
