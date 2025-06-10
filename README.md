@@ -7,13 +7,16 @@ A personal project I took on to relearn full-cycle development, and to better or
     - standalone backend services
     - caching, request limits, auth tokens
 - Voyager Commons <a href='https://github.com/maxinefonua/voyager-commons' target='_blank' rel='noopener noreferrer nofollow'>GitHub</a>
-    - shared models and utils
-    - scripts for data syncing
-#### Frontend built with:
+    - an SDK for API services
+    - scripts and jars for syncing data
+#### Front-End Tech Stack:
 - Spring Boot
+- Mapbox
+- JavaScript
 - Thymeleaf
 - HTMX
 - Lombok
+- Bootstrap
 - Java Code Coverage
 - IntelliJ
 
