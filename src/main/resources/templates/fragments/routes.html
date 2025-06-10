@@ -218,9 +218,7 @@
             </figure>
         </div>
     </div>
-    <form th:if="${routeList}"
-          id="route-exclusion-form"
-          class="row justify-content-center"
+    <form th:if="${routeList}" id="route-exclusion-form"
           name="pathExclusions"
           th:object="${pathExclusions}">
         <h5>Delta Route</h5>
@@ -251,7 +249,7 @@
                         </div>
                         <button hx-get="/exclude-route" name="routeId"
                                 hx-swap="outerHTML transition:true"
-                                type="button" class="btn btn-outline-danger col-lg-5 col-sm-4 mt-4"
+                                type="button" class="btn btn-outline-danger"
                                 hx-include="#route-exclusion-form,
                                         #select-airport-start-code-for-location,
                                         #select-airport-end-code-for-location"
@@ -308,7 +306,6 @@
 <!--updating ROUTE-->
 <form th:fragment="delta-route" id="route-exclusion-form"
       th:if="${routeList}"
-      class="row justify-content-center"
       name="pathExclusions"
       th:object="${pathExclusions}">
     <h5>Delta Route</h5>
@@ -339,7 +336,7 @@
                     </div>
                     <button hx-get="/exclude-route" name="routeId"
                             hx-swap="outerHTML transition:true"
-                            type="button" class="btn btn-outline-danger col-lg-5 col-sm-4 mt-4"
+                            type="button" class="btn btn-outline-danger"
                             hx-include="#route-exclusion-form,
                                         #select-airport-start-code-for-location,
                                         #select-airport-end-code-for-location"
