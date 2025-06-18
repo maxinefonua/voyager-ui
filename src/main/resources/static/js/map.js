@@ -128,12 +128,6 @@ function addTripLocationToMap(optionSelected,isStart) {
     }
 };
 
-function mapFitToTrip() {
-    if (startMarker && endMarker) mapFitBothMarkers(startMarker,endMarker);
-    else if (airportStartMarker && airportEndMarker) mapFitBothMarkers(airportStartMarker,airportEndMarker);
-    else recenterMap();
-}
-
 function fitMapToElementBounds(elementWithBounds) {
     const bounds = elementWithBounds.dataset.bounds
                 .split(',')
@@ -148,18 +142,87 @@ function fitMapToElemWithBounds(elem) {
     map.fitBounds(bounds);
 }
 
-function zoomToTripLocation(isStart) {
-    const startSelect = document.getElementById('select-start-location');
-    const endSelect = document.getElementById('select-end-location');
-    if (isStart && startSelect && startSelect.selectedIndex != 0) {
-        fitMapToElemWithBounds(startSelect[startSelect.selectedIndex]);
-    } else if (!isStart && endSelect && endSelect.selectedIndex !=0) {
-        fitMapToElemWithBounds(endSelect[endSelect.selectedIndex]);
-    } else if (isStart && airportStartMarker) {
-        centerMapOnMarker(airportStartMarker);
-    } else if (!isStart && airportEndMarker) {
-        centerMapOnMarker(airportEndMarker);
+function zoomToTripLocation(isStart,targetElemId) {
+    event.preventDefault(); // prevents url mod
+    closeTripMarkerPopups();
+    if (isStart) {
+        if (startMarker && airportStartMarker && nonDeltaStartMarker) {
+            mapFitThreeMarkers(startMarker,airportStartMarker,nonDeltaStartMarker);
+            startMarker.togglePopup();
+        } else if (airportStartMarker && nonDeltaStartMarker) {
+            mapFitBothMarkers(airportStartMarker,nonDeltaStartMarker);
+            nonDeltaStartMarker.togglePopup();
+        } else if (startMarker && airportStartMarker) {
+            mapFitBothMarkers(airportStartMarker,startMarker);
+            startMarker.togglePopup();
+        } else if (nonDeltaStartMarker && airportStartMarker) {
+            mapFitBothMarkers(nonDeltaStartMarker,startMarker);
+            nonDeltaStartMarker.togglePopup();
+        } else if (startMarker) {
+            centerMapOnMarker(startMarker);
+            startMarker.togglePopup();
+        } else if (airportStartMarker) {
+            centerMapOnMarker(airportStartMarker);
+            airportStartMarker.togglePopup();
+        } else if (nonDeltaStartMarker) {
+            centerMapOnMarker(nonDeltaStartMarker);
+            nonDeltaStartMarker.togglePopup();
+        } else recenterMap();
+    } else {
+        if (endMarker && airportEndMarker && nonDeltaEndMarker) {
+            mapFitThreeMarkers(endMarker,airportEndMarker,nonDeltaEndMarker);
+            endMarker.togglePopup();
+        } else if (airportEndMarker && nonDeltaEndMarker) {
+            mapFitBothMarkers(airportEndMarker,nonDeltaEndMarker);
+            nonDeltaEndMarker.togglePopup();
+        } else if (endMarker && airportEndMarker) {
+            mapFitBothMarkers(airportEndMarker,endMarker);
+            endMarker.togglePopup();
+        } else if (nonDeltaEndMarker && airportEndMarker) {
+            mapFitBothMarkers(nonDeltaEndMarker,airportEndMarker);
+            nonDeltaEndMarker.togglePopup();
+        } else if (endMarker) {
+            centerMapOnMarker(endMarker);
+            endMarker.togglePopup();
+        } else if (airportEndMarker) {
+            centerMapOnMarker(airportEndMarker);
+            airportEndMarker.togglePopup();
+        } else if (nonDeltaEndMarker) {
+            centerMapOnMarker(nonDeltaEndMarker);
+            nonDeltaEndMarker.togglePopup();
+        } else recenterMap();
     }
+    scrollElemToTarget(targetElemId);
+}
+
+function scrollElemToTarget(targetElemId) {
+    const target = document.querySelector(targetElemId);
+    const contentContainer = document.getElementById('scrollable-content');
+
+    if (target && contentContainer) {
+        const offset = target.offsetTop - contentContainer.offsetTop;
+        contentContainer.scrollTo({
+            top: offset,
+            behavior: 'smooth'
+        });
+    }
+}
+
+function mapFitToTrip() {
+    closeTripMarkerPopups();
+    var marker1 = null;
+    var marker2 = null;
+
+    if (startMarker) marker1 = startMarker;
+    else if (nonDeltaStartMarker) marker1 = nonDeltaStartMarker;
+    else if (airportStartMarker) marker1 = airportStartMarker;
+
+    if (endMarker) marker2 = endMarker;
+    else if (nonDeltaEndMarker) marker2 = nonDeltaEndMarker;
+    else if (airportEndMarker) marker2 = airportEndMarker;
+
+    if (marker1 && marker2) mapFitBothMarkers(marker1,marker2);
+    else recenterMap();
 }
 
 function recenterMap() {

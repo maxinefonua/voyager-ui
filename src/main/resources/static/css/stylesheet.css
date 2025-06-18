@@ -41,6 +41,11 @@ svg path {
     fill: #0d6efd
 }
 
+a.list-group-item-action.active .scroll-nav-icon {
+  fill: #FFFFFF !important;
+  stroke: #FFFFFF !important; /* Optional: if you have strokes */
+}
+
 .airport-marker-non-delta {
   background-image: url(../images/airport-marker.svg);
   background-size: cover;
