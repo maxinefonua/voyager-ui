@@ -208,7 +208,8 @@ function scrollElemToTarget(targetElemId) {
     }
 }
 
-function mapFitToTrip() {
+function mapFitToTrip(targetElemId) {
+    event.preventDefault();
     closeTripMarkerPopups();
     var marker1 = null;
     var marker2 = null;
@@ -223,6 +224,7 @@ function mapFitToTrip() {
 
     if (marker1 && marker2) mapFitBothMarkers(marker1,marker2);
     else recenterMap();
+    scrollElemToTarget(targetElemId);
 }
 
 function recenterMap() {
