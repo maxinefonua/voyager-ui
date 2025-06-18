@@ -146,6 +146,9 @@ function closeTripMarkerPopups() {
 }
 
 function addAirportToMap(airportInputElem,isStart) {
+    if (isStart) clearStartMarkers();
+    else clearEndMarkers();
+
     if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
         const allAirports = document.getElementById('all-airports');
         const deltaAirports = document.getElementById('delta-airports');
@@ -155,13 +158,8 @@ function addAirportToMap(airportInputElem,isStart) {
             const isDelta = (deltaMatch != null);
             airportInputElem.classList.remove('is-invalid');
             if (isStart) {
-                if (isDelta) {
-                    if (airportStartMarker) airportStartMarker.remove();
-                    airportStartMarker = addAirportMarker(airportMatch,isDelta);
-                } else {
-                    if (nonDeltaStartMarker) nonDeltaStartMarker.remove();
-                    nonDeltaStartMarker = addAirportMarker(airportMatch,isDelta);
-                }
+                if (isDelta) airportStartMarker = addAirportMarker(airportMatch,isDelta);
+                else nonDeltaStartMarker = addAirportMarker(airportMatch,isDelta);
                 if (startMarker && airportStartMarker && nonDeltaStartMarker)
                     mapFitThreeMarkers(startMarker,nonDeltaStartMarker,airportStartMarker);
                 else if (startMarker && airportStartMarker)
@@ -170,13 +168,8 @@ function addAirportToMap(airportInputElem,isStart) {
                     mapFitBothMarkers(startMarker,nonDeltaStartMarker);
                 else mapFitBothMarkers(airportStartMarker,nonDeltaStartMarker);
             } else {
-                if (isDelta) {
-                    if (airportEndMarker) airportEndMarker.remove();
-                    airportEndMarker = addAirportMarker(airportMatch,isDelta);
-                } else {
-                    if (nonDeltaEndMarker) nonDeltaEndMarker.remove();
-                    nonDeltaEndMarker = addAirportMarker(airportMatch,isDelta);
-                }
+                if (isDelta) airportEndMarker = addAirportMarker(airportMatch,isDelta);
+                else nonDeltaEndMarker = addAirportMarker(airportMatch,isDelta);
                 if (endMarker && airportEndMarker && nonDeltaEndMarker)
                     mapFitThreeMarkers(endMarker,airportEndMarker,nonDeltaEndMarker);
                 else if (endMarker && airportEndMarker)
@@ -187,30 +180,9 @@ function addAirportToMap(airportInputElem,isStart) {
             }
             airportInputElem.value = airportInputElem.value.toUpperCase(); // sets IATA value
         }
-    } else { // if input is empty, remove invalid styling
-        if (airportInputElem && (airportInputElem.value == null || airportInputElem.value.trim().length == 0)) {
-            airportInputElem.classList.remove('is-invalid');
-        } else airportInputElem.classList.add('is-invalid');
-        if (isStart) {
-            if (airportStartMarker) {
-                airportStartMarker.remove();
-                airportStartMarker = null;
-            }
-            if (nonDeltaStartMarker) {
-                nonDeltaStartMarker.remove();
-                nonDeltaStartMarker = null;
-            }
-        } else {
-            if (airportEndMarker) {
-                airportEndMarker.remove();
-                airportEndMarker = null;
-            }
-            if (nonDeltaEndMarker) {
-                nonDeltaEndMarker.remove();
-                nonDeltaEndMarker = null;
-            }
-        }
-    }
+    } else if (airportInputElem && (airportInputElem.value == null || airportInputElem.value.trim().length == 0)) {
+        airportInputElem.classList.remove('is-invalid');
+    } else airportInputElem.classList.add('is-invalid');
 }
 
 function addAirportToMapFromCode(airportCode) {
