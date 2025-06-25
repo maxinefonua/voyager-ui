@@ -1,5 +1,4 @@
 package org.voyager.controller;
-import io.vavr.control.Option;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +8,6 @@ import org.voyager.model.*;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
 import org.voyager.model.location.Location;
-import org.voyager.model.location.Source;
-import org.voyager.model.location.Status;
 import org.voyager.model.response.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

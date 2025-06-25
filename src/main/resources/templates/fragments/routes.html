@@ -316,12 +316,34 @@
                 <div class="accordion-collapse collapse"
                      th:id="'route-info-'+${iter.index}">
                     <div class="accordion-body">
-                        <div class="row justify-content-center">
+                        <div class="row justify-content-center mb-4">
                             <div class="col-6 col-lg-4">
-                                <span th:utext="'<strong>Origin: </strong>' + ${airportNames[iter.index][0]}"></span>
+                                <span th:utext="'<strong>Origin: </strong>' + ${routeAirportList[iter.index][0].name}"></span>
                             </div>
-                            <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${airportNames[iter.index][1]}"></div>
+                            <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${routeAirportList[iter.index][1].name}"></div>
                         </div>
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th scope="col">Flight Number</th>
+                                <th scope="col">Departure Time</th>
+                                <th scope="col">Arrival Time</th>
+                                <th scope="col">Duration</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="flight : ${routeFlightList[iter.index]}">
+                                <td th:text="${flight.flightNumber}"></td>
+                                <td th:text="${#temporals.format(flight.zonedDateTimeDeparture.toLocalTime(), 'h:mm a')}"></td>
+                                <td th:text="${#temporals.format(flight.zonedDateTimeArrival.toLocalTime(), 'h:mm a')}"></td>
+                                <td>
+                                    <span th:if="${flight.duration.toDaysPart() > 0}" th:text="${flight.duration.toDaysPart()} + 'days '"></span>
+                                    <span th:if="${flight.duration.toHoursPart() > 0}" th:text="${flight.duration.toHoursPart()} + 'hrs '"></span>
+                                    <span th:if="${flight.duration.toMinutesPart() > 0}" th:text="${flight.duration.toMinutesPart()} + 'min'"></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                         <button hx-get="/exclude-route" name="routeId"
                                 hx-swap="outerHTML transition:true"
                                 type="button" class="btn btn-outline-danger"
@@ -329,7 +351,7 @@
                                         #select-airport-start-code-for-location,
                                         #select-airport-end-code-for-location"
                                 hx-target="#route-exclusion-form"
-                                th:value="${route.id}">Exclude Flight</button>
+                                th:value="${route.id}">Exclude Route</button>
                     </div>
                 </div>
             </div>
@@ -353,23 +375,42 @@
                     <div class="accordion-collapse collapse"
                          th:id="'excluded-info-'+${iter.index}">
                         <div class="accordion-body">
-                            <div class="row justify-content-center">
-                                <span class="col-6" th:utext="'<strong>Origin: </strong>' + ${route.origin}"></span>
-                                <span class="col-6" th:utext="'<strong>Destination: </strong>' + ${route.destination}"></span>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="float-end">
-                                    <button type="button" class="btn btn-success"
-                                            hx-get="/enable-route"
-                                            name="routeId"
-                                            hx-swap="outerHTML transition:true"
-                                            hx-include="#route-exclusion-form,
-                                    #select-airport-start-code-for-location,
-                                    #select-airport-end-code-for-location"
-                                            hx-target="#route-exclusion-form"
-                                            th:value="${route.id}">Enable Flight</button>
+                            <div class="row justify-content-center mb-4">
+                                <div class="col-6 col-lg-4">
+                                    <span th:utext="'<strong>Origin: </strong>' + ${excludedRouteAirportList[iter.index][0].name}"></span>
                                 </div>
+                                <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${excludedRouteAirportList[iter.index][1].name}"></div>
                             </div>
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Flight Number</th>
+                                    <th scope="col">Departure Time</th>
+                                    <th scope="col">Arrival Time</th>
+                                    <th scope="col">Duration</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="flight : ${excludedRouteFlightList[iter.index]}">
+                                    <td th:text="${flight.flightNumber}"></td>
+                                    <td th:text="${#temporals.format(flight.zonedDateTimeDeparture.toLocalTime(), 'h:mm a')}"></td>
+                                    <td th:text="${#temporals.format(flight.zonedDateTimeArrival.toLocalTime(), 'h:mm a')}"></td>
+                                    <td>
+                                        <span th:if="${flight.duration.toDaysPart() > 0}" th:text="${flight.duration.toDaysPart()} + 'days '"></span>
+                                        <span th:if="${flight.duration.toHoursPart() > 0}" th:text="${flight.duration.toHoursPart()} + 'hrs '"></span>
+                                        <span th:if="${flight.duration.toMinutesPart() > 0}" th:text="${flight.duration.toMinutesPart()} + 'min'"></span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <button hx-get="/enable-route" name="routeId"
+                                    hx-swap="outerHTML transition:true"
+                                    type="button" class="btn btn-outline-success"
+                                    hx-include="#route-exclusion-form,
+                                        #select-airport-start-code-for-location,
+                                        #select-airport-end-code-for-location"
+                                    hx-target="#route-exclusion-form"
+                                    th:value="${route.id}">Enable Route</button>
                         </div>
                     </div>
                 </div>
@@ -403,12 +444,34 @@
             <div class="accordion-collapse collapse"
                  th:id="'route-info-'+${iter.index}">
                 <div class="accordion-body">
-                    <div class="row justify-content-center">
+                    <div class="row justify-content-center mb-4">
                         <div class="col-6 col-lg-4">
-                            <span th:utext="'<strong>Origin: </strong>' + ${airportNames[iter.index][0]}"></span>
+                            <span th:utext="'<strong>Origin: </strong>' + ${routeAirportList[iter.index][0].name}"></span>
                         </div>
-                        <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${airportNames[iter.index][1]}"></div>
+                        <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${routeAirportList[iter.index][1].name}"></div>
                     </div>
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col">Flight Number</th>
+                            <th scope="col">Departure Time</th>
+                            <th scope="col">Arrival Time</th>
+                            <th scope="col">Duration</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="flight : ${routeFlightList[iter.index]}">
+                            <td th:text="${flight.flightNumber}"></td>
+                            <td th:text="${#temporals.format(flight.zonedDateTimeDeparture.toLocalTime(), 'h:mm a')}"></td>
+                            <td th:text="${#temporals.format(flight.zonedDateTimeArrival.toLocalTime(), 'h:mm a')}"></td>
+                            <td>
+                                <span th:if="${flight.duration.toDaysPart() > 0}" th:text="${flight.duration.toDaysPart()} + 'days '"></span>
+                                <span th:if="${flight.duration.toHoursPart() > 0}" th:text="${flight.duration.toHoursPart()} + 'hrs '"></span>
+                                <span th:if="${flight.duration.toMinutesPart() > 0}" th:text="${flight.duration.toMinutesPart()} + 'min'"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                     <button hx-get="/exclude-route" name="routeId"
                             hx-swap="outerHTML transition:true"
                             type="button" class="btn btn-outline-danger"
@@ -440,23 +503,42 @@
                 <div class="accordion-collapse collapse"
                      th:id="'excluded-info-'+${iter.index}">
                     <div class="accordion-body">
-                        <div class="row justify-content-center">
-                            <span class="col-6" th:utext="'<strong>Origin: </strong>' + ${route.origin}"></span>
-                            <span class="col-6" th:utext="'<strong>Destination: </strong>' + ${route.destination}"></span>
-                        </div>
-                        <div class="row mt-2">
-                            <div class="float-end">
-                                <button type="button" class="btn btn-success"
-                                        hx-get="/enable-route"
-                                        name="routeId"
-                                        hx-swap="outerHTML transition:true"
-                                        hx-include="#route-exclusion-form,
-                                    #select-airport-start-code-for-location,
-                                    #select-airport-end-code-for-location"
-                                        hx-target="#route-exclusion-form"
-                                        th:value="${route.id}">Enable Flight</button>
+                        <div class="row justify-content-center mb-4">
+                            <div class="col-6 col-lg-4">
+                                <span th:utext="'<strong>Origin: </strong>' + ${excludedRouteAirportList[iter.index][0].name}"></span>
                             </div>
+                            <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${excludedRouteAirportList[iter.index][1].name}"></div>
                         </div>
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                            <tr>
+                                <th scope="col">Flight Number</th>
+                                <th scope="col">Departure Time</th>
+                                <th scope="col">Arrival Time</th>
+                                <th scope="col">Duration</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="flight : ${excludedRouteFlightList[iter.index]}">
+                                <td th:text="${flight.flightNumber}"></td>
+                                <td th:text="${#temporals.format(flight.zonedDateTimeDeparture.toLocalTime(), 'h:mm a')}"></td>
+                                <td th:text="${#temporals.format(flight.zonedDateTimeArrival.toLocalTime(), 'h:mm a')}"></td>
+                                <td>
+                                    <span th:if="${flight.duration.toDaysPart() > 0}" th:text="${flight.duration.toDaysPart()} + 'days '"></span>
+                                    <span th:if="${flight.duration.toHoursPart() > 0}" th:text="${flight.duration.toHoursPart()} + 'hrs '"></span>
+                                    <span th:if="${flight.duration.toMinutesPart() > 0}" th:text="${flight.duration.toMinutesPart()} + 'min'"></span>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <button hx-get="/enable-route" name="routeId"
+                                hx-swap="outerHTML transition:true"
+                                type="button" class="btn btn-outline-success"
+                                hx-include="#route-exclusion-form,
+                                        #select-airport-start-code-for-location,
+                                        #select-airport-end-code-for-location"
+                                hx-target="#route-exclusion-form"
+                                th:value="${route.id}">Enable Route</button>
                     </div>
                 </div>
             </div>
