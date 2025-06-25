@@ -4,6 +4,7 @@ import org.voyager.model.Airline;
 import org.voyager.model.ResultDetails;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
+import org.voyager.model.flight.Flight;
 import org.voyager.model.location.*;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
@@ -30,6 +31,8 @@ public interface VoyagerService {
     List<Airport> airports(List<AirportType> type);
     List<Airport> airports(Airline airline);
     List<Airport> airports();
+    List<Flight> getFlights(List<Integer> flightIds);
+    List<Flight> getFlights();
     Boolean isValidIataCode(String airportCode);
     Boolean isDeltaIataCode(String airportCode);
     Airport getAirport(String iata);

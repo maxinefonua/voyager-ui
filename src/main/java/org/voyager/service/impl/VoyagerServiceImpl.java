@@ -19,6 +19,7 @@ import org.voyager.model.Airline;
 import org.voyager.model.ResultDetails;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
+import org.voyager.model.flight.Flight;
 import org.voyager.model.location.*;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
@@ -43,6 +44,7 @@ public class VoyagerServiceImpl implements VoyagerService {
     private RouteService routeService;
     private SearchService searchService;
     private LocationService locationService;
+    private FlightService flightService;
 
     private List<Airport> allAirports;
     private List<Airport> deltaAirports;
@@ -62,6 +64,7 @@ public class VoyagerServiceImpl implements VoyagerService {
         this.routeService = voyager.getRouteService();
         this.searchService = voyager.getSearchService();
         this.locationService = voyager.getLocationService();
+        this.flightService = voyager.getFlightService();
 
         this.allAirports = fetchAirports();
         this.deltaAirports = fetchAirports(Airline.DELTA);
@@ -157,6 +160,32 @@ public class VoyagerServiceImpl implements VoyagerService {
     @Override
     public List<Airport> airports() {
         return allAirports;
+    }
+
+    @Override
+    public List<Flight> getFlights(List<Integer> flightIds) {
+        return fetchFlights(flightIds);
+    }
+
+    @Override
+    public List<Flight> getFlights() {
+        return fetchFlights();
+    }
+
+    private List<Flight> fetchFlights() {
+        Either<ServiceError,List<Flight>> either = flightService.getFlights();
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        return either.get();
+    }
+
+    private List<Flight> fetchFlights(List<Integer> flightIds) {
+        List<Flight> flightList = new ArrayList<>();
+        for (Integer flightId : flightIds) {
+            Either<ServiceError,Flight> either = flightService.getFlight(flightId);
+            if (either.isLeft()) resolveServiceError(either.getLeft());
+            else flightList.add(either.get());
+        }
+        return flightList;
     }
 
     @Override
