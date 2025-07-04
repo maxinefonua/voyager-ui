@@ -46,9 +46,11 @@
                 th:hx-on::after-request="'setPlaceholderToEnabledOption(\'airport-code-search-' + ${iter.index} + '\',\'filtered-list-search-' + ${iter.index} + '\')'"
                 th:hx-on::before-request="'clearAirportMarkerFitToElemId(airportMarker,\'location-display-'+${iter.index}+'\')'"
                 th:hx-target="'#filtered-list-search-'+${iter.index}"
-                hx-trigger="load,change"
+                hx-trigger="change"
                 hx-swap="innerHTML">
-            <option selected value="DELTA">Delta Airports</option>
+            <option hx-get="/airline-options"
+                 hx-trigger="load"
+                 hx-swap="innerHTML"></option>
             <hr class="dropdown-divider">
             <option value="ALL">All Civil</option>
             <option value="MILITARY">Military</option>
@@ -69,7 +71,6 @@
                 >Pin</button>
     </div>
 </div>
-
 
 <!-- INITIAL AIRPORT FORM for SAVED LOCATION -->
 <div th:fragment="airport-form" th:if="${resultDetails.location}">

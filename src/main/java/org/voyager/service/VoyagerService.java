@@ -9,7 +9,7 @@ import org.voyager.model.location.*;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
-import org.voyager.model.route.Path;
+import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.Route;
 
 import java.util.List;
@@ -31,12 +31,12 @@ public interface VoyagerService {
     List<Airport> airports(List<AirportType> type);
     List<Airport> airports(Airline airline);
     List<Airport> airports();
-    List<Flight> getFlights(List<Integer> flightIds);
-    List<Flight> getFlights();
+    List<Flight> getFlights(Integer routeId,boolean isActive);
+    List<Flight> getFlights(Integer routeId,boolean isActive,Airline airline);
     Boolean isValidIataCode(String airportCode);
     Boolean isDeltaIataCode(String airportCode);
     Airport getAirport(String iata);
-    Path getPath(String origin, String destination);
-    Path getPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList);
+    List<PathAirline> getPath(String origin, String destination);
+    List<PathAirline> getPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline);
     Route getRoute(Integer id);
 }

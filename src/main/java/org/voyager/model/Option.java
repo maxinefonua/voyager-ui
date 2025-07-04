@@ -11,7 +11,8 @@ public class Option {
     String display;
     String value;
     String elementName;
-    boolean selected = false;
+    @Builder.Default
+    Boolean selected = false;
 
     public static List<Option> getFilterOptions(TripFilter tripFilter) {
         switch (tripFilter) {

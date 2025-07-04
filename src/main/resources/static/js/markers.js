@@ -264,4 +264,3 @@ function clearAirportMarkerMapFitToLocation(isStart) {
         }
     }
 }
-
