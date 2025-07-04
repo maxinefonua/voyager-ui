@@ -62,7 +62,7 @@ public class TripsController {
         pathExclusions.getRouteIds().add(routeId);
         populateDeltaRoute(routeAttributes, startAirport, endAirport, closerStartAirport, closerEndAirport, pathExclusions);
         model.addAllAttributes(routeAttributes);
-        return "fragments/routes :: delta-route";
+        return "fragments/trips :: delta-route";
     }
 
     @GetMapping("/enable-route")
@@ -73,7 +73,7 @@ public class TripsController {
         pathExclusions.getRouteIds().remove(routeId);
         populateDeltaRoute(routeAttributes, startAirport, endAirport, closerStartAirport,closerEndAirport, pathExclusions);
         model.addAllAttributes(routeAttributes);
-        return "fragments/routes :: delta-route";
+        return "fragments/trips :: delta-route";
     }
 
     @GetMapping("/reverse-path")
@@ -116,7 +116,7 @@ public class TripsController {
         Map<String, Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId, endLocationId, startAirport, endAirport, closerStartAirport, closerEndAirport);
         populateDeltaRoute(reviewPathAttributes, startAirport, endAirport,closerStartAirport,closerEndAirport, pathExclusions);
         model.addAllAttributes(reviewPathAttributes);
-        return "fragments/routes :: review-path";
+        return "fragments/trips :: review-path";
     }
 
     @GetMapping("/radio-selection")
@@ -144,14 +144,14 @@ public class TripsController {
         switch (tripFilter) {
             case LOCATION -> {
                 populateLocationDefaults(model);
-                return List.of(new ModelAndView("fragments/routes :: by-location", model.asMap()),
-                        new ModelAndView("fragments/routes :: review-path", reviewPathAttributes));
+                return List.of(new ModelAndView("fragments/trips :: by-location", model.asMap()),
+                        new ModelAndView("fragments/trips :: review-path", reviewPathAttributes));
             }
             case AIRPORT -> {
                 model.addAttribute("isStart", isStart);
                 model.addAttribute("optionList", getDefaultAirportOptionListForInput());
-                return List.of(new ModelAndView("fragments/routes :: by-airport", model.asMap()),
-                        new ModelAndView("fragments/routes :: review-path", reviewPathAttributes));
+                return List.of(new ModelAndView("fragments/trips :: by-airport", model.asMap()),
+                        new ModelAndView("fragments/trips :: review-path", reviewPathAttributes));
             }
             default -> {
                 LOGGER.error(String.format("/radio-selection called w %s - but not yet implemented",
@@ -227,8 +227,8 @@ public class TripsController {
         populateDeltaRoute(reviewPathAttributes, startAirport, endAirport,closerStartAirport,closerEndAirport, pathExclusions);
 
         return List.of(
-                new ModelAndView("fragments/routes :: update-airport-input", model.asMap()),
-                new ModelAndView("fragments/routes :: review-path", reviewPathAttributes)
+                new ModelAndView("fragments/trips :: update-airport-input", model.asMap()),
+                new ModelAndView("fragments/trips :: review-path", reviewPathAttributes)
         );
     }
 
@@ -286,9 +286,9 @@ public class TripsController {
 
         model.addAttribute("isStart", isStart);
         return List.of(
-                new ModelAndView("fragments/routes :: airport-select-options-for-location", model.asMap()),
-                new ModelAndView("fragments/routes :: review-path", reviewPathAttributes),
-                new ModelAndView("fragments/routes :: closer-airports", closerAttributes)
+                new ModelAndView("fragments/trips :: airport-select-options-for-location", model.asMap()),
+                new ModelAndView("fragments/trips :: review-path", reviewPathAttributes),
+                new ModelAndView("fragments/trips :: closer-airports", closerAttributes)
         );
     }
 
@@ -339,8 +339,8 @@ public class TripsController {
             model.addAttribute("closerAirportOptionList", closerAirportOptionList);
         }
         model.addAttribute("isStart", isStart);
-        return List.of(new ModelAndView("fragments/routes :: closer-airport-options-for-location", model.asMap()),
-                new ModelAndView("fragments/routes :: review-path", reviewPathAttributes));
+        return List.of(new ModelAndView("fragments/trips :: closer-airport-options-for-location", model.asMap()),
+                new ModelAndView("fragments/trips :: review-path", reviewPathAttributes));
     }
 
     @GetMapping("/trips/nearby-airports-location")
@@ -365,8 +365,8 @@ public class TripsController {
             model.addAttribute("optionList", optionList);
         }
         model.addAttribute("isStart", isStart);
-        return List.of(new ModelAndView("fragments/routes :: airport-select-options-for-location", model.asMap()),
-                new ModelAndView("fragments/routes :: review-path", reviewPathAttributes));
+        return List.of(new ModelAndView("fragments/trips :: airport-select-options-for-location", model.asMap()),
+                new ModelAndView("fragments/trips :: review-path", reviewPathAttributes));
     }
 
     @GetMapping("/airport-options")
@@ -389,8 +389,8 @@ public class TripsController {
                 startAirport, endAirport, closerStartAirport, closerEndAirport);
 
         return List.of(new ModelAndView("fragments/options :: trip-select-options", model.asMap()),
-                new ModelAndView("fragments/routes :: review-path", reviewPathAttributes),
-                new ModelAndView("fragments/routes :: update-airport-input", airportInputAttributes));
+                new ModelAndView("fragments/trips :: review-path", reviewPathAttributes),
+                new ModelAndView("fragments/trips :: update-airport-input", airportInputAttributes));
     }
 
     @GetMapping("/location-options")
@@ -406,7 +406,7 @@ public class TripsController {
         model.addAttribute("isStart", isStart);
         model.addAttribute("optionList", getLocationOptionsList(locationFilter));
         return List.of(new ModelAndView("fragments/options :: trip-select-options", model.asMap()),
-                new ModelAndView("fragments/routes :: review-path", reviewPathAttributes));
+                new ModelAndView("fragments/trips :: review-path", reviewPathAttributes));
     }
 
     @GetMapping("/airline-options")
@@ -620,7 +620,7 @@ public class TripsController {
         mavAttributes.put("airportFilter", airportFilter.name());
         if (closerFilter != null) mavAttributes.put("closerFilter", closerFilter.name());
         else mavAttributes.put("closerFilter", closerFilter);
-        return new ModelAndView("fragments/routes :: trip-input", mavAttributes);
+        return new ModelAndView("fragments/trips :: trip-input", mavAttributes);
     }
 
     private Map<String, Object> populateReviewPathAttributes(Integer startLocationId, Integer endLocationId,
