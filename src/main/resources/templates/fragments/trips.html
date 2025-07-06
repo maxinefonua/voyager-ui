@@ -87,11 +87,7 @@
                 <div style="height:180px"
                      class="overflow-auto ps-4 pe-4">
                     <div id="trip-input-start">
-                        <div th:replace="~{fragments/trips :: radio-trip-selection(isStart=true)}"></div>
-                        <div id="select-start" class="mt-2 d-grid">
-                            <div th:replace="~{fragments/trips :: by-airport(airportCode=null,closerFilter=null,nonDeltaCode=null,airportOptionList=null,airportFilter=${airportFilterStart},selection=${tripFilterStart},isStart=true,optionList=${optionList})}"></div>
-                            <div th:replace="~{fragments/trips :: by-location(airportFilter=${airportFilterStart},locationFilter=${locationFilter},selection=${tripFilterStart},isStart=true,optionList=${optionList},airportOptionList=${airportOptionList},closerAirportOptionList=${closerAirportOptionList},closerFilter=${closerFilter})}"></div>
-                        </div>
+                        <div th:replace="~{fragments/trips :: trip-filter(isStart=true,tripFilter=${tripFilterStart},optionList=${optionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
                     </div>
                 </div>
                 <h4 id="to-city">To</h4>
@@ -140,6 +136,79 @@
         </div>
     </div>
 </div>
+
+<!-- TRIP FILTER START/END-->
+<div th:fragment="trip-filter(isStart,tripFilter,optionList,inputText,inputValue)"
+     th:id="${isStart}?'trip-input-start':'trip-input-end'"
+     class="input-group row mt-2">
+    <select class="form-select" style="max-width:170px"
+            th:id="${isStart}?'start-trip-filter':'end-trip-filter'"
+            hx-get="/trip-filter-options"
+            th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
+            hx-trigger="change"
+            th:hx-include="${isStart}?
+                '#start-selection,#select-airport-end-code-for-location,
+                #closer-airport-end-code-for-location'
+                :
+                '#end-selection,#select-airport-start-code-for-location,
+                #closer-airport-start-code-for-location'"
+            hx-swap="innerHTML"
+            name="tripFilter"
+            th:hx-on::after-request="${isStart}?'resetTripInputElements(' + ${isStart} + ',this.value,\'start-input-text\',\'start-input-value\')':'resetTripInputElements(' + ${isStart} + ',this.value,\'end-input-text\',\'end-input-value\')'"
+            th:hx-target="${isStart}?'#input-start-options':'#input-end-options'">
+        <option th:selected="${tripFilter == null or tripFilter == 'AIRPORT'}" value="AIRPORT">By Airport</option>
+        <option th:selected="${tripFilter != null and tripFilter == 'LOCATION'}" value="LOCATION">By Location</option>
+    </select>
+    <datalist th:id="${isStart}?'input-start-options':'input-end-options'">
+        <option th:replace="~{fragments/options :: trip-input-options(optionList=${optionList},tripFilter=${tripFilter})}"></option>
+    </datalist>
+    <input th:id="${isStart}?'start-input-value':'end-input-value'"
+           th:value="${inputValue}"
+           th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
+           th:hx-include="${isStart}?'#start-trip-filter':'#end-trip-filter'"
+           hx-trigger="input changed">
+    <input th:id="${isStart}?'start-input-text':'end-input-text'"
+           class="form-control"
+           name="inputText"
+           th:placeholder="${tripFilter == null or tripFilter == 'AIRPORT'}?'Search Airport':'Search Location'"
+           th:list="${isStart}?'input-start-options':'input-end-options'"
+           th:oninput="${isStart}?'debouncedProcessTripInput(this,\'start-input-value\',\'start-trip-filter\',\'input-start-options\')'
+           :
+           'debouncedProcessTripInput(this,\'end-input-value\',\'end-trip-filter\',\'input-end-options\')'"
+           th:value="${inputText}">
+    </div>
+
+<!--AIRPORT INPUT replacing fragment-->
+<input th:fragment="trips-input(isStart,inputText)"
+       th:id="${isStart}?'input-airport-start-code-for-location':'input-airport-end-code-for-location'"
+       class="form-control"
+       hx-get="/trips/airport-input"
+       hx-trigger="input changed delay:1s"
+       th:hx-target="${isStart}?'#airport-input-start':'#airport-input-end'"
+       th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
+       th:name="${isStart}?'startAirportCode':'endAirportCode'"
+       th:hx-include="${isStart}?
+               '#select-end-options,#select-airport-end-code-for-location,
+               #closer-airport-end-code-for-location,#airport-input-end,
+               #route-exclusion-form'
+               :
+               '#select-start-options,#select-airport-start-code-for-location,
+               #closer-airport-start-code-for-location,#airport-input-start,
+               #route-exclusion-form'"
+       th:placeholder="${isStart}?'Enter Start Airport':'Enter End Airport'"
+       th:list="${isStart}?'input-start-options':'input-end-options'"
+       th:value="${inputText}"
+       th:oninput="'debouncedAddAirportToMap(this,'+ ${isStart} + ')'">
+
+<!--AIRPORT INPUT DATALIST replacing fragment-->
+<datalist th:fragment="input-datalist(isStart,optionList)"
+          th:id="${isStart}?'input-start-options':'input-end-options'">
+    <option th:each="option,iter : ${optionList}"
+            th:value="${option.value}"
+            th:text="${option.display}"></option>
+</datalist>
+
+<!--actual input value/airport code OR location sourceId-->
 
 <!--REVERSE REPLACE TRIP input START/END-->
 <div th:fragment="trip-input"
@@ -663,8 +732,8 @@
                 th:hx-on::after-request="${isStart}?'resetMapAndAirportInput(\'input-airport-start-code-for-location\',true)':'resetMapAndAirportInput(\'input-airport-end-code-for-location\',false)'"
                 name="airportFilter"
                 th:hx-target="${isStart}?'#select-start-options':'#select-end-options'">
-            <option th:selected="${airportFilter == null or airportFilter == 'CIVIL'}" value="CIVIL">Civil Airports</option>
-            <option th:selected="${airportFilter != null and airportFilter == 'MILITARY'}" value="MILITARY">Military</option>
+            <option th:selected="${airportFilter == null or airportFilter == 'CIVIL'}" value="AIRPORT">By Airport</option>
+            <option th:selected="${airportFilter != null and airportFilter == 'MILITARY'}" value="LOCATION">By Location</option>
         </select>
         <datalist th:id="${isStart}?'select-start-options':'select-end-options'">
             <option th:each="option,iter : ${optionList}"

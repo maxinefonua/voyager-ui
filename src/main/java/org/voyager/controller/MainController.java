@@ -143,6 +143,7 @@ public class MainController {
                 new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
     }
+    
     @GetMapping("/review-location-reset")
     public Collection<ModelAndView> resetLocationReview(@RequestParam Boolean fromOrigin,
                                                         @RequestParam(required = false) Integer startLocationId,

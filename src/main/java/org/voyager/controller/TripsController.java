@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
@@ -18,6 +19,8 @@ import org.voyager.model.airport.AirportType;
 import org.voyager.model.flight.Flight;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.Status;
+import org.voyager.model.response.SearchResult;
+import org.voyager.model.result.ResultSearch;
 import org.voyager.model.route.Path;
 import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.Route;
@@ -27,6 +30,7 @@ import java.time.*;
 import java.util.*;
 
 import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
+import static org.voyager.utils.ConstantsUI.SEARCH_TEXT_ATTRIBUTE_NAME;
 
 @Controller
 public class TripsController {
@@ -343,6 +347,25 @@ public class TripsController {
                 new ModelAndView("fragments/trips :: review-path", reviewPathAttributes));
     }
 
+    @GetMapping("/lookup")
+    public String lookup(Model model, String inputText)  {
+        List<Option> optionList = new ArrayList<>();
+        SearchResult<ResultDetails> voyagerResponse = voyagerService.lookupWithDetails(inputText, 0, 10);
+        List<ResultDetails> lookupResults = voyagerResponse.getResults();
+        Integer totalResultsCount = voyagerResponse.getResultCount();
+        optionList.addAll(lookupResults.stream().map(resultDetails -> {
+            ResultSearch resultSearch = resultDetails.getResultSearch();
+            String displayText = String.format("%s, %s | %s",resultSearch.getName(),
+                    resultSearch.getSubdivision(),resultSearch.getCountryName());
+            String valueText = String.format("%s=%s",resultSearch.getSource(),resultSearch.getSourceId());
+            return Option.builder().display(displayText).value(valueText).build();
+        }).toList());
+        model.addAttribute("optionList",optionList);
+        model.addAttribute("tripFilter",TripFilter.LOCATION);
+        return "fragments/options :: trip-input-options";
+    }
+
+
     @GetMapping("/trips/nearby-airports-location")
     public Collection<ModelAndView> nearbyAirports(Model model,
                                                    Integer startLocationId, Integer endLocationId,
@@ -389,6 +412,35 @@ public class TripsController {
                 startAirport, endAirport, closerStartAirport, closerEndAirport);
 
         return List.of(new ModelAndView("fragments/options :: trip-select-options", model.asMap()),
+                new ModelAndView("fragments/trips :: review-path", reviewPathAttributes),
+                new ModelAndView("fragments/trips :: update-airport-input", airportInputAttributes));
+    }
+
+    @GetMapping("/trip-filter-options")
+    public Collection<ModelAndView> getTripFilterOptions(Model model,
+                                                      Integer startLocationId, Integer endLocationId,
+                                                      String startAirport, String endAirport,
+                                                      String closerStartAirport, String closerEndAirport,
+                                                         TripFilter tripFilter,
+                                                      Boolean isStart) {
+        LOGGER.debug(String.format("/trip-filter-options called with tripFilter %s",
+                tripFilter.name()));
+        List<Option> optionList = new ArrayList<>();
+        if (tripFilter.equals(TripFilter.AIRPORT))
+            optionList.addAll(getAirportOptionsListForInput(AirportFilter.CIVIL));
+        if (tripFilter.equals(TripFilter.LOCATION))
+            optionList.addAll(getLocationOptionsList());
+        model.addAttribute("tripFilter",tripFilter.name());
+        model.addAttribute("isStart", isStart);
+        model.addAttribute("optionList", optionList);
+
+        Map<String, Object> airportInputAttributes = new HashMap<>();
+        airportInputAttributes.put("isStart", isStart);
+
+        Map<String, Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId, endLocationId,
+                startAirport, endAirport, closerStartAirport, closerEndAirport);
+
+        return List.of(new ModelAndView("fragments/options :: trip-input-options", model.asMap()),
                 new ModelAndView("fragments/trips :: review-path", reviewPathAttributes),
                 new ModelAndView("fragments/trips :: update-airport-input", airportInputAttributes));
     }
@@ -484,6 +536,24 @@ public class TripsController {
                         .display(String.format("%s, %s in %s", location.getName(),
                                 location.getSubdivision(), location.getCountryCode()))
                         .value(String.valueOf(location.getId().intValue())).build())
+                .toList();
+    }
+
+    private List<Option> getAllLocationOptionsList() {
+        return voyagerService.getLocations().stream().map(location -> Option.builder()
+                        .elementName(String.format("%s-%s", location.getName(), location.getId()))
+                        .display(String.format("%s, %s in %s", location.getName(),
+                                location.getSubdivision(), location.getCountryCode()))
+                        .value(String.valueOf(location.getId().intValue())).build())
+                .toList();
+    }
+
+    private List<Option> getLocationOptionsList() {
+        return voyagerService.getLocations().stream().map(location -> Option.builder()
+                        .elementName(String.format("%s-%s", location.getName(), location.getId()))
+                        .display(String.format("%s, %s | %s", location.getName(),
+                                location.getSubdivision(), location.getCountryCode()))
+                        .value(String.format("%s=%s",location.getSource().name(),location.getSourceId())).build())
                 .toList();
     }
 

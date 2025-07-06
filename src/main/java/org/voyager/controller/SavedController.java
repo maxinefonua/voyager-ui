@@ -63,13 +63,13 @@ public class SavedController {
         return "fragments/locations :: location-details";
     }
 
-    @GetMapping("/lookup")
-    public String getSavedLocationOptions(Model model, @RequestParam Boolean isStart) {
-        List<Location> locations = voyagerService.getLocations();
-        model.addAttribute("locations", locations);
-        model.addAttribute("isStart", isStart);
-        return "fragments/locations :: saved-locations-options";
-    }
+//    @GetMapping("/lookup")
+//    public String getSavedLocationOptions(Model model, @RequestParam Boolean isStart) {
+//        List<Location> locations = voyagerService.getLocations();
+//        model.addAttribute("locations", locations);
+//        model.addAttribute("isStart", isStart);
+//        return "fragments/locations :: saved-locations-options";
+//    }
 
     @GetMapping("/unpin-airport-location")
     public String unpinAirport(Model model, @NonNull String airportCode, @NonNull Integer locationId) {

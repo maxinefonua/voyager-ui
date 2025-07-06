@@ -13,3 +13,4 @@ function debounce(func, delay) {
 const debouncedAirportInput = debounce(checkAirportInput, 1000);
 const debouncedAddAirportToMap = debounce(addAirportToMap, 1000);
 const debouncedPostPinAirport = debounce(postPinAirport, 100);
+const debouncedProcessTripInput = debounce(processTripInput, 500);

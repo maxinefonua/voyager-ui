@@ -42,4 +42,11 @@
         th:attr="data-element-name=${option.elementName}?${option.elementName}"
         th:value="${option.value}"
         th:text="${option.display}"></option>
+
+<!--FILTERED OPTIONS FOR TRIP SELECT-->
+<option th:fragment="trip-input-options(optionList,tripFilter)"
+        th:each="option,iter : ${optionList}"
+        th:text="${tripFilter == null or tripFilter == 'AIRPORT'}?${option.value}"
+        th:value="${option.display}"
+        th:data-value="${option.value}"></option>
 </html>
