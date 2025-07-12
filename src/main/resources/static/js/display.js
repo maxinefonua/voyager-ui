@@ -33,6 +33,20 @@ function zoomToLocation(isStart,targetElemId,reviewElem) {
     scrollElemToTarget(targetElemId);
 }
 
+function removeLocationFromMap(isStart) {
+    if (isStart) clearStartMarkers();
+    else clearEndMarkers();
+}
+
+function mapFitTripScrollTo(targetElemId) {
+    event.preventDefault();
+    closeMarkerPopups();
+    if (startMarker && endMarker) mapFitBothMarkers(startMarker,endMarker);
+    else recenterMap();
+    scrollElemToTarget(targetElemId);
+}
+
+
 function addLocationToMap(isStart,longitude,latitude,bounds,stringOfCodesArray) {
     const trimmedArray = stringOfCodesArray.replace(/[\[\]]/g, '');
     const airportCodes = trimmedArray.split(', '); // Split by comma and space

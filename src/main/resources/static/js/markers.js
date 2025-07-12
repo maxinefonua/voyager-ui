@@ -262,6 +262,10 @@ function clearStartMarkers() {
         nonDeltaStartMarker.remove();
         nonDeltaStartMarker = null;
     }
+    airportStartMarkers.forEach((marker,iter) => {
+        marker.remove();
+    });
+    airportStartMarkers.length = 0;
 }
 
 function clearEndMarkers() {
@@ -277,6 +281,10 @@ function clearEndMarkers() {
         nonDeltaEndMarker.remove();
         nonDeltaEndMarker = null;
     }
+    airportEndMarkers.forEach((marker,iter) => {
+        marker.remove();
+    });
+    airportEndMarkers.length = 0;
 }
 
 function clearAirportMarkerMapFitToLocation(isStart) {

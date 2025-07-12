@@ -59,6 +59,14 @@ function airportIncluded(includeButtonElem,inputElemId) {
     }
 }
 
+function checkReverse(reverseButtonElem,startInputValueElem,endInputValueElem) {
+    if (startInputValueElem.value.length > 0 && endInputValueElem.value.length > 0) {
+        reverseButtonElem.disabled = false;
+    } else {
+        reverseButtonElem.disabled = true;
+    }
+}
+
 function processAirportInput(isStart,inputElem,includeButtonElemId,locationMarker) {
     const selectedOption = Array.from(inputElem.list.options)
         .find(option => option.value === inputElem.value);
