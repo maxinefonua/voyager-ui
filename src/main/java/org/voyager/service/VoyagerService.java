@@ -9,6 +9,7 @@ import org.voyager.model.location.*;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
+import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.Route;
 
@@ -20,6 +21,7 @@ public interface VoyagerService {
     LookupAttribution lookupAttribution();
     List<Airport> nearbyAirports(double latitude, double longitude, int limit,AirportType type);
     List<Airport> nearbyAirports(double latitude, double longitude, int limit,Airline airline);
+    List<Airport> nearbyAirportsAllActiveAirlines(double latitude, double longitude, int limit);
     List<Location> getLocations();
     List<Location> getLocations(Status status);
     Location getLocation(Integer id);
@@ -39,4 +41,5 @@ public interface VoyagerService {
     List<PathAirline> getPath(String origin, String destination);
     List<PathAirline> getPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline);
     Route getRoute(Integer id);
+    ResultSearchFull getResultSearchFull(String sourceId);
 }

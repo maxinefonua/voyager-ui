@@ -24,6 +24,7 @@ import org.voyager.model.location.*;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
+import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.Route;
 import org.voyager.service.*;
@@ -104,6 +105,12 @@ public class VoyagerServiceImpl implements VoyagerService {
     @Override
     public List<Airport> nearbyAirports(double latitude, double longitude, int limit, Airline airline) {
         return fetchNearbyAirports(latitude,longitude,limit,airline);
+    }
+
+    @Override
+    public List<Airport> nearbyAirportsAllActiveAirlines(double latitude, double longitude, int limit) {
+        List<Airline> airlines = Arrays.asList(Airline.values());
+        return fetchNearbyAirports(latitude,longitude,limit,airlines);
     }
 
     @Override
@@ -204,6 +211,11 @@ public class VoyagerServiceImpl implements VoyagerService {
     @Override
     public Route getRoute(Integer id) {
         return fetchRoute(id);
+    }
+
+    @Override
+    public ResultSearchFull getResultSearchFull(String sourceId) {
+        return fetchResultSearchFull(sourceId);
     }
 
     private List<Flight> fetchFlights(Integer routeId, boolean isActive) {
@@ -335,6 +347,12 @@ public class VoyagerServiceImpl implements VoyagerService {
         return either.get();
     }
 
+    private ResultSearchFull fetchResultSearchFull(String sourceId) {
+        Either<ServiceError,ResultSearchFull> either = searchService.fetchResultSearchFull(sourceId);
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        return either.get();
+    }
+
     private List<Airport> fetchNearbyAirports(double latitude, double longitude, int limit) {
         Either<ServiceError,List<Airport>> either = airportService.getNearbyAirports(longitude,latitude,limit);
         if (either.isLeft()) resolveServiceError(either.getLeft());
@@ -352,6 +370,13 @@ public class VoyagerServiceImpl implements VoyagerService {
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
+
+    private List<Airport> fetchNearbyAirports(double latitude, double longitude, int limit, List<Airline> airlineList) {
+        Either<ServiceError,List<Airport>> either = airportService.getNearbyAirports(longitude,latitude,limit,airlineList);
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        return either.get();
+    }
+
 
     private List<Airport> fetchNearbyAirports(double latitude, double longitude, int limit, AirportType type, Airline airline) {
         Either<ServiceError, List<Airport>> either = airportService.getNearbyAirports(longitude, latitude, limit,type,airline);

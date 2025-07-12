@@ -46,12 +46,6 @@ a.list-group-item-action.active .scroll-nav-icon {
   stroke: #FFFFFF !important; /* Optional: if you have strokes */
 }
 
-.airport-marker-non-delta {
-  background-image: url(../images/airport-marker.svg);
-  background-size: cover;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 0px;
+.airport-marker path {
+  fill: #fd0d6e;
 }
