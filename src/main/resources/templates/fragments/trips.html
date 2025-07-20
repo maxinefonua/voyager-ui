@@ -545,7 +545,6 @@
       id="path-airline-list"
       class="accordion list-group mt-4"
       name="pathExclusions"
-      th:hx-on::after-settle="'loadAirlineOptions(' + ${airlineOptionList} + ')'"
       th:object="${pathExclusions}">
     <div th:if="${#lists.isEmpty(pathAirlineList)}"
          class="list-group-item list-group-item-secondary">

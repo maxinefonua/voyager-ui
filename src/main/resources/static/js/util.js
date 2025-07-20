@@ -10,9 +10,3 @@ function replaceTargetWithLoading(targetElemId) {
             <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
         </div>`
 }
-
-function loadAirlineOptions(airlineOptionList) {
-    if (airlineOptionList) {
-        console.log(airlineOptionList);
-    } else console.log('airlineOptionList null');
-}
