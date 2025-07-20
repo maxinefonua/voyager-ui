@@ -126,7 +126,7 @@
                             </button>
                             <div th:replace="~{fragments/trips :: display-review-initial(isStart=false,tripFilter='LOCATION',location=${endLocation},airport=${endAirport})}"></div>
                         </div>
-                        <form th:replace="~{fragments/trips :: display-path(pathExclusions=null,pathAirlineList=null,startLocation=null,endLocation=null,startAirportCodes=null,endAirportCodes=null)}"></form>
+                        <div th:replace="~{fragments/trips :: display-path(airlineOptionList=null,pathExclusions=null,pathAirlineList=null,pathAirportsList=null,startLocation=null,endLocation=null,startAirportCodes=null,endAirportCodes=null)}"></div>
                     </div>
                 </div>
             </div>
@@ -170,7 +170,7 @@
 <div th:fragment="pin-airports-initial(isStart)"
      th:id="${isStart}?'include-airports-start':'include-airports-end'"
      class="input-group row mt-2">
-    <div class="col p-0">
+    <div class="col p-0 pt-1">
         <input placeholder="Enter Airport" class="form-control" disabled>
     </div>
     <button class="btn btn-secondary pe-0 ps-0" style="display:none" disabled>+</button>
@@ -181,10 +181,10 @@
      th:hx-swap-oob="${isStart}?'outerHTML:#include-airports-start':'outerHTML:#include-airports-end'"
      th:id="${isStart}?'include-airports-start':'include-airports-end'"
      class="input-group row mt-2">
-    <div class="d-flex p-0 pb-2 overflow-x-auto" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
+    <div class="d-flex p-0 pb-3 overflow-x-auto" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
         <form th:replace="~{fragments/trips :: airport-codes(isStart=${isStart},airportCodes=${airportCodes})}"></form>
         <input th:id="${isStart}?'pin-airport-input-start':'pin-airport-input-end'"
-               class="col-auto col-md form-control"
+               class="mt-1 col-auto col-md form-control"
                type="text" aria-label="Airport"
                name="airportCode"
                th:placeholder="${#lists.isEmpty(airportCodes.codes)}?'Enter Airport':'Enter Additional Airport'"
@@ -210,7 +210,7 @@
 
 <!--UPDATING airport codes form add/remove-->
 <form th:fragment="airport-codes(isStart, airportCodes)"
-      class="d-flex"
+      class="mt-1 d-flex"
       hx-get="/build-path"
       hx-include="#start-input-value,#end-input-value,#display-path"
       hx-target="#display-path"
@@ -500,81 +500,112 @@
     </div>
 </form>
 
-<form th:fragment="display-path(pathExclusions,pathAirlineList,startLocation,endLocation,startAirportCodes,endAirportCodes)"
+<!--updating DISPLAY PATH with start and end locations + airports -->
+<div th:fragment="display-path(airlineOptionList,startLocation,endLocation,startAirportCodes,endAirportCodes)"
+     th:id="display-path"
+     class="list-group">
+    <div th:if="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+         class="list-group-item list-group-item-secondary">
+        <span th:if="${startLocation == null or endLocation == null}">Both Locations Required</span>
+        <span th:if="${(startLocation != null and endLocation != null) and (#lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes))}">Airports Required for Both Locations</span>
+    </div>
+    <div th:unless="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+         class="list-group">
+        <div class="row justify-content-center">
+            <input type="hidden" id="start-location-id" name="startLocationId" th:value="${startLocation.id}">
+            <input type="hidden" id="end-location-id" name="endLocationId" th:value="${endLocation.id}">
+            <select hx-get="/path"
+                    hx-trigger="load,change"
+                    hx-include="#start-location-id,#end-location-id"
+                    hx-target="#path-airline-list"
+                    hx-swap="outerHTML" style="max-width:130px"
+                    hx-on::before-request="replaceTargetWithLoading('path-airline-list')"
+                    name="airlineSelection" class="form-select">
+                <option selected value="ALL">All Airlines</option>
+                <option th:each="option,iter : ${airlineOptionList}"
+                        th:value="${option.value}"
+                        th:text="${option.display}"
+                        th:disabled="${option.disabled}"></option>
+            </select>
+        </div>
+    </div>
+    <form th:unless="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+          class="accordion list-group mt-4"
+          id="path-airline-list">
+        <div class="list-group-item">
+            <i role="status">Loading...</i>
+            <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+        </div>
+    </form>
+</div>
+
+<!--updating PATH LIST BETWEEN VALID START END AIRPORTS -->
+<form th:fragment="path-airline(pathAirlineList,pathAirportsList,pathExclusions)"
+      th:if="${pathAirlineList}"
+      id="path-airline-list"
+      class="accordion list-group mt-4"
       name="pathExclusions"
-      th:id="display-path"
+      th:hx-on::after-settle="'loadAirlineOptions(' + ${airlineOptionList} + ')'"
       th:object="${pathExclusions}">
-    <div class="accordion list-group mt-2">
-        <div th:unless="${pathAirlineList}"
-             class="list-group-item list-group-item-secondary">
-            <span th:if="${startLocation == null or endLocation == null}">Both Locations Required</span>
-            <span th:if="${(startLocation != null and endLocation != null) and (#lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes))}">Airports Required for Both Locations</span>
-        </div>
-        <div th:if="${pathAirlineList}">
-            <div class="row">
-                <select name="airline" class="form-select">
-                    <option selected disabled>Filter By Airline</option>
-                    <option th:each="option,iter : ${airlineOptionList}" th:value="${option.value}" th:text="option.display"></option>
-                </select>
-            </div>
-        </div>
-        <div th:if="${pathAirlineList != null and #lists.isEmpty(pathAirlineList)}"
-             class="list-group-item list-group-item-secondary">
-            <span>No Paths Found</span>
-        </div>
-        <div th:if="${pathAirlineList != null and not #lists.isEmpty(pathAirlineList)}"
-             th:each="pathAirline,iter : ${pathAirlineList}"
-             class="accordion-item">
-            <button type="button"
-                    class="accordion-button collapsed list-group-item list-group-item-action"
-                    data-bs-toggle="collapse"
-                    th:data-bs-target="'#path-info-'+${iter.index}"
-                    aria-expanded="false"
-                    th:aria-controls="'path-info-'+${iter.index}">
-                <i th:each="route,routeIter : ${pathAirline.routeList}"><span th:text="${routeIter.first}?${route.origin}+' → '+${route.destination}:' → '+${route.destination}"></span></i>
-            </button>
-            <div class="accordion-collapse collapse"
-                 th:id="'path-info-'+${iter.index}">
-                <div class="accordion-body">
-                    <div class="row justify-content-center mb-4">
-                        <div class="col-6 col-lg-4">
-                            <span th:utext="'<strong>Origin: </strong>' + ${pathAirportsList[iter.index][0].name}"></span>
-                        </div>
-                        <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${pathAirportsList[iter.index][#lists.size(pathAirportsList[iter.index])-1].name}"></div>
-                    </div>
-<!--                    <table class="table table-hover">-->
-<!--                        <thead class="table-light">-->
-<!--                        <tr>-->
-<!--                            <th scope="col">Flight Number</th>-->
-<!--                            <th scope="col">Departure Time</th>-->
-<!--                            <th scope="col">Arrival Time</th>-->
-<!--                            <th scope="col">Duration</th>-->
-<!--                        </tr>-->
-<!--                        </thead>-->
-<!--                        <tbody>-->
-<!--                        <tr th:each="flight : ${routeFlightList[iter.index]}">-->
-<!--                            <td th:text="${flight.flightNumber}"></td>-->
-<!--                            <td th:text="${#temporals.format(flight.zonedDateTimeDeparture.toLocalTime(), 'h:mm a')}"></td>-->
-<!--                            <td th:text="${#temporals.format(flight.zonedDateTimeArrival.toLocalTime(), 'h:mm a')}"></td>-->
-<!--                            <td>-->
-<!--                                <span th:if="${flight.duration.toDaysPart() > 0}" th:text="${flight.duration.toDaysPart()} + 'days '"></span>-->
-<!--                                <span th:if="${flight.duration.toHoursPart() > 0}" th:text="${flight.duration.toHoursPart()} + 'hrs '"></span>-->
-<!--                                <span th:if="${flight.duration.toMinutesPart() > 0}" th:text="${flight.duration.toMinutesPart()} + 'min'"></span>-->
-<!--                            </td>-->
-<!--                        </tr>-->
-<!--                        </tbody>-->
-<!--                    </table>-->
-<!--                    <button hx-get="/exclude-route" name="routeId"-->
-<!--                            hx-swap="outerHTML transition:true"-->
-<!--                            type="button" class="btn btn-outline-danger"-->
-<!--                            hx-include="#route-exclusion-form,-->
-<!--                                        #select-airport-start-code-for-location,-->
-<!--                                        #select-airport-end-code-for-location,-->
-<!--                                        #closer-airport-start-code-for-location,-->
-<!--                                        #closer-airport-end-code-for-location"-->
-<!--                            hx-target="#route-exclusion-form"-->
-<!--                            th:value="${route.id}">Exclude Route</button>-->
+    <div th:if="${#lists.isEmpty(pathAirlineList)}"
+         class="list-group-item list-group-item-secondary">
+        <span>No Paths Found</span>
+    </div>
+    <div th:unless="${#lists.isEmpty(pathAirlineList)}"
+         th:each="pathAirline,iter : ${pathAirlineList}"
+         class="accordion-item">
+        <button type="button"
+                class="accordion-button collapsed list-group-item list-group-item-action"
+                data-bs-toggle="collapse"
+                th:data-bs-target="'#path-info-'+${iter.index}"
+                aria-expanded="false"
+                th:aria-controls="'path-info-'+${iter.index}">
+            <i th:each="route,routeIter : ${pathAirline.routeList}"><span th:text="${routeIter.first}?${route.origin}+' → '+${route.destination}:' → '+${route.destination}"></span></i>
+        </button>
+        <div class="accordion-collapse collapse"
+             th:id="'path-info-'+${iter.index}">
+            <div class="accordion-body">
+                <div class="row justify-content-center mb-4">
+                    <span th:utext="'Airline: ' + ${pathAirline.airline.displayText}"></span>
                 </div>
+                <div class="row justify-content-center mb-4">
+                    <div class="col-6 col-lg-4">
+                        <span th:utext="'<strong>Origin: </strong>' + ${pathAirportsList[iter.index][0].name}"></span>
+                    </div>
+                    <div class="col-6 col-lg-4" th:utext="'<strong>Destination: </strong>' + ${pathAirportsList[iter.index][#lists.size(pathAirportsList[iter.index])-1].name}"></div>
+                </div>
+                <!--                    <table class="table table-hover">-->
+                <!--                        <thead class="table-light">-->
+                <!--                        <tr>-->
+                <!--                            <th scope="col">Flight Number</th>-->
+                <!--                            <th scope="col">Departure Time</th>-->
+                <!--                            <th scope="col">Arrival Time</th>-->
+                <!--                            <th scope="col">Duration</th>-->
+                <!--                        </tr>-->
+                <!--                        </thead>-->
+                <!--                        <tbody>-->
+                <!--                        <tr th:each="flight : ${routeFlightList[iter.index]}">-->
+                <!--                            <td th:text="${flight.flightNumber}"></td>-->
+                <!--                            <td th:text="${#temporals.format(flight.zonedDateTimeDeparture.toLocalTime(), 'h:mm a')}"></td>-->
+                <!--                            <td th:text="${#temporals.format(flight.zonedDateTimeArrival.toLocalTime(), 'h:mm a')}"></td>-->
+                <!--                            <td>-->
+                <!--                                <span th:if="${flight.duration.toDaysPart() > 0}" th:text="${flight.duration.toDaysPart()} + 'days '"></span>-->
+                <!--                                <span th:if="${flight.duration.toHoursPart() > 0}" th:text="${flight.duration.toHoursPart()} + 'hrs '"></span>-->
+                <!--                                <span th:if="${flight.duration.toMinutesPart() > 0}" th:text="${flight.duration.toMinutesPart()} + 'min'"></span>-->
+                <!--                            </td>-->
+                <!--                        </tr>-->
+                <!--                        </tbody>-->
+                <!--                    </table>-->
+                <!--                    <button hx-get="/exclude-route" name="routeId"-->
+                <!--                            hx-swap="outerHTML transition:true"-->
+                <!--                            type="button" class="btn btn-outline-danger"-->
+                <!--                            hx-include="#route-exclusion-form,-->
+                <!--                                        #select-airport-start-code-for-location,-->
+                <!--                                        #select-airport-end-code-for-location,-->
+                <!--                                        #closer-airport-start-code-for-location,-->
+                <!--                                        #closer-airport-end-code-for-location"-->
+                <!--                            hx-target="#route-exclusion-form"-->
+                <!--                            th:value="${route.id}">Exclude Route</button>-->
             </div>
         </div>
     </div>

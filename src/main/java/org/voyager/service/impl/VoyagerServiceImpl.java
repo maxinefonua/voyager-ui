@@ -26,6 +26,7 @@ import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.PathAirline;
+import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
 import org.voyager.service.*;
 
@@ -192,17 +193,17 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
-    public List<PathAirline> getPath(List<String> originList, List<String> destinationList) {
+    public PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList) {
         return fetchPath(originList,destinationList);
     }
 
     @Override
-    public List<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline) {
+    public PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline) {
         return fetchPath(originList,destinationList, excludeAirportList,excludeRouteIdList,airline);
     }
 
     @Override
-    public List<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
+    public PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
         return fetchPath(originList,destinationList, excludeAirportList,excludeRouteIdList);
     }
 
@@ -214,6 +215,13 @@ public class VoyagerServiceImpl implements VoyagerService {
     @Override
     public ResultSearchFull getResultSearchFull(String sourceId) {
         return fetchResultSearchFull(sourceId);
+    }
+
+    @Override
+    public List<Airline> getAirlines(List<String> iataList) {
+        Either<ServiceError,List<Airline>> either = airportService.getAirlines(iataList);
+        if (either.isLeft()) resolveServiceError(either.getLeft());
+        return either.get();
     }
 
     private List<Flight> fetchFlights(Integer routeId, boolean isActive) {
@@ -315,26 +323,26 @@ public class VoyagerServiceImpl implements VoyagerService {
         return resultDetail;
     }
 
-    private List<PathAirline> fetchPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
-        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,excludeAirportList,excludeRouteIdList);
+    private PathResponse<PathAirline> fetchPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
+        Either<ServiceError,PathResponse<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,excludeAirportList,excludeRouteIdList);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
 
-    private List<PathAirline> fetchPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline) {
-        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,excludeAirportList,excludeRouteIdList,airline);
+    private PathResponse<PathAirline> fetchPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline) {
+        Either<ServiceError,PathResponse<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,excludeAirportList,excludeRouteIdList,airline);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
 
-    private List<PathAirline> fetchPath(List<String> originList, List<String> destinationList) {
-        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList);
+    private PathResponse<PathAirline> fetchPath(List<String> originList, List<String> destinationList) {
+        Either<ServiceError,PathResponse<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
 
-    private List<PathAirline> fetchPath(List<String> originList, List<String> destinationList, Airline airline) {
-        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,airline);
+    private PathResponse<PathAirline> fetchPath(List<String> originList, List<String> destinationList, Airline airline) {
+        Either<ServiceError, PathResponse<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,airline);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }

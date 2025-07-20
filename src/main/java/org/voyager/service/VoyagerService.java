@@ -11,6 +11,7 @@ import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.PathAirline;
+import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
 
 import java.util.List;
@@ -38,9 +39,11 @@ public interface VoyagerService {
     Boolean isValidIataCode(String airportCode);
     Boolean isDeltaIataCode(String airportCode);
     Airport getAirport(String iata);
-    List<PathAirline> getPath(List<String> originList, List<String> destinationList);
-    List<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline);
-    List<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList);
+    PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList);
+    PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline);
+    PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList);
     Route getRoute(Integer id);
     ResultSearchFull getResultSearchFull(String sourceId);
+
+    List<Airline> getAirlines(List<String> iataList);
 }
