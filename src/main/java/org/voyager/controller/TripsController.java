@@ -1,5 +1,6 @@
 package org.voyager.controller;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,13 +25,14 @@ import org.voyager.model.result.ResultSearch;
 import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.Route;
-import org.voyager.service.VoyagerService;
+import org.voyager.service.*;
 import org.voyager.utils.LocationMapperUtils;
 
 import java.time.*;
 import java.util.*;
 
 import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
+import static org.voyager.utils.ConstantsUtils.SOURCE_ID_PARAM_NAME;
 
 @Controller
 public class TripsController {
@@ -82,47 +84,40 @@ public class TripsController {
         return "fragments/trips :: delta-route";
     }
 
-    @GetMapping("/reverse-path")
-    @Cacheable("reverseCache")
-    public Collection<ModelAndView> reversePath(Model model, Integer startLocationId, Integer endLocationId,
-                                                String startAirport, String endAirport,
-                                                String closerStartAirport, String closerEndAirport,
-                                                @RequestParam(name = "airportFilter") List<AirportFilter> airportFilters,
-                                                AirportFilter closerFilterStart, AirportFilter closerFilterEnd,
-                                                @RequestParam(name = "locationFilter", required = false) List<Status> locationFilters) {
-        ModelAndView reversedPathMav = new ModelAndView(
-                buildPath(model, endLocationId, startLocationId, endAirport, startAirport, closerEndAirport, closerStartAirport, new PathExclusions()),
-                model.asMap());
-
-        Status locationFilterStart = null;
-        Status locationFilterEnd = null;
-        TripFilter tripFilterEnd = null;
-        TripFilter tripFilterStart = null;
-        if (startLocationId != null) {
-            tripFilterStart = TripFilter.LOCATION;
-            locationFilterStart = locationFilters.get(0);
-        } else tripFilterStart = TripFilter.AIRPORT;
-        if (endLocationId != null) {
-            tripFilterEnd = TripFilter.LOCATION;
-            locationFilterEnd = locationFilters.get(locationFilters.size() - 1);
-        } else tripFilterEnd = TripFilter.AIRPORT;
-
-        ModelAndView startMav = reverseTrip(true, tripFilterEnd, locationFilterEnd, endLocationId,
-                airportFilters.get(airportFilters.size() - 1), endAirport, closerFilterEnd, closerEndAirport);
-        ModelAndView endMav = reverseTrip(false, tripFilterStart, locationFilterStart, startLocationId,
-                airportFilters.get(0), startAirport, closerFilterStart, closerStartAirport);
-        return List.of(reversedPathMav, startMav, endMav);
-    }
-
     @GetMapping("/build-path")
-    public String buildPath(Model model, Integer startLocationId, Integer endLocationId,
-                            String startAirport, String endAirport,
-                            String closerStartAirport, String closerEndAirport,
-                            PathExclusions pathExclusions) {
-        Map<String, Object> reviewPathAttributes = populateReviewPathAttributes(startLocationId, endLocationId, startAirport, endAirport, closerStartAirport, closerEndAirport);
-        populateDeltaRoute(reviewPathAttributes, startAirport, endAirport,closerStartAirport,closerEndAirport, pathExclusions);
-        model.addAllAttributes(reviewPathAttributes);
-        return "fragments/trips :: review-path";
+    public String buildPath(Model model, @RequestParam(name = SOURCE_ID_PARAM_NAME) String[] sourceIds, PathExclusions pathExclusions) {
+        Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
+        Location startLocation = null;
+        Location endLocation = null;
+        List<String> startAirportCodes = List.of();
+        List<String> endAirportCodes = List.of();
+        if (StringUtils.isNotBlank(sourceIds[0])) startLocation = voyagerService.getLocation(source,sourceIds[0]);
+        if (StringUtils.isNotBlank(sourceIds[1])) endLocation = voyagerService.getLocation(source,sourceIds[1]);
+        if (startLocation != null && endLocation != null) {
+            startAirportCodes = startLocation.getAirports();
+            endAirportCodes = endLocation.getAirports();
+            if (!startAirportCodes.isEmpty() && !endAirportCodes.isEmpty()) {
+                List<PathAirline> pathAirlineList = voyagerService.getPath(startAirportCodes,endAirportCodes);
+                List<List<Airport>> pathAirportsList = new ArrayList<>();
+                if (!pathAirlineList.isEmpty()) {
+                    for (PathAirline pathAirline : pathAirlineList) {
+                        List<Airport> pathAirports = new ArrayList<>();
+                        pathAirports.add(voyagerService.getAirport(pathAirline.getRouteList().get(0).getOrigin()));
+                        for (Route route : pathAirline.getRouteList()) {
+                            pathAirports.add(voyagerService.getAirport(route.getDestination()));
+                        }
+                        pathAirportsList.add(pathAirports);
+                    }
+                }
+                model.addAttribute("pathAirlineList",pathAirlineList);
+                model.addAttribute("pathAirportsList",pathAirportsList);
+            }
+        }
+        model.addAttribute("startLocation",startLocation);
+        model.addAttribute("endLocation",endLocation);
+        model.addAttribute("startAirportCodes",startAirportCodes);
+        model.addAttribute("endAirportCodes",endAirportCodes);
+        return "fragments/trips :: display-path";
     }
 
     @GetMapping("/radio-selection")
@@ -274,7 +269,7 @@ public class TripsController {
             if (airportFilter == AirportFilter.PINNED || airportFilter == AirportFilter.PINNED_DELTA
                     || airportFilter == AirportFilter.PINNED_NONDELTA) {
                 for (Airport pinned : nearbyAirports) {
-                    pinned.setDistance(Airport.calculateDistance(location.getLatitude(), location.getLongitude(),
+                    pinned.setDistance(Airport.calculateDistanceKm(location.getLatitude(), location.getLongitude(),
                             pinned.getLatitude(), pinned.getLongitude()));
                 }
             }
@@ -302,12 +297,12 @@ public class TripsController {
         List<Airport> airports = getAirports(location, closerFilter);
         List<Airport> closerAirports = new ArrayList<>();
 
-        double minDistance = Airport.calculateDistance(location.getLatitude(), location.getLongitude(),
+        double minDistance = Airport.calculateDistanceKm(location.getLatitude(), location.getLongitude(),
                 closest.getLatitude(), closest.getLongitude());
 
         for (Airport airport : airports) {
             if (airport.getDistance() == null || closest.getDistance() == null) {
-                double distance = Airport.calculateDistance(location.getLatitude(), location.getLongitude(),
+                double distance = Airport.calculateDistanceKm(location.getLatitude(), location.getLongitude(),
                         airport.getLatitude(), airport.getLongitude());
                 if (distance < minDistance)
                     closerAirports.add(airport);
@@ -942,7 +937,7 @@ public class TripsController {
 
         if (deltaStart != null && deltaEnd != null) {
             if (voyagerService.isDeltaIataCode(deltaStart) && voyagerService.isValidIataCode(closerStartAirport)) {
-                List<PathAirline> pathAirlineList = voyagerService.getPath(closerStartAirport,deltaStart);
+                List<PathAirline> pathAirlineList = voyagerService.getPath(List.of(closerStartAirport),List.of(deltaStart));
                 List<Route> closerStartRouteList = pathAirlineList.get(0).getRouteList();
                 List<Airport[]> closerStartRouteAirportList = new ArrayList<>();
                 List<List<Flight>> closerStartRouteFlightList = new ArrayList<>();
@@ -954,7 +949,7 @@ public class TripsController {
             }
 
             if (voyagerService.isDeltaIataCode(deltaEnd) && voyagerService.isValidIataCode(closerEndAirport)) {
-                List<PathAirline> pathAirlineList = voyagerService.getPath(deltaEnd,closerEndAirport);
+                List<PathAirline> pathAirlineList = voyagerService.getPath(List.of(deltaEnd),List.of(closerEndAirport));
                 List<Route> closerEndRouteList = pathAirlineList.get(0).getRouteList();
                 List<Airport[]> closerEndRouteAirportList = new ArrayList<>();
                 List<List<Flight>> closerEndRouteFlightList = new ArrayList<>();
@@ -1037,7 +1032,7 @@ public class TripsController {
                 excludedRouteFlightList.add(flightList);
             }
         }
-        pathAirlineList = voyagerService.getPath(deltaStart, deltaEnd, excludeAirports, excludeRouteIds,Airline.DELTA);
+        pathAirlineList = voyagerService.getPath(List.of(deltaStart), List.of(deltaEnd), excludeAirports, excludeRouteIds,Airline.DELTA);
 
         for (Route route : pathAirlineList.get(0).getRouteList()) {
             Airport origin = voyagerService.getAirport(route.getOrigin());

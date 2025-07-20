@@ -21,6 +21,16 @@ function closeMarkerPopups() {
     });
 }
 
+function reverseMarkers() {
+    const tempMarker = startMarker;
+    startMarker = endMarker;
+    endMarker = tempMarker;
+
+    const tempAirportMarkers = airportStartMarkers;
+    airportStartMarkers = airportEndMarkers;
+    airportEndMarkers = tempAirportMarkers;
+}
+
 function zoomToLocation(isStart,targetElemId,reviewElem) {
     event.preventDefault(); // prevents url mod
     closeMarkerPopups();

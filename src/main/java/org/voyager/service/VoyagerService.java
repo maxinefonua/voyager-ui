@@ -38,8 +38,9 @@ public interface VoyagerService {
     Boolean isValidIataCode(String airportCode);
     Boolean isDeltaIataCode(String airportCode);
     Airport getAirport(String iata);
-    List<PathAirline> getPath(String origin, String destination);
-    List<PathAirline> getPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline);
+    List<PathAirline> getPath(List<String> originList, List<String> destinationList);
+    List<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline);
+    List<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList);
     Route getRoute(Integer id);
     ResultSearchFull getResultSearchFull(String sourceId);
 }

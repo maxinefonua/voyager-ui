@@ -54,14 +54,7 @@ public class VoyagerServiceImpl implements VoyagerService {
 
     @PostConstruct
     public void init() {
-        VoyagerConfig voyagerConfig = new VoyagerConfig(
-                resolveProtocol(voyagerAPIConfig.getProtocol()),
-                voyagerAPIConfig.getHost(),
-                voyagerAPIConfig.getPort(),
-                voyagerAPIConfig.getMaxThreads(),
-                voyagerAPIConfig.getAuthToken());
-
-        Voyager voyager = new Voyager(voyagerConfig);
+        Voyager voyager = new Voyager(voyagerAPIConfig.getVoyagerConfig());
         this.airportService = voyager.getAirportService();
         this.routeService = voyager.getRouteService();
         this.searchService = voyager.getSearchService();
@@ -199,13 +192,18 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
-    public List<PathAirline> getPath(String origin, String destination) {
-        return fetchPath(origin,destination);
+    public List<PathAirline> getPath(List<String> originList, List<String> destinationList) {
+        return fetchPath(originList,destinationList);
     }
 
     @Override
-    public List<PathAirline> getPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline) {
-        return fetchPath(origin,destination, excludeAirportList,excludeRouteIdList,airline);
+    public List<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline) {
+        return fetchPath(originList,destinationList, excludeAirportList,excludeRouteIdList,airline);
+    }
+
+    @Override
+    public List<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
+        return fetchPath(originList,destinationList, excludeAirportList,excludeRouteIdList);
     }
 
     @Override
@@ -317,26 +315,26 @@ public class VoyagerServiceImpl implements VoyagerService {
         return resultDetail;
     }
 
-    private List<PathAirline> fetchPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
-        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(origin,destination,excludeAirportList,excludeRouteIdList);
+    private List<PathAirline> fetchPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
+        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,excludeAirportList,excludeRouteIdList);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
 
-    private List<PathAirline> fetchPath(String origin, String destination, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline) {
-        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(origin,destination,excludeAirportList,excludeRouteIdList,airline);
+    private List<PathAirline> fetchPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline) {
+        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,excludeAirportList,excludeRouteIdList,airline);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
 
-    private List<PathAirline> fetchPath(String origin, String destination) {
-        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(origin,destination);
+    private List<PathAirline> fetchPath(List<String> originList, List<String> destinationList) {
+        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }
 
-    private List<PathAirline> fetchPath(String origin, String destination, Airline airline) {
-        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(origin,destination,airline);
+    private List<PathAirline> fetchPath(List<String> originList, List<String> destinationList, Airline airline) {
+        Either<ServiceError,List<PathAirline>> either = pathService.getPathAirlineList(originList,destinationList,airline);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }

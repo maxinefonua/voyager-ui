@@ -87,6 +87,23 @@ function processAirportInput(isStart,inputElem,includeButtonElemId,locationMarke
     }
 }
 
+function reverseTrip(startTextElemId,startValueElemId,endTextElemId,endValueElemId) {
+    const startTextElem = document.getElementById(startTextElemId);
+    const startValueElem = document.getElementById(startValueElemId);
+    const endTextElem = document.getElementById(endTextElemId);
+    const endValueElem = document.getElementById(endValueElemId);
+
+    const tempText = startTextElem.value;
+    const tempValue = startValueElem.value;
+    startTextElem.value = endTextElem.value;
+    startValueElem.value = endValueElem.value;
+    startValueElem.dispatchEvent(new Event('input'));
+    endTextElem.value = tempText;
+    endValueElem.value = tempValue;
+    endValueElem.dispatchEvent(new Event('input'));
+    reverseMarkers();
+}
+
 function includeAirport(includeButtonElem,inputElemId) {
     const inputElem = document.getElementById(inputElemId);
     const selectedOption = Array.from(inputElem.list.options)
