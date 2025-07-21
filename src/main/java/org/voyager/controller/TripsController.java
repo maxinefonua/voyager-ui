@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.convert.DurationFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +29,7 @@ import org.voyager.service.*;
 import org.voyager.utils.LocationMapperUtils;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.voyager.utils.ConstantsUI.AIRPORT_FILTER_PARAM_NAME;
@@ -531,6 +533,49 @@ public class TripsController {
         model.addAttribute("airportCodes",airportCodes);
         model.addAttribute("isStart",isStart);
         return "fragments/trips :: airport-codes";
+    }
+
+    @GetMapping("/flights")
+    public String getFlights(Model model,Integer routeId,Airline airline, Integer pathIterIndex) {
+        List<Flight> flightList = voyagerService.getFlights(routeId,true,airline);
+        Route route = voyagerService.getRoute(routeId);
+        Airport startAirport = voyagerService.getAirport(route.getOrigin());
+        Airport endAirport = voyagerService.getAirport(route.getDestination());
+        flightList.forEach(flight -> {
+            while (flight.getZonedDateTimeArrival().isBefore(flight.getZonedDateTimeDeparture())) {
+                flight.setZonedDateTimeArrival(flight.getZonedDateTimeArrival().plusDays(1));
+            }
+            flight.setDuration(Duration.between(flight.getZonedDateTimeDeparture(), flight.getZonedDateTimeArrival()));
+        });
+        flightList.sort(Comparator.comparing(Flight::getZonedDateTimeDeparture));
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("h:mm a");
+        DateTimeFormatter departureFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        List<FlightDetails> flightDetailsList = flightList.stream().map(flight -> {
+            Duration duration = Duration.between(flight.getZonedDateTimeDeparture(),flight.getZonedDateTimeArrival());
+            StringJoiner durationString = new StringJoiner(" ");
+            if (duration.toDaysPart() > 0)
+                durationString.add(String.format("%d%s",duration.toDaysPart(),"days"));
+            if (duration.toHoursPart() > 0)
+                durationString.add(String.format("%d%s",duration.toHoursPart(),"hrs"));
+            if (duration.toMinutesPart() > 0)
+                durationString.add(String.format("%d%s",duration.toHoursPart(),"mns"));
+            return
+                FlightDetails.builder().flightNumber(flight.getFlightNumber())
+                        .departureTimeFormatted(departureFormatter.format(flight.getZonedDateTimeDeparture()
+                                .withZoneSameInstant(startAirport.getZoneId())))
+                        .arrivalTimeFormatted(dateTimeFormatter.format(flight.getZonedDateTimeArrival()
+                                .withZoneSameInstant(endAirport.getZoneId())))
+                        .durationFormatted(durationString.toString())
+                        .build();
+        }).sorted(Comparator.comparing(FlightDetails::getDepartureTimeFormatted)).toList();
+        flightDetailsList.forEach(flightDetails -> {
+            LocalTime localTime = LocalTime.parse(flightDetails.getDepartureTimeFormatted(),departureFormatter);
+            flightDetails.setDepartureTimeFormatted(localTime.format(dateTimeFormatter));
+        });
+        model.addAttribute("flightDetailsList",flightDetailsList);
+        model.addAttribute("routeId",routeId);
+        model.addAttribute("pathIterIndex",pathIterIndex);
+        return "fragments/trips :: flights-body";
     }
 
     private List<Option> getAirportOptionsListForInput(AirportFilter airportFilter) {
