@@ -571,6 +571,113 @@
              th:id="'path-info-'+${iter.index}">
             <div class="accordion-body">
                 <div th:unless="${pathAirline.airline.name} == 'DELTA'"
+                     class="row justify-content-center mb-2">
+                    <span th:utext="'Airline: ' + ${pathAirline.airline.displayText}"></span>
+                </div>
+                <div th:id="'route-carousel-'+${iter.index}" class="carousel carousel-dark slide">
+                    <div th:if="${pathAirline.routeList?.size > 1}" class="carousel-indicators mb-0">
+                        <button th:each="route,routeIter : ${pathAirline.routeList}"
+                                type="button"
+                                th:data-bs-target="'#route-carousel-'+${iter.index}"
+                                th:data-bs-slide-to="${routeIter.index}"
+                                th:class="${routeIter.first}?'active':''"
+                                aria-current="true"
+                                th:aria-label="'Slide ' + ${(routeIter.index)+1}"></button>
+                    </div>
+                    <div class="carousel-inner">
+                        <div th:each="route,routeIter : ${pathAirline.routeList}"
+                             class="carousel-item"
+                             th:classappend="${routeIter.first}?'active':''">
+                            <div class="row justify-content-center mb-3">
+                                <div class="card col-auto col-md-8 pt-3"
+                                     th:classappend="${pathAirline.routeList?.size > 1}?'mb-3':''"
+                                     th:id="'path-airline-values-'+${iter.index}+'-route-'+${route.id}">
+                                    <div class="row justify-content-center mb-3">
+                                        <div class="col-6 col-lg-4">
+                                            <span th:utext="'<strong>' + ${route.origin} + '</strong> ' + ${pathAirportsList[iter.index][routeIter.index].name}"></span>
+                                        </div>
+                                        <div class="col-6 col-lg-4" th:utext="'<strong>' + ${route.destination} + '</strong> ' + ${pathAirportsList[iter.index][routeIter.index+1].name}"></div>
+                                    </div>
+                                    <input name="pathIterIndex"
+                                           type="hidden"
+                                           th:value="${iter.index}">
+                                    <input name="airline"
+                                           type="hidden"
+                                           th:value="${pathAirline.airline.name}">
+                                    <input name="startZoneId"
+                                           type="hidden"
+                                           th:value="${pathAirportsList[iter.index][routeIter.index].zoneId}">
+                                    <input name="endZoneId"
+                                           type="hidden"
+                                           th:value="${pathAirportsList[iter.index][(routeIter.index)+1].zoneId}">
+                                    <input hx-get="/flights"
+                                           type="hidden"
+                                           name="routeId"
+                                           th:value="${route.id}"
+                                           th:hx-include="'#path-airline-values-'+${iter.index}+'-route-'+${route.id}"
+                                           hx-trigger="load"
+                                           th:hx-target="'#path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"
+                                           hx-swap="outerHTML transition:true" />
+                                    <table class="table table-hover mb-3">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">Flight Number</th>
+                                            <th scope="col">Departure Time</th>
+                                            <th scope="col">Arrival Time</th>
+                                            <th scope="col">Duration</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody th:id="'path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button th:if="${pathAirline.routeList?.size > 1}" class="carousel-control-prev" type="button" th:data-bs-target="'#route-carousel-'+${iter.index}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button th:if="${pathAirline.routeList?.size > 1}" class="carousel-control-next" type="button" th:data-bs-target="'#route-carousel-'+${iter.index}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!--BEFORE EDIT-->
+<form th:fragment="path-airline2(pathAirlineList,pathAirportsList,pathExclusions)"
+      th:if="${pathAirlineList}"
+      id="path-airline-list"
+      class="accordion list-group mt-4"
+      name="pathExclusions"
+      th:object="${pathExclusions}">
+    <div th:if="${#lists.isEmpty(pathAirlineList)}"
+         class="list-group-item list-group-item-secondary">
+        <span>No Paths Found</span>
+    </div>
+    <div th:unless="${#lists.isEmpty(pathAirlineList)}"
+         th:each="pathAirline,iter : ${pathAirlineList}"
+         class="accordion-item">
+        <button type="button"
+                class="accordion-button collapsed list-group-item list-group-item-action"
+                data-bs-toggle="collapse"
+                th:data-bs-target="'#path-info-'+${iter.index}"
+                aria-expanded="false"
+                th:aria-controls="'path-info-'+${iter.index}">
+            <i th:each="route,routeIter : ${pathAirline.routeList}">
+                <span th:text="${routeIter.first}?${route.origin}+' → '+${route.destination}:' → '+${route.destination}"></span>
+            </i>
+            <span th:if="${pathAirline.airline.name == 'DELTA'}">
+                <img src="../images/delta.svg" width="20px" height="20px" alt="delta icon">
+            </span>
+        </button>
+        <div class="accordion-collapse collapse"
+             th:id="'path-info-'+${iter.index}">
+            <div class="accordion-body">
+                <div th:unless="${pathAirline.airline.name} == 'DELTA'"
                      class="row justify-content-center mb-4">
                     <span th:utext="'Airline: ' + ${pathAirline.airline.displayText}"></span>
                 </div>
@@ -588,11 +695,17 @@
                     <input name="airline"
                            type="hidden"
                            th:value="${pathAirline.airline.name}">
+                    <input name="startZoneId"
+                           type="hidden"
+                           th:value="${pathAirportsList[iter.index][routeIter.index].zoneId}">
+                    <input name="endZoneId"
+                           type="hidden"
+                           th:value="${pathAirportsList[iter.index][(routeIter.index)+1].zoneId}">
                     <input hx-get="/flights"
                            type="hidden"
                            name="routeId"
                            th:value="${route.id}"
-                           th:hx-include="'#path-info-'+${iter.index}"
+                           th:hx-include="'#path-airline-values-'+${iter.index}+'-route-'+${route.id}"
                            hx-trigger="load"
                            th:hx-target="'#path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"
                            hx-swap="outerHTML transition:true" />
@@ -608,22 +721,13 @@
                         <tbody th:id="'path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"></tbody>
                     </table>
                 </div>
-                <!--                    <button hx-get="/exclude-route" name="routeId"-->
-                <!--                            hx-swap="outerHTML transition:true"-->
-                <!--                            type="button" class="btn btn-outline-danger"-->
-                <!--                            hx-include="#route-exclusion-form,-->
-                <!--                                        #select-airport-start-code-for-location,-->
-                <!--                                        #select-airport-end-code-for-location,-->
-                <!--                                        #closer-airport-start-code-for-location,-->
-                <!--                                        #closer-airport-end-code-for-location"-->
-                <!--                            hx-target="#route-exclusion-form"-->
-                <!--                            th:value="${route.id}">Exclude Route</button>-->
             </div>
         </div>
     </div>
 </form>
 
 
+<!--updating FLIGHTS BODY-->
 <tbody th:fragment="flights-body(flightDetailsList,pathIterIndex,routeId)"
        th:id="'path-airline-' + ${pathIterIndex} + '-route-' + ${routeId}">
 <tr th:each="flightDetails : ${flightDetailsList}">

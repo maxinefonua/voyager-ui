@@ -536,11 +536,10 @@ public class TripsController {
     }
 
     @GetMapping("/flights")
-    public String getFlights(Model model,Integer routeId,Airline airline, Integer pathIterIndex) {
+    public String getFlights(Model model,Integer routeId,
+                             String startZoneId, String endZoneId,
+                             Airline airline, Integer pathIterIndex) {
         List<Flight> flightList = voyagerService.getFlights(routeId,true,airline);
-        Route route = voyagerService.getRoute(routeId);
-        Airport startAirport = voyagerService.getAirport(route.getOrigin());
-        Airport endAirport = voyagerService.getAirport(route.getDestination());
         flightList.forEach(flight -> {
             while (flight.getZonedDateTimeArrival().isBefore(flight.getZonedDateTimeDeparture())) {
                 flight.setZonedDateTimeArrival(flight.getZonedDateTimeArrival().plusDays(1));
@@ -551,20 +550,20 @@ public class TripsController {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("h:mm a");
         DateTimeFormatter departureFormatter = DateTimeFormatter.ofPattern("HH:mm");
         List<FlightDetails> flightDetailsList = flightList.stream().map(flight -> {
-            Duration duration = Duration.between(flight.getZonedDateTimeDeparture(),flight.getZonedDateTimeArrival());
+            Duration duration = flight.getDuration();
             StringJoiner durationString = new StringJoiner(" ");
             if (duration.toDaysPart() > 0)
                 durationString.add(String.format("%d%s",duration.toDaysPart(),"days"));
             if (duration.toHoursPart() > 0)
                 durationString.add(String.format("%d%s",duration.toHoursPart(),"hrs"));
             if (duration.toMinutesPart() > 0)
-                durationString.add(String.format("%d%s",duration.toHoursPart(),"mns"));
+                durationString.add(String.format("%d%s",duration.toMinutesPart(),"mns"));
             return
                 FlightDetails.builder().flightNumber(flight.getFlightNumber())
                         .departureTimeFormatted(departureFormatter.format(flight.getZonedDateTimeDeparture()
-                                .withZoneSameInstant(startAirport.getZoneId())))
+                                .withZoneSameInstant(ZoneId.of(startZoneId))))
                         .arrivalTimeFormatted(dateTimeFormatter.format(flight.getZonedDateTimeArrival()
-                                .withZoneSameInstant(endAirport.getZoneId())))
+                                .withZoneSameInstant(ZoneId.of(endZoneId))))
                         .durationFormatted(durationString.toString())
                         .build();
         }).sorted(Comparator.comparing(FlightDetails::getDepartureTimeFormatted)).toList();
