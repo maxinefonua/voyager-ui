@@ -2,42 +2,44 @@
       xmlns:hx-on="http://www.w3.org/1999/xhtml">
 
 <!--TODO: verify unnecessary-->
-<div th:fragment="airport-form-initial(isStart)"
-     class="input-group mt-2">
-    <select
-            id="airport-filter-select-"
-            th:attrappend="id=${isStart}?'start':'end'"
-            class="form-select"
-            style="max-width:150px"
-            name="airportFilter"
-            hx-get="/nearby-airports"
-            th:hx-vals="${isStart}?'js:{latitude:startMarker.getLngLat().lat,longitude:startMarker.getLngLat().lng}':'js:{latitude:endMarker.getLngLat().lat,longitude:endMarker.getLngLat().lng}'"
-            th:hx-target="${isStart}?'#filtered-airports-start':'#filtered-airports-end'"
-            hx-trigger="change"
-            th:hx-on::after-request="${isStart}?'setAirportPlaceHolderFromList(\'airport-start-code\',\'filtered-airports-start\')':'setAirportPlaceHolderFromList(\'airport-end-code\',\'filtered-airports-end\')'"
-            th:hx-on::before-request="'clearAirportMarkerMapFitToLocation('+${isStart}+')'"
-            hx-swap="innerHTML"
-    >
-        <option selected value="DELTA">Delta Airports</option>
-        <hr class="dropdown-divider">
-        <option disabled>Additional Airline Support Under Development</option>
-    </select>
-    <input th:id="${isStart}?'airport-start-code':'airport-end-code'"
-           class="form-control"
-           th:placeholder="${isStart}?'Start Airport':'End Airport'"
-           type="text" aria-label="Airport"
-           hx-swap="innerHTML transition:true"
-           hx-get="/review-airport-reset"
-           hx-trigger="input"
-           hx-target="#review-summary"
-           th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"
-           hx-include="#select-start-location,#select-end-location,#non-delta-start-code,#non-delta-end-code,"
-           th:attrappend="hx-include=${isStart}?'#airport-end-code':'#airport-start-code'"
-           th:hx-on::after-request="'debouncedAddAirportToMap(this,' + ${isStart} + ')'"
-           th:name="${isStart}?startAirportCode:endAirportCode"
-           th:list="${isStart}?'filtered-airports-start':'filtered-airports-end'" required
-    >
-</div>
+<!--<div th:fragment="airport-form-initial(isStart)"-->
+<!--     class="input-group mt-2">-->
+<!--    <select-->
+<!--            id="airport-filter-select-"-->
+<!--            th:attrappend="id=${isStart}?'start':'end'"-->
+<!--            class="form-select"-->
+<!--            style="max-width:150px"-->
+<!--            name="airportFilter"-->
+<!--            hx-get="/nearby-airports"-->
+<!--            th:hx-vals="${isStart}?'js:{latitude:startMarker.getLngLat().lat,longitude:startMarker.getLngLat().lng}':'js:{latitude:endMarker.getLngLat().lat,longitude:endMarker.getLngLat().lng}'"-->
+<!--            th:hx-target="${isStart}?'#filtered-airports-start':'#filtered-airports-end'"-->
+<!--            hx-trigger="change"-->
+<!--            th:hx-on::after-request="${isStart}?'setAirportPlaceHolderFromList(\'airport-start-code\',\'filtered-airports-start\')':'setAirportPlaceHolderFromList(\'airport-end-code\',\'filtered-airports-end\')'"-->
+<!--            th:hx-on::before-request="'clearAirportMarkerMapFitToLocation('+${isStart}+')'"-->
+<!--            hx-swap="innerHTML"-->
+<!--    >-->
+<!--        <div hx-get="/airline-options"-->
+<!--             hx-trigger="load"-->
+<!--             hx-swap="outerHTML"></div>-->
+<!--        <hr class="dropdown-divider">-->
+<!--        <option disabled>Additional Airline Support Under Development</option>-->
+<!--    </select>-->
+<!--    <input th:id="${isStart}?'airport-start-code':'airport-end-code'"-->
+<!--           class="form-control"-->
+<!--           th:placeholder="${isStart}?'Start Airport':'End Airport'"-->
+<!--           type="text" aria-label="Airport"-->
+<!--           hx-swap="innerHTML transition:true"-->
+<!--           hx-get="/review-airport-reset"-->
+<!--           hx-trigger="input"-->
+<!--           hx-target="#review-summary"-->
+<!--           th:hx-vals="'{&quot;fromOrigin&quot;:'+${isStart}+'}'"-->
+<!--           hx-include="#select-start-location,#select-end-location,#non-delta-start-code,#non-delta-end-code,"-->
+<!--           th:attrappend="hx-include=${isStart}?'#airport-end-code':'#airport-start-code'"-->
+<!--           th:hx-on::after-request="'debouncedAddAirportToMap(this,' + ${isStart} + ')'"-->
+<!--           th:name="${isStart}?startAirportCode:endAirportCode"-->
+<!--           th:list="${isStart}?'filtered-airports-start':'filtered-airports-end'" required-->
+<!--    >-->
+<!--</div>-->
 
 <!--TODO: verify unnecessary-->
 <form th:fragment="non-delta-airport-not-trips"
@@ -159,10 +161,6 @@
         <input type="hidden" id="countryCode" name="countryCode" th:value="${resultDetails.resultSearch.countryCode}" />
         <input type="hidden" id="latitude" name="latitude" th:value="${resultDetails.resultSearch.latitude}" />
         <input type="hidden" id="longitude" name="longitude" th:value="${resultDetails.resultSearch.longitude}" />
-        <input type="hidden" id="west" name="west" th:value="${resultDetails.resultSearch.bounds[0]}" />
-        <input type="hidden" id="south" name="south" th:value="${resultDetails.resultSearch.bounds[1]}" />
-        <input type="hidden" id="east" name="east" th:value="${resultDetails.resultSearch.bounds[2]}" />
-        <input type="hidden" id="north" name="north" th:value="${resultDetails.resultSearch.bounds[3]}" />
     </div>
     <div class="row justify-content-center">
         <button th:if="${resultDetails.resultSearch.status.name() == 'NEW'}"

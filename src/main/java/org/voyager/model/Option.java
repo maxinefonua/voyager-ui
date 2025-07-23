@@ -8,10 +8,19 @@ import java.util.List;
 
 @Builder @Data
 public class Option {
+    Double longitude;
+    Double latitude;
     String display;
+    String name;
+    String city;
+    String subdivision;
+    String country;
     String value;
     String elementName;
-    boolean selected = false;
+    @Builder.Default
+    Boolean selected = false;
+    @Builder.Default
+    Boolean disabled = false;
 
     public static List<Option> getFilterOptions(TripFilter tripFilter) {
         switch (tripFilter) {

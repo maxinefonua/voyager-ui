@@ -145,10 +145,53 @@ function closeTripMarkerPopups() {
         && nonDeltaEndMarker.getPopup().isOpen()) nonDeltaEndMarker.getPopup().remove();
 }
 
+var lineFeature = null;
+
+function addTripLine() {
+    closeTripMarkerPopups();
+    var marker1 = nonDeltaStartMarker;
+    if (marker1 == null) marker1 = airportStartMarker;
+
+    var marker2 = nonDeltaEndMarker;
+    if (marker2 == null) marker2 = airportEndMarker;
+
+    if (marker1 && marker2) {
+        if (lineFeature == null) {
+            lineFeature = {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'LineString',
+                    coordinates: [
+                        [marker1.getLngLat().lng, marker1.getLngLat().lat], // Convert to array
+                        [marker2.getLngLat().lng, marker2.getLngLat().lat]  // Convert to array
+                    ]
+                }
+            };
+            // Add source and layer
+            map.addSource('line-between-markers', {
+                type: 'geojson',
+                data: lineFeature
+            });
+            map.addLayer({
+                id: 'line-between-markers',
+                type: 'line',
+                source: 'line-between-markers',
+                paint: {
+                    'line-color': '#ff0000',
+                    'line-width': 3
+                }
+            });
+        } else {
+
+        }
+
+    }
+}
+
 function addAirportToMap(airportInputElem,isStart) {
     if (isStart) clearStartMarkers();
     else clearEndMarkers();
-
     if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
         const allAirports = document.getElementById('all-airports');
         const deltaAirports = document.getElementById('delta-airports');

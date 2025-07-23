@@ -22,6 +22,25 @@
     filter: drop-shadow( 1px 1px 1px rgba(0, 0, 0, .3));
 }
 
+.btn-airport-code {
+    transition: all 0.2s;
+    background-color: var(--bs-tertiary-bg);
+}
+
+.btn-airport-code:hover {
+    background-color: var(--bs-secondary-bg);
+    cursor: pointer;
+}
+
+.btn-airport-code:has(.btn-close:hover) {
+    background-color: var(--bs-tertiary-bg);
+    pointer-events: none; /* This prevents clicks on the parent */
+}
+
+.btn-close {
+    pointer-events: auto; /* But allows clicks on the child */
+}
+
 .airport-marker {
   background-image: url(../images/delta-marker.svg);
   background-size: cover;
@@ -46,12 +65,6 @@ a.list-group-item-action.active .scroll-nav-icon {
   stroke: #FFFFFF !important; /* Optional: if you have strokes */
 }
 
-.airport-marker-non-delta {
-  background-image: url(../images/airport-marker.svg);
-  background-size: cover;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 0px;
+.airport-marker path {
+  fill: #fd0d6e;
 }

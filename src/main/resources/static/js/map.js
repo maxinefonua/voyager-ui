@@ -211,6 +211,7 @@ function scrollElemToTarget(targetElemId) {
 function mapFitToTrip(targetElemId) {
     event.preventDefault();
     closeTripMarkerPopups();
+    closeMarkerPopups();
     var marker1 = null;
     var marker2 = null;
 

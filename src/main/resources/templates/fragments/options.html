@@ -42,4 +42,25 @@
         th:attr="data-element-name=${option.elementName}?${option.elementName}"
         th:value="${option.value}"
         th:text="${option.display}"></option>
+
+<!--NEARBY AIRPORT OPTIONS FOR INPUT-->
+<option th:fragment="trip-input-options(optionList,tripFilter)"
+        th:each="option,iter : ${optionList}"
+        th:attr="disabled=${option.disabled}?true"
+        th:text="${tripFilter == null or tripFilter == 'AIRPORT'}?${option.value}"
+        th:value="${option.display}"
+        th:data-airport="${option.name}"
+        th:data-city="${option.city}"
+        th:data-longitude="${option.longitude}"
+        th:data-latitude="${option.latitude}"
+        th:data-subdivision="${option.subdivision}"
+        th:data-country="${option.country}"
+        th:data-value="${option.value}"></option>
+
+<!--LOCATION SEARCH OPTIONS FOR INPUT-->
+<option th:fragment="location-input-options(optionList)"
+        th:each="option,iter : ${optionList}"
+        th:attr="disabled=${option.disabled}?true"
+        th:value="${option.display}"
+        th:data-value="${option.value}"></option>
 </html>

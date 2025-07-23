@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
 import org.voyager.model.route.Path;
+import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.Route;
 import org.voyager.service.VoyagerService;
 
@@ -142,6 +143,7 @@ public class MainController {
                 new ModelAndView("fragments/search :: lookupFooterResults",
                         Map.of("totalResultsCount",totalResultsCount)));
     }
+    
     @GetMapping("/review-location-reset")
     public Collection<ModelAndView> resetLocationReview(@RequestParam Boolean fromOrigin,
                                                         @RequestParam(required = false) Integer startLocationId,
@@ -225,17 +227,6 @@ public class MainController {
         if (endAirport != null) attributes.put("endAirport", endAirport);
         if (nonDeltaStartAirport != null) attributes.put("nonDeltaStartAirport",nonDeltaStartAirport);
         if (nonDeltaEndAirport != null) attributes.put("nonDeltaEndAirport",nonDeltaEndAirport);
-
-        if (startAirport != null && endAirport != null) {
-            Path path = voyagerService.getPath(startAirport.getIata(),endAirport.getIata());
-            List<String> middleAirports = new ArrayList<>();
-            for (Route route : path.getRouteList()) {
-                middleAirports.add(route.getDestination());
-            }
-            middleAirports.remove(endAirport.getIata());
-            attributes.put("middleAirports",middleAirports);
-        }
-
         return new ModelAndView("fragments/trips :: review-path", attributes);
     }
 

@@ -61,10 +61,6 @@
                 th:data-name="${resultDetails.resultSearch.name}"
                 th:data-subdivision="${resultDetails.resultSearch.subdivision}"
                 th:data-country="${resultDetails.resultSearch.countryName}"
-                th:data-bounds="${#strings.arrayJoin(
-                    #numbers.arrayFormatDecimal(resultDetails.resultSearch.bounds, 1, 'POINT', 7, 'POINT'),
-                    ','
-                )}"
                 aria-expanded="true"
                 th:text="${resultDetails.resultSearch.name} + ', ' + ${resultDetails.resultSearch.subdivision} + ' | ' + ${resultDetails.resultSearch.countryName}"
                 th:onclick="updateLookupMap(this)"></button>
@@ -80,10 +76,6 @@
                 th:data-name="${resultDetails.resultSearch.name}"
                 th:data-subdivision="${resultDetails.resultSearch.subdivision}"
                 th:data-country="${resultDetails.resultSearch.countryName}"
-                th:data-bounds="${#strings.arrayJoin(
-                    #numbers.arrayFormatDecimal(resultDetails.resultSearch.bounds, 1, 'POINT', 7, 'POINT'),
-                    ','
-                )}"
                 aria-expanded="false"
                 th:text="${resultDetails.resultSearch.name} + ', ' + ${resultDetails.resultSearch.subdivision} + ' | ' + ${resultDetails.resultSearch.countryName}"
                 th:onclick="updateLookupMap(this)"

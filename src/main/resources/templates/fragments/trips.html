@@ -1,194 +1,435 @@
-<!DOCTYPE html>
 <html lang="en"
-      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml"
-      xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Trip Content</title>
-</head>
-<!--TRIPS MAIN BODY HEADERS AND SECTIONS-->
+      xmlns:th="http://www.thymeleaf.org" xmlns:hx-on="http://www.w3.org/1999/xhtml">
+
+<!--TRIPS NAV BAR WITH AUTOSCROLL-->
+<nav th:fragment="trips-scroll-nav"
+     id="trips-scroll-nav" class="list-group">
+    <a class="list-group-item list-group-item-action p-2" href="#from-city"
+       onclick="zoomToLocation(true, '#from-city',document.getElementById('start-display-review'))">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 200 160"
+             style="width:100%; height:auto;">
+            <path class="scroll-nav-icon"
+                  d="M 26.42 13.21 L 38.65 7.66 L 110.52 28.87 L 158.27 6.96 C 164.84 4.67 186.45 -2.11 192.97 10.01 C 194.87 14.18 193.26 18.93 186.39 22.8 L 52.47 85.49 C 39.97 89.4 42.52 87.93 6.01 60.29 C 2.17 54.94 7.18 52.68 14.04 54.83 L 43.79 60.43 L 71.29 47.17 Z m 80.75 54.44 C 100.16 74.8 110.53 83.24 116.22 77.39 C 122.98 69.92 112.32 63 107.18 67.61 Z m -18.18 8.47 C 82.49 81.72 89.88 91.35 96.67 86.69 C 103.91 80.28 95.59 71.72 88.99 76.08 Z m -77.53 39.34 C 5.03 117.72 7.11 125.82 13.64 125.61 L 111.19 125.57 C 119.14 124.6 117.05 115.78 112.13 115.4 Z"/>
+        </svg>
+    </a>
+    <a class="list-group-item list-group-item-action p-2" href="#to-city"
+       onclick="zoomToLocation(false, '#to-city',document.getElementById('end-display-review'))">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 180 160"
+             style="width:100%; height:auto;">
+            <path class="scroll-nav-icon"
+                  d="M 50.841 3.023 L 63.413 7.746 L 99.235 73.564 L 148.492 91.835 C 154.757 94.862 174.832 105.348 170.872 118.529 C 169.267 122.821 164.77 125.041 157.176 122.92 L 18.151 72.552 C 6.548 66.478 9.39 67.242 3.118 21.881 C 4.186 15.383 9.327 17.327 12.657 23.698 L 29.734 48.695 L 58.555 58.764 Z m 18.604 95.594 C 59.432 98.715 60.797 112.016 68.957 111.903 C 79.019 111.401 76.375 98.97 69.48 98.595 Z m -18.844 -6.866 C 42.044 91.114 40.461 103.149 48.557 104.655 C 58.209 105.242 58.379 93.306 50.629 91.722 Z m 17.149 58.399 C 61.94 149.84 59.74 158.81 67.6 160.19 L 162.48 159.93 C 170.03 160.27 170.35 150.47 163.15 150.15 Z"/>
+        </svg>
+    </a>
+    <a class="list-group-item list-group-item-action p-2" href="#review"
+       onclick="mapFitTripScrollTo('#review');">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             style="width:100%; height:auto;"
+             viewBox="0 0 43.491 43.491"
+             xml:space="preserve">
+	<g>
+		<path class="scroll-nav-icon"
+              d="M41.625,9.778c-0.378-0.23-3.22-1.961-3.22-1.961s2.054-5.874,1.875-6.688C40.104,0.316,39.232,0,39.232,0l-3.461,6.388
+			l-3.557-1.546l-0.021-2.333l-1.087-0.966c0,0-0.317,2.663-0.77,3.308c-0.449,0.644-2.229,1.851-2.229,1.851l0.938,0.95
+			l2.426-1.307l2.991,2.071l-3.716,6.216c0,0,0.749,0.923,1.486,0.521c0.736-0.402,4.342-5.037,4.342-5.037s3.501,1.958,3.873,2.043
+			c0.372,0.087,1.291,0.574,1.757-0.54C42.67,10.506,42.003,10.008,41.625,9.778z"/>
+        <path class="scroll-nav-icon"
+              d="M36.078,16.177c-0.525-0.631-1.115-1.204-1.732-1.745l-0.899,0.93c0.565,0.492,1.108,1.013,1.592,1.587
+			c-0.875,0.573-1.894,1.078-3.024,1.496c-0.832-2.472-2.047-4.528-3.511-5.924c0.554,0.181,1.089,0.401,1.609,0.646l0.688-1.107
+			c-2.05-0.985-4.346-1.539-6.768-1.539c-0.01,0-0.016,0-0.021,0s-0.011,0-0.016,0c-0.018,0-0.035,0.002-0.055,0.002
+			c-4.798,0.028-9.092,2.224-11.951,5.654c-0.264,0.317-0.514,0.645-0.752,0.982c-1.813,2.557-2.882,5.674-2.882,9.04
+			c0,3.365,1.069,6.482,2.882,9.04c0.238,0.337,0.488,0.666,0.752,0.981c2.86,3.431,7.153,5.625,11.951,5.653
+			c0.02,0,0.037,0.002,0.055,0.002c0.005,0,0.01,0,0.016,0s0.014,0,0.021,0c4.836,0,9.167-2.202,12.045-5.655
+			c0.264-0.316,0.514-0.646,0.752-0.982c1.812-2.557,2.881-5.676,2.881-9.04c0-3.365-1.068-6.483-2.881-9.04
+			C36.592,16.822,36.344,16.493,36.078,16.177z M19.451,12.56c-1.441,1.39-2.638,3.422-3.463,5.861
+			c-1.106-0.413-2.102-0.91-2.959-1.473C14.712,14.951,16.924,13.412,19.451,12.56z M12.274,17.932
+			c0.974,0.651,2.101,1.22,3.347,1.689c-0.537,1.964-0.846,4.145-0.856,6.446H9.646C9.675,23.04,10.647,20.24,12.274,17.932z
+			 M9.693,27.354h5.096c0.083,1.926,0.375,3.752,0.832,5.424c-1.246,0.469-2.373,1.039-3.347,1.689
+			C10.832,32.421,9.904,29.988,9.693,27.354z M13.033,35.447c0.857-0.561,1.85-1.057,2.953-1.469
+			c0.826,2.438,2.023,4.47,3.465,5.859C16.924,38.986,14.716,37.445,13.033,35.447z M23.391,40.543
+			c-2.639-0.361-4.917-3.068-6.209-6.967c1.862-0.559,3.971-0.896,6.209-0.952V40.543z M23.391,31.339
+			c-2.36,0.058-4.587,0.423-6.568,1.03c-0.406-1.542-0.666-3.232-0.745-5.016h7.313V31.339z M23.391,26.066h-7.339
+			c0.011-2.16,0.292-4.201,0.776-6.036c1.979,0.606,4.204,0.972,6.563,1.028V26.066L23.391,26.066z M23.391,19.773
+			c-2.237-0.055-4.346-0.392-6.207-0.95c1.293-3.896,3.568-6.607,6.207-6.969V19.773z M24.678,11.864
+			c2.61,0.403,4.858,3.108,6.137,6.979c-1.844,0.546-3.926,0.877-6.137,0.931V11.864z M24.678,21.059
+			c2.332-0.056,4.53-0.413,6.494-1.007c0.479,1.829,0.76,3.863,0.77,6.015h-7.264V21.059z M24.678,27.354h7.238
+			c-0.078,1.774-0.337,3.457-0.738,4.994c-1.965-0.595-4.168-0.953-6.5-1.009V27.354z M24.678,40.534v-7.909
+			c2.211,0.055,4.295,0.385,6.141,0.932C29.539,37.428,27.288,40.13,24.678,40.534z M28.502,39.876
+			c1.463-1.396,2.682-3.45,3.514-5.922c1.129,0.417,2.146,0.921,3.021,1.493C33.327,37.475,31.077,39.033,28.502,39.876z
+			 M35.794,34.467c-0.991-0.664-2.144-1.242-3.416-1.716c0.452-1.664,0.742-3.481,0.824-5.397h5.173
+			C38.164,29.988,37.236,32.421,35.794,34.467z M33.229,26.066c-0.012-2.291-0.317-4.462-0.852-6.42
+			c1.273-0.474,2.424-1.052,3.415-1.714c1.626,2.308,2.601,5.108,2.628,8.134H33.229z"/>
+        <path class="scroll-nav-icon"
+              d="M3.69,25.822c0-11.465,9.327-20.794,20.794-20.794c1.187,0,2.344,0.117,3.475,0.31l1.316-0.811l0.434-1.44
+			c-1.486-0.3-3.65-0.622-5.225-0.622c-12.88,0-23.357,10.479-23.357,23.357c0,1.355,0.069,2.625,0.222,3.83
+			c0.641,5.061,7.079,13.838,12.19,13.839C8.005,39.533,3.69,33.273,3.69,25.822z"/>
+	</g>
+</svg>
+    </a>
+</nav>
+
+<!--TRIPS MAIN PAGE-->
 <div th:fragment="trips" class="container">
-    <div class="row justify-content-center">
-        <div class="col-1 d-flex justify-content-center">
+    <div class="row justify-content-around">
+        <div class="col-1 col-md-auto p-0" style="width:40px">
             <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
         </div>
-        <div class="col-11">
+        <div class="col-10 col-md">
             <div id="scrollable-content"
-                    data-bs-spy="scroll"
-                    data-bs-target="#trips-scroll-nav"
-                    data-bs-smooth-scroll="true"
-                    class="scrollspy-example overflow-y-scroll"
-                    style="height:250px;"
-                    tabindex="0">
-                <h4 id="from-city">From</h4>
-                <div style="height:250px"
-                     class="overflow-auto p-2">
-                    <span id="from-location-container"
-                          hx-swap="beforeend transition:true"
-                          hx-get="/lookup"
-                          hx-trigger="load"
-                          hx-target="#select-start-location"
-                          hx-vals='"isStart":"true"'
-                          class="overflow-auto">
-                    <select class="form-select"
-                            id="select-start-location"
-                            name="startLocationId"
-                            hx-swap="innerHTML transition:true"
-                            hx-get="/review-location-reset"
-                            hx-trigger="change"
-                            hx-target="#review-summary"
-                            hx-include="#select-end-location,#airport-end-code,#non-delta-end-code"
-                            hx-vals='"fromOrigin":"true"'
-                            hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],true)"
-                    >
-                        <option selected disabled value="0">Start Location</option>
-                    </select>
-                        <datalist id="filtered-airports-start"></datalist>
-                        <div>THIS IS WHERE PINNED AIRPORTS WILL UPDATE
-                            <div id="pinned-start-airports"
-                                 hx-swap-oob="innerHTML:#pinned-start-airports transition:true"></div>
-                            THIS IS END OF PINNED AIRPORTS
-                        </div>
-                    <div th:replace="~{fragments/form :: airport-form-initial(true)}"></div>
-                </span>
-                    <div id="non-delta-start"
-                         hx-swap-oob="outerHTML:#non-delta-start">
+                 data-bs-spy="scroll"
+                 data-bs-target="#trips-scroll-nav"
+                 data-bs-smooth-scroll="true"
+                 class="scrollspy-example overflow-y-scroll"
+                 style="height:250px;"
+                 tabindex="0">
+                <h4 id="from-city">Origin</h4>
+                <div style="height:180px"
+                     class="overflow-auto ps-4 pe-4">
+                    <div id="trip-input-start">
+                        <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${optionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
+                        <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
                     </div>
                 </div>
-                <h4 id="to-city">To</h4>
-                <div id="to-location-container"
-                     hx-get="/lookup"
-                     hx-vals='"isStart":"false"'
-                     hx-swap="beforeend transition:true"
-                     hx-target="#select-end-location"
-                     hx-trigger="load"
-                     style="height:250px"
-                     class="overflow-auto p-2">
-                    <select class="form-select"
-                            id="select-end-location"
-                            name="endLocationId"
-                            hx-swap="innerHTML transition:true"
-                            hx-get="/review-location-reset"
-                            hx-trigger="change"
-                            hx-target="#review-summary"
-                            hx-include="#select-start-location,#airport-start-code,#non-delta-start-code"
-                            hx-vals='"fromOrigin":"false"'
-                            hx-on::after-request="addTripLocationToMap(this.options[this.selectedIndex],false)"
-                    >
-                        <option selected disabled value="0">End Location</option>
-                    </select>
-                    <datalist id="filtered-airports-end"></datalist>
-                    <div th:replace="~{fragments/form :: airport-form-initial(false)}"></div>
-                    <div id="non-delta-end"
-                         hx-swap-oob="outerHTML:#non-delta-end">
+                <h4 id="to-city">Destination</h4>
+                <div style="height:180px"
+                     class="overflow-auto ps-4 pe-4">
+                    <div id="trip-input-start">
+                        <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${optionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
+                        <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=false)}"></div>
                     </div>
                 </div>
                 <h4 id="review">Review</h4>
                 <div id="review-summary"
                      style="height:200px"
                      class="overflow-auto p-2">
-                    <div th:replace="~{fragments/trips :: review-path}"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!--TRIPS NAV BAR WITH AUTOSCROLL-->
-<div th:fragment="trips-scroll-nav"
-     id="trips-scroll-nav" style="width:40px" class="list-group">
-    <a class="list-group-item list-group-item-action" href="#from-city" onclick="zoomToTripLocation(true)">u</a>
-    <a class="list-group-item list-group-item-action" href="#to-city" onclick="zoomToTripLocation(false)">d</a>
-    <a class="list-group-item list-group-item-action" href="#review" onclick="mapFitToTrip()">c</a>
-</div>
-
-<!--TRIPS UPDATING REVIEW SECTION-->
-<div th:fragment="review-path" class="container text-center">
-    <div class="row justify-content-center">
-        <div class="col-5">
-            <figure>
-                <blockquote class="blockquote">
-                    <span th:if="${startLocation}"
-                       th:text="${startLocation.name} + ', ' + ${startLocation.subdivision}"></span>
-                    <span th:if="${startLocation == null && nonDeltaStartAirport != null}"
-                          th:text="${nonDeltaStartAirport.city} + ', ' + ${nonDeltaStartAirport.subdivision}"></span>
-                    <span th:if="${startLocation == null && nonDeltaStartAirport == null && startAirport != null}"
-                          th:text="${startAirport.city} + ', ' + ${startAirport.subdivision}"></span>
-                    <i th:if="${startLocation == null && startAirport == null && nonDeltaStartAirport == null}">Select Start Location</i>
-                </blockquote>
-                <figcaption class="blockquote-footer">
-                   <div th:if="${nonDeltaStartAirport}">
-                        Initial Check-In: <strong th:text="${nonDeltaStartAirport.iata}"></strong>
-                   </div>
-                    <span th:text="${nonDeltaStartAirport}?'Delta Check-In: ':'Check-In: '"></span>
-                    <strong th:if="${startAirport}" th:text="${startAirport.iata}"></strong>
-                    <i th:unless="${startAirport}">Select Start Airport</i>
-                </figcaption>
-            </figure>
-        </div>
-<!--        TODO: implement reverse flights/trip, needs an API, swap all values, return same review-path -->
-        <button class="vr btn-reverse container"
-                hx-get="/reverse-trip"
-                hx-target="#review-summary"
-                hx-swap="innerHTML transition:true"
-                hx-include="#select-start-location,#select-end-location,#airport-start-code,#airport-end-code,#non-delta-start-code,#non-delta-end-code"
-                hx-on::after-request="swapSelectionsAndInputs(`select-start-location`,`select-end-location`,`airport-start-code`,`airport-end-code`,`non-delta-start-code`,`non-delta-end-code`)"
-                th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 viewBox="1.13991 3.51996 122.8 148.6">
-                <path d="M 59.87 16.15 C 59.87 0.57 58.86 0.32 72.46 10.4 L 97.15 28.53 C 107.48 34.83 109.12 34.05 97.91 43.4 L 69.36 66.17 C 60.75 73.02 60.3 73.76 60.43 62.13 V 46.74 C 40.31 47.99 24.23 51.55 6.19 62.77 C 0.9 67.22 0.5 67.62 1.7 62.38 C 15.6 26.92 51.23 24.79 60.02 25.86 Z M 64 107.2 V 89.08 C 63.75 83.25 62 84.98 58.68 87.29 L 21.37 113.03 C 15.5 117.86 15.5 117.86 21.46 122.11 L 60.51 151.03 C 63.09 152.84 64.02 152.49 64.02 148.67 V 129.26 C 97.53 130.95 112.47 113.44 123.37 94.06 C 124.66 89.3 124.55 89.41 116.75 93.42 C 94.19 105.92 76.32 107.31 64 107.32 Z"/>
-            </svg>
-        </button>
-        <div class="col-5">
-            <figure>
-                <blockquote class="blockquote">
-                    <span th:if="${endLocation}"
-                          th:text="${endLocation.name} + ', ' + ${endLocation.subdivision}"></span>
-                    <span th:if="${endLocation == null && nonDeltaEndAirport != null}"
-                          th:text="${nonDeltaEndAirport.city} + ', ' + ${nonDeltaEndAirport.subdivision}"></span>
-                    <span th:if="${endLocation == null && nonDeltaEndAirport == null && endAirport != null}"
-                          th:text="${endAirport.city} + ', ' + ${endAirport.subdivision}"></span>
-                    <i th:if="${endLocation == null && endAirport == null && nonDeltaEndAirport == null}">Select End Location</i>
-                </blockquote>
-                <figcaption class="blockquote-footer">
-                    <span th:text="${nonDeltaEndAirport}?'Delta Destination: ':'Destination: '"></span>
-                    <strong th:if="${endAirport}" th:text="${endAirport.iata}"></strong>
-                    <i th:unless="${endAirport}">Select End Airport</i>
-                    <div th:if="${nonDeltaEndAirport}">
-                        Final Destination: <strong th:text="${nonDeltaEndAirport.iata}"></strong>
+                    <div id="review-path"
+                         class="container text-center">
+                        <div class="row justify-content-center"
+                             id="review-locations"
+                             hx-get="/build-path"
+                             hx-include="#start-input-value,#end-input-value,#display-path"
+                             hx-target="#display-path"
+                             hx-swap="outerHTML"
+                             hx-trigger="htmx:afterSettle from:#review-locations"
+                             hx-on::after-request="checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'))">
+                            <div th:replace="~{fragments/trips :: display-review-initial(isStart=true,tripFilter='LOCATION',location=${startLocation},airport=${startAirport})}"></div>
+                            <button class="vr btn-reverse container"
+                                    onclick="reverseTrip('start-input-text','start-input-value','end-input-text','end-input-value')"
+                                    id="reverse-button"
+                                    hx-on::after-request="reverseTripMarkers()"
+                                    th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="1.13991 3.51996 122.8 148.6">
+                                    <path d="M 59.87 16.15 C 59.87 0.57 58.86 0.32 72.46 10.4 L 97.15 28.53 C 107.48 34.83 109.12 34.05 97.91 43.4 L 69.36 66.17 C 60.75 73.02 60.3 73.76 60.43 62.13 V 46.74 C 40.31 47.99 24.23 51.55 6.19 62.77 C 0.9 67.22 0.5 67.62 1.7 62.38 C 15.6 26.92 51.23 24.79 60.02 25.86 Z M 64 107.2 V 89.08 C 63.75 83.25 62 84.98 58.68 87.29 L 21.37 113.03 C 15.5 117.86 15.5 117.86 21.46 122.11 L 60.51 151.03 C 63.09 152.84 64.02 152.49 64.02 148.67 V 129.26 C 97.53 130.95 112.47 113.44 123.37 94.06 C 124.66 89.3 124.55 89.41 116.75 93.42 C 94.19 105.92 76.32 107.31 64 107.32 Z"/>
+                                </svg>
+                            </button>
+                            <div th:replace="~{fragments/trips :: display-review-initial(isStart=false,tripFilter='LOCATION',location=${endLocation},airport=${endAirport})}"></div>
+                        </div>
+                        <div th:replace="~{fragments/trips :: display-path(airlineOptionList=null,pathExclusions=null,pathAirlineList=null,pathAirportsList=null,startLocation=null,endLocation=null,startAirportCodes=null,endAirportCodes=null)}"></div>
                     </div>
-                </figcaption>
-            </figure>
-        </div>
-    </div>
-    <div th:if="${startAirport != null or endAirport != null}" class="row justify-content-center">
-        <div class="col-5">
-            <h5>Delta Route</h5>
-            <div class="m-2">
-                <span th:text="${startAirport}?${startAirport.iata}:'?'"></span>
-                <span th:if="${middleAirports}" th:each="iata,iter : ${middleAirports}" th:text="' -> ' + ${iata}"></span>
-                <span th:text="${endAirport}?' -> ' + ${endAirport.iata}:' -> ?'"></span>
-            </div>
-        </div>
-        <button class="vr btn-primary container" disabled></button>
-        <div class="col-5">
-            <h5 th:if="${middleAirports}">Allowed Airports</h5>
-            <div th:if="${middleAirports}"
-                 class="hstack gap-5 form-check m-2 justify-content-center">
-                <div>
-                    <input class="form-check-input" type="checkbox" value="" id="start-checked" checked disabled>
-                    <label class="form-check-label" for="checkChecked" th:text="${startAirport.iata}"></label>
-                </div>
-                <div th:each="iata,iter : ${middleAirports}">
-                    <input class="form-check-input" type="checkbox" th:value="${iata}" checked>
-                    <label class="form-check-label" for="checkChecked" th:text="${iata}"></label>
-                </div>
-                <div>
-                    <input class="form-check-input" type="checkbox" value="" id="checkChecked" checked disabled>
-                    <label class="form-check-label" for="checkChecked" th:text="${endAirport.iata}"></label>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!--replacing LOCATION INPUT from/to-->
+<div th:fragment="location-input(isStart,optionList)"
+     th:id="${isStart}?'location-input-start':'location-input-end'"
+     class="input-group row mt-2">
+    <span class="input-group-text col-auto"
+          th:text="${isStart}?'From':'To'"></span>
+    <input th:id="${isStart}?'start-input-value':'end-input-value'"
+           th:value="${inputValue}"
+           type="hidden"
+           hx-get="/update-review"
+           name="sourceId"
+           style="max-width:80px"
+           th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
+           hx-trigger="input changed"
+           class="input-group-text"
+           th:hx-target="${isStart}?'#start-display-review':'#end-display-review'">
+    <datalist th:id="${isStart}?'input-start-options':'input-end-options'"></datalist>
+    <input th:id="${isStart}?'start-input-text':'end-input-text'"
+           class="form-control"
+           name="inputText"
+           placeholder="Lookup location"
+           th:list="${isStart}?'input-start-options':'input-end-options'"
+           th:oninput="${isStart}?
+           'debouncedProcessLocationInput(this,\'start-input-value\',\'input-start-options\')'
+           :
+           'debouncedProcessLocationInput(this,\'end-input-value\',\'input-end-options\')'"
+           th:onkeydown="${isStart}?
+           'if(event.key === \'Enter\') processLocationInput(this,\'start-input-value\',\'input-start-options\')'
+           :
+           'if(event.key === \'Enter\') processLocationInput(this,\'end-input-value\',\'input-end-options\')'"
+           th:value="${inputText}">
+</div>
+
+<!--replace INITIAL PIN AIRPORTS start/end-->
+<div th:fragment="pin-airports-initial(isStart)"
+     th:id="${isStart}?'include-airports-start':'include-airports-end'"
+     class="input-group row mt-2">
+    <div class="col p-0 pt-1">
+        <input placeholder="Enter Airport" class="form-control" disabled>
+    </div>
+    <button class="btn btn-secondary pe-0 ps-0" style="display:none" disabled>+</button>
+</div>
+
+<!--swapping in PIN AIRPORTS on NEW LOCATION-->
+<div th:fragment="pin-airports(isStart,nearbyAirportOptionList,airportCodes)"
+     th:hx-swap-oob="${isStart}?'outerHTML:#include-airports-start':'outerHTML:#include-airports-end'"
+     th:id="${isStart}?'include-airports-start':'include-airports-end'"
+     class="input-group row mt-2">
+    <div class="d-md-flex p-0 pb-2" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
+        <form th:replace="~{fragments/trips :: airport-codes(isStart=${isStart},airportCodes=${airportCodes})}"></form>
+        <input th:id="${isStart}?'pin-airport-input-start':'pin-airport-input-end'"
+               class="mt-1 col-auto col-md form-control"
+               type="text" aria-label="Airport"
+               name="airportCode"
+               th:placeholder="${#lists.isEmpty(airportCodes.codes)}?'Enter Airport':'Enter Additional Airport'"
+               th:list="${isStart}?'nearby-airports-start':'nearby-airports-end'"
+               required
+               th:oninput="${isStart}?'debouncedProcessAirportInput(true,this,\'include-button-start\',startMarker)':'debouncedProcessAirportInput(false,this,\'include-button-end\',endMarker)'"
+               th:disabled="${nearbyAirportOptionList == null}">
+        <datalist th:id="${isStart}?'nearby-airports-start':'nearby-airports-end'">
+            <option th:replace="~{fragments/options :: trip-input-options(optionList=${nearbyAirportOptionList},tripFilter='AIRPORT')}"></option>
+        </datalist>
+        <button th:id="${isStart}?'include-button-start':'include-button-end'"
+                style="display:none"
+                hx-get="/add-airport-code"
+                th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
+                th:hx-include="${isStart}?'#airport-codes-start,#start-input-value':'#airport-codes-end,#end-input-value'"
+                hx-trigger="click"
+                name="airportCode"
+                hx-swap="outerHTML"
+                th:hx-target="${isStart}?'#airport-codes-start':'#airport-codes-end'" disabled
+                th:hx-on::after-request="${isStart}?'airportIncluded(this,\'pin-airport-input-start\')':'airportIncluded(this,\'pin-airport-input-end\')'">+</button>
+        </div>
+</div>
+
+<!--UPDATING airport codes form add/remove-->
+<form th:fragment="airport-codes(isStart, airportCodes)"
+      class="mt-1 d-flex overflow-x-auto pb-2 pb-md-0"
+      hx-get="/build-path"
+      hx-include="#start-input-value,#end-input-value,#display-path"
+      hx-target="#display-path"
+      hx-swap="outerHTML"
+      th:hx-trigger="${isStart}?'htmx:afterSettle from:#airport-codes-start':'htmx:afterSettle from:#airport-codes-end'"
+      th:id="${isStart} ? 'airport-codes-start' : 'airport-codes-end'"
+      name="airportCodes"
+      th:object="${airportCodes}">
+    <div th:each="code, iter : *{codes}"
+            th:onclick="${isStart}?'mapFitToMarkerToggleAirport(true,' + ${iter.index} + ')':'mapFitToMarkerToggleAirport(false,' + ${iter.index} + ')'"
+            class="input-group-text pe-2 me-2 btn-airport-code">
+        <span th:text="${code}"></span>
+        <input type="hidden" th:field="*{codes[__${iter.index}__]}" th:value="${code}" />
+        <button class="btn-close"
+                hx-get="/remove-airport-code"
+                th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
+                th:hx-include="${isStart}?'#airport-codes-start,#start-input-value':'#airport-codes-end,#end-input-value'"
+                hx-trigger="click"
+                th:value="${code}"
+                name="airportCode"
+                onclick="event.stopPropagation();"
+                th:hx-target="${isStart}?'#airport-codes-start':'#airport-codes-end'"
+                hx-swap="outerHTML"
+                th:hx-on::before-request="${isStart}?'airportRemoved(true,' + ${iter.index} + ',\'' + ${code} + '\',\'nearby-airports-start\')':'airportRemoved(false,' + ${iter.index}+ ',\''+${code}+'\',\'nearby-airports-end\')'"
+                style="transform: scale(0.7); transform-origin: center;">
+        </button>
+    </div>
+</form>
+
+<!--NEW DISPLAY REVIEW start/end-->
+<div th:fragment="display-review(isStart,tripFilter,location,airport)"
+     th:id="${isStart}?'start-display-review':'end-display-review'"
+     th:data-location-bounds="${location}?${#strings.arrayJoin(
+            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}"
+     th:hx-swap-oob="${isStart}?'outerHTML:#start-display-review':'outerHTML:#end-display-review'"
+     th:hx-on::after-settle="${location}?'addLocationToMap('+${isStart}+','+${location.longitude}+','+${location.latitude}+',['+${#strings.arrayJoin(
+            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}+'],\'' + ${location.airports} + '\')':'removeLocationFromMap(' + ${isStart} + ')'"
+     class="col-5">
+    <figure>
+        <blockquote class="blockquote" style="font-size:large">
+            <span th:if="${location}"
+                  th:text="${location.name} + ', ' + ${location.subdivision}"></span>
+            <i th:if="${tripFilter == 'LOCATION' && location == null && airport == null}"
+               th:text="${isStart}?'Select Start Location':'Select End Location'"></i>
+        </blockquote>
+    </figure>
+    <figcaption th:if=${location} class="blockquote-footer" th:text="${location.countryCode}"></figcaption>
+</div>
+
+<!--replacing initial DISPLAY REVIEW start/end-->
+<div th:fragment="display-review-initial(isStart,tripFilter,location,airport)"
+     th:id="${isStart}?'start-display-review':'end-display-review'"
+     class="col-5">
+    <figure>
+        <blockquote class="blockquote" style="font-size:large">
+            <span th:if="${location}"
+                  th:text="${location.name} + ', ' + ${location.subdivision}"></span>
+            <i th:if="${tripFilter == 'LOCATION' && location == null && airport == null}"
+               th:text="${isStart}?'Select Start Location':'Select End Location'"></i>
+        </blockquote>
+    </figure>
+</div>
+
+<!--updating DISPLAY PATH with start and end locations + airports -->
+<div th:fragment="display-path(airlineOptionList,startLocation,endLocation,startAirportCodes,endAirportCodes)"
+     th:id="display-path"
+     class="list-group">
+    <div th:if="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+         class="list-group-item list-group-item-secondary">
+        <span th:if="${startLocation == null or endLocation == null}">Both Locations Required</span>
+        <span th:if="${(startLocation != null and endLocation != null) and (#lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes))}">Airports Required for Both Locations</span>
+    </div>
+    <div th:unless="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+         class="list-group">
+        <div class="row justify-content-center">
+            <input type="hidden" id="start-location-id" name="startLocationId" th:value="${startLocation.id}">
+            <input type="hidden" id="end-location-id" name="endLocationId" th:value="${endLocation.id}">
+            <select hx-get="/path"
+                    hx-trigger="load,change"
+                    hx-include="#start-location-id,#end-location-id"
+                    hx-target="#path-airline-list"
+                    hx-swap="outerHTML" style="max-width:130px"
+                    hx-on::before-request="replaceTargetWithLoading('path-airline-list')"
+                    name="airlineSelection" class="form-select">
+                <option selected value="ALL">All Airlines</option>
+                <option th:each="option,iter : ${airlineOptionList}"
+                        th:value="${option.value}"
+                        th:text="${option.display}"
+                        th:disabled="${option.disabled}"></option>
+            </select>
+        </div>
+    </div>
+    <form th:unless="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+          class="accordion list-group mt-4"
+          id="path-airline-list">
+        <div class="list-group-item">
+            <i role="status">Loading...</i>
+            <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+        </div>
+    </form>
+</div>
+
+<!--updating PATH LIST BETWEEN VALID START END AIRPORTS -->
+<form th:fragment="path-airline(pathAirlineList,pathAirportsList,pathExclusions)"
+      th:if="${pathAirlineList}"
+      id="path-airline-list"
+      class="accordion list-group mt-4"
+      name="pathExclusions"
+      th:object="${pathExclusions}">
+    <div th:if="${#lists.isEmpty(pathAirlineList)}"
+         class="list-group-item list-group-item-secondary">
+        <span>No Paths Found</span>
+    </div>
+    <div th:unless="${#lists.isEmpty(pathAirlineList)}"
+         th:each="pathAirline,iter : ${pathAirlineList}"
+         class="accordion-item">
+        <button type="button"
+                class="accordion-button collapsed list-group-item list-group-item-action"
+                data-bs-toggle="collapse"
+                th:data-bs-target="'#path-info-'+${iter.index}"
+                aria-expanded="false"
+                th:aria-controls="'path-info-'+${iter.index}">
+            <i th:each="route,routeIter : ${pathAirline.routeList}">
+                <span th:text="${routeIter.first}?${route.origin}+' → '+${route.destination}:' → '+${route.destination}"></span>
+            </i>
+            <span th:if="${pathAirline.airline.name == 'DELTA'}">
+                <img src="../images/delta.svg" width="20px" height="20px" alt="delta icon">
+            </span>
+        </button>
+        <div class="accordion-collapse collapse"
+             th:id="'path-info-'+${iter.index}">
+            <div class="accordion-body">
+                <div th:unless="${pathAirline.airline.name} == 'DELTA'"
+                     class="row justify-content-center mb-2">
+                    <span th:utext="'Airline: ' + ${pathAirline.airline.displayText}"></span>
+                </div>
+                <div th:id="'route-carousel-'+${iter.index}" class="carousel carousel-dark slide">
+                    <div th:if="${pathAirline.routeList?.size > 1}" class="carousel-indicators mb-0">
+                        <button th:each="route,routeIter : ${pathAirline.routeList}"
+                                type="button"
+                                th:data-bs-target="'#route-carousel-'+${iter.index}"
+                                th:data-bs-slide-to="${routeIter.index}"
+                                th:class="${routeIter.first}?'active':''"
+                                aria-current="true"
+                                th:aria-label="'Slide ' + ${(routeIter.index)+1}"></button>
+                    </div>
+                    <div class="carousel-inner">
+                        <div th:each="route,routeIter : ${pathAirline.routeList}"
+                             class="carousel-item"
+                             th:classappend="${routeIter.first}?'active':''">
+                            <div class="row justify-content-center mb-3">
+                                <div class="card col-auto col-md-8 pt-3"
+                                     th:classappend="${pathAirline.routeList?.size > 1}?'mb-3':''"
+                                     th:id="'path-airline-values-'+${iter.index}+'-route-'+${route.id}">
+                                    <div class="row justify-content-center mb-3">
+                                        <div class="col-6 col-lg-4">
+                                            <span th:utext="'<strong>' + ${route.origin} + '</strong> ' + ${pathAirportsList[iter.index][routeIter.index].name}"></span>
+                                        </div>
+                                        <div class="col-6 col-lg-4" th:utext="'<strong>' + ${route.destination} + '</strong> ' + ${pathAirportsList[iter.index][routeIter.index+1].name}"></div>
+                                    </div>
+                                    <input name="pathIterIndex"
+                                           type="hidden"
+                                           th:value="${iter.index}">
+                                    <input name="airline"
+                                           type="hidden"
+                                           th:value="${pathAirline.airline.name}">
+                                    <input name="startZoneId"
+                                           type="hidden"
+                                           th:value="${pathAirportsList[iter.index][routeIter.index].zoneId}">
+                                    <input name="endZoneId"
+                                           type="hidden"
+                                           th:value="${pathAirportsList[iter.index][(routeIter.index)+1].zoneId}">
+                                    <input hx-get="/flights"
+                                           type="hidden"
+                                           name="routeId"
+                                           th:value="${route.id}"
+                                           th:hx-include="'#path-airline-values-'+${iter.index}+'-route-'+${route.id}"
+                                           hx-trigger="load"
+                                           th:hx-target="'#path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"
+                                           hx-swap="outerHTML transition:true" />
+                                    <table class="table table-hover mb-3">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">Flight Number</th>
+                                            <th scope="col">Departure Time</th>
+                                            <th scope="col">Arrival Time</th>
+                                            <th scope="col">Duration</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody th:id="'path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button th:if="${pathAirline.routeList?.size > 1}" class="carousel-control-prev" type="button" th:data-bs-target="'#route-carousel-'+${iter.index}" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button th:if="${pathAirline.routeList?.size > 1}" class="carousel-control-next" type="button" th:data-bs-target="'#route-carousel-'+${iter.index}" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!--updating FLIGHTS BODY-->
+<tbody th:fragment="flights-body(flightDetailsList,pathIterIndex,routeId)"
+       th:id="'path-airline-' + ${pathIterIndex} + '-route-' + ${routeId}">
+<tr th:each="flightDetails : ${flightDetailsList}">
+    <td th:text="${flightDetails.flightNumber}"></td>
+    <td th:text="${flightDetails.departureTimeFormatted}"></td>
+    <td th:text="${flightDetails.arrivalTimeFormatted}"></td>
+    <td th:text="${flightDetails.durationFormatted}"></td>
+</tr>
+</tbody>
+
 </html>
