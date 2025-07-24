@@ -48,14 +48,18 @@ public class VoyagerServiceImpl implements VoyagerService {
     private SearchService searchService;
     private LocationService locationService;
     private FlightService flightService;
+    private Voyager voyager;
 
     private List<Airport> allAirports;
     private List<Airport> deltaAirports;
     private Map<String,Airport> airportMap;
 
+    private CountryServiceAPI countryServiceAPI;
+    private LocationServiceAPI locationServiceAPI;
+
     @PostConstruct
     public void init() {
-        Voyager voyager = new Voyager(voyagerAPIConfig.getVoyagerConfig());
+        this.voyager = new Voyager(voyagerAPIConfig.getVoyagerConfig());
         this.airportService = voyager.getAirportService();
         this.routeService = voyager.getRouteService();
         this.searchService = voyager.getSearchService();
@@ -222,6 +226,18 @@ public class VoyagerServiceImpl implements VoyagerService {
         Either<ServiceError,List<Airline>> either = airportService.getAirlines(iataList);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
+    }
+
+    @Override
+    public CountryServiceAPI getCountryServiceAPI() {
+        if (countryServiceAPI == null) countryServiceAPI = new CountryServiceAPI(voyager.getCountryService());
+        return countryServiceAPI;
+    }
+
+    @Override
+    public LocationServiceAPI getLocationServiceAPI() {
+        if (locationServiceAPI == null) locationServiceAPI = new LocationServiceAPI(voyager.getLocationService());
+        return locationServiceAPI;
     }
 
     private List<Flight> fetchFlights(Integer routeId, boolean isActive) {
@@ -418,5 +434,16 @@ public class VoyagerServiceImpl implements VoyagerService {
         LOGGER.error(serviceError.getException().getMessage());
         throw new ResponseStatusException(serviceError.getHttpStatus().getCode(),
                 serviceError.getException().getMessage(), serviceError.getException());
+    }
+
+    static <T> T unwrapEither(Either<ServiceError, T> either) {
+        if (either.isLeft()) {
+            ServiceError serviceError = either.getLeft();
+            Exception exception = serviceError.getException();
+            LOGGER.error(exception.getMessage());
+            throw new ResponseStatusException(serviceError.getHttpStatus().getCode(),
+                    exception.getMessage(), exception);
+        }
+        return either.get();
     }
 }

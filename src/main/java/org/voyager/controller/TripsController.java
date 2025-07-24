@@ -38,7 +38,6 @@ import static org.voyager.utils.ConstantsUtils.SOURCE_ID_PARAM_NAME;
 @Controller
 public class TripsController {
     private static final TripFilter DEFAULT_TRIP_FILTER = TripFilter.AIRPORT;
-    private static final Status DEFAULT_LOCATION_STATUS_FILTER = Status.SAVED;
     private static final AirportFilter DEFAULT_AIRPORT_FILTER = AirportFilter.CIVIL;
     private static final AirportFilter DEFAULT_CLOSER_FILTER = AirportFilter.CIVIL;
     private static final Logger LOGGER = LoggerFactory.getLogger(TripsController.class);

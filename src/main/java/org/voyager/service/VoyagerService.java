@@ -13,8 +13,11 @@ import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
+import org.voyager.service.impl.CountryServiceAPI;
+import org.voyager.service.impl.LocationServiceAPI;
 
 import java.util.List;
+import java.util.Map;
 
 public interface VoyagerService {
     SearchResult<ResultSearch> lookup(String query, int skipRows, int limit);
@@ -46,4 +49,7 @@ public interface VoyagerService {
     ResultSearchFull getResultSearchFull(String sourceId);
 
     List<Airline> getAirlines(List<String> iataList);
+
+    CountryServiceAPI getCountryServiceAPI();
+    LocationServiceAPI getLocationServiceAPI();
 }

@@ -27,7 +27,7 @@
                 hx-get="/saved"
                 hx-target="#tabContent"
                 hx-on::before-request="activate(this)"
-                hx-on::after-request="mapToFirstLocation(false)"
+                hx-on::after-request="recenterMap()"
                 hx-swap="innerHTML">
             Saved
         </a>
@@ -46,7 +46,8 @@
     </li>
 </ul>
 <div th:fragment="saved-tab" class="container mt-2">
-    <div th:replace="~{fragments/locations :: saved-locations}"></div>
+    <div th:replace="~{fragments/saved :: main-saved-page}"></div>
+    <div th:replace="~{fragments/saved :: saved-locations}"></div>
 </div>
 <div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>
