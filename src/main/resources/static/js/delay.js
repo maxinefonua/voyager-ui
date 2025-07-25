@@ -16,3 +16,5 @@ const debouncedPostPinAirport = debounce(postPinAirport, 100);
 const debouncedProcessTripInput = debounce(processTripInput, 500);
 const debouncedProcessLocationInput = debounce(processLocationInput, 500);
 const debouncedProcessAirportInput = debounce(processAirportInput, 500);
+const debouncedRemoveClosestClassFrom = debounce(removeClosestClassFrom, 1000);
+const debouncedCheckForRemoval = debounce(checkForRemoval, 2000);

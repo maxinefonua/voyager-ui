@@ -1,7 +1,6 @@
 package org.voyager.controller;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.voyager.config.VoyagerAPIConfig;
 import org.voyager.model.LocationDetails;
 import org.voyager.model.LocationFilter;
-import org.voyager.model.Option;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.country.Continent;
 import org.voyager.model.country.Country;
@@ -20,14 +17,11 @@ import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationPatch;
 import org.voyager.model.location.Source;
 import org.voyager.model.location.Status;
-import org.voyager.service.CountryService;
-import org.voyager.service.Voyager;
 import org.voyager.service.VoyagerService;
 import org.voyager.service.impl.CountryServiceAPI;
 import org.voyager.service.impl.LocationServiceAPI;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -48,13 +42,13 @@ public class SavedController {
 
     void addDefaultAttributes(Model model) {
         List<List<Country>> continentCountryList = new ArrayList<>();
-        List<List<List<Location>>> continentLocationList = new ArrayList<>();
+        List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
         Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
         for (Continent continent : Continent.values()) {
             List<String> countryCodes = new ArrayList<>();
             List<Country> countryList = new ArrayList<>();
             List<List<Location>> countryLocationsList = new ArrayList<>();
-            List<Location> continentLocations = locationServiceAPI.getLocations(source,continent);
+            List<Location> continentLocations = locationServiceAPI.getLocations(source,continent,List.of(Status.SAVED));
             continentLocations.forEach(location -> {
                 String countryCode = location.getCountryCode();
                 if (countryCodes.contains(countryCode)) {
@@ -69,12 +63,13 @@ public class SavedController {
                 }
             });
             continentCountryList.add(countryList);
+            continentCountryLocationsList.add(countryLocationsList);
         }
         model.addAttribute("continentList", Continent.values());
         model.addAttribute("continentCountryList", continentCountryList);
-        model.addAttribute("continentLocationList", continentLocationList);
+        model.addAttribute("continentCountryLocationsList", continentCountryLocationsList);
 
-//            // TODO: add country details for airports
+            // TODO: add country details for airports
         List<Location> locations = voyagerService.getLocations(Status.SAVED);
         List<LocationDetails> locationDetailsList = new ArrayList<>();
         locations.forEach(location-> { // TODO: add country details for airports
@@ -90,25 +85,41 @@ public class SavedController {
     @GetMapping("/saved")
     public String getSaved(Model model) {
         addDefaultAttributes(model);
+        model.addAttribute("locationFilter",new LocationFilter());
         return "fragments/tab :: saved-tab";
     }
 
     @GetMapping("/saved-locations")
     public String getSavedLocations(Model model,LocationFilter locationFilter) {
-        List<Location> locations = voyagerService.getLocations();
-        if (locationFilter.getFilterArchive()) {
-            locations = locations.stream().filter(location -> !location.getStatus().equals(Status.ARCHIVED)).toList();
+        List<List<Country>> continentCountryList = new ArrayList<>();
+        List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
+        Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
+        for (Continent continent : Continent.values()) {
+            List<String> countryCodes = new ArrayList<>();
+            List<Country> countryList = new ArrayList<>();
+            List<List<Location>> countryLocationsList = new ArrayList<>();
+            List<Location> continentLocations = locationServiceAPI.getLocations(source,continent,
+                    locationFilter.getIncludeArchived()?List.of(Status.SAVED,Status.ARCHIVED):List.of(Status.SAVED));
+            continentLocations.forEach(location -> {
+                String countryCode = location.getCountryCode();
+                if (countryCodes.contains(countryCode)) {
+                    countryLocationsList.get(countryCodes.indexOf(countryCode)).add(location);
+                } else {
+                    Country country = countryServiceAPI.getCountry(countryCode);
+                    countryList.add(country);
+                    countryList.sort(Comparator.comparing(Country::getName));
+                    int insertIndex = countryList.indexOf(country);
+                    countryCodes.add(insertIndex,countryCode);
+                    countryLocationsList.add(insertIndex,new ArrayList<>(List.of(location)));
+                }
+            });
+            continentCountryList.add(countryList);
+            continentCountryLocationsList.add(countryLocationsList);
         }
-        List<LocationDetails> locationDetailsList = new ArrayList<>();
-        locations.forEach(location-> { // TODO: add country details for airports
-            List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
-                    .map(iata -> voyagerService.getAirport(iata)).toList());
-            locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
-            location.setCountryCode(countryServiceAPI.getCountry(location.getCountryCode()).getName());
-        });
-        model.addAttribute("locationFilter",locationFilter);
-        model.addAttribute("locationDetailsList",locationDetailsList);
-        return "fragments/locations :: location-details";
+        model.addAttribute("continentList", Continent.values());
+        model.addAttribute("continentCountryList", continentCountryList);
+        model.addAttribute("continentCountryLocationsList", continentCountryLocationsList);
+        return "fragments/saved :: main-saved-page";
     }
 
     @GetMapping("/unpin-airport-location")
@@ -147,7 +158,7 @@ public class SavedController {
     }
 
     @GetMapping("/location-status")
-    public String pinAirportToLocation(Model model, @NonNull Status status, @NonNull Integer locationId) {
+    public String updateLocationStatus(Model model, @NonNull Status status, @NonNull Integer locationId) {
         Location location = voyagerService.getLocation(locationId);
         if (!location.getStatus().equals(status)) {
             LocationPatch locationPatch = LocationPatch.builder().status(status.name()).build();
@@ -156,6 +167,8 @@ public class SavedController {
             LOGGER.info(String.format("patched location %s",patched));
         }
         model.addAttribute("status",location.getStatus());
-        return "fragments/form :: archive-location-success";
+        if (status.equals(Status.ARCHIVED))
+            return "fragments/saved :: archive-location-success";
+        return "fragments/saved :: unarchive-location-success";
     }
 }

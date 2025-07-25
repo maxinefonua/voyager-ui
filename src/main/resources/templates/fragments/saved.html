@@ -16,7 +16,8 @@
 </div>
 
 <!--SAVED ACCORDION Continents-->
-<div th:fragment="saved-continent-list(continentList,continentCountryList)" class="accordion list-group"
+<div th:fragment="saved-continent-list(continentList,continentCountryList)"
+     class="accordion list-group"
      id="continent-list">
   <div th:each="continent,iter : ${continentList}"
           class="accordion-item">
@@ -24,9 +25,9 @@
       <button class="accordion-button list-group-item" type="button"
               data-bs-toggle="collapse"
               th:href="'#continent-locations-'+${continent.name}"
-              onclick="scrollElemToHref(this)"
+              onclick="recenterMap();scrollElemToHref(this);"
               th:data-bs-target="'#continent-display-'+${continent.name}"
-              th:text="${#lists.isEmpty(continentCountryList[iter.index])}?${continent.displayText}+' (none saved)':${continent.displayText}"
+              th:text="${continent.displayText}"
               th:disabled="${#lists.isEmpty(continentCountryList[iter.index])}"
               aria-controls="collapseOne"></button>
     </h2>
@@ -34,7 +35,7 @@
          class="accordion-collapse collapse"
          th:classappend="${iter.first}?'show':''"
          data-bs-parent="#continent-list">
-      <div class="accordion-body">
+      <div class="accordion-body p-sm-3 p-1">
         <nav th:replace="~{fragments/saved :: saved-scroll-nav(countryList=${continentCountryList[iter.index]})}"></nav>
       </div>
     </div>
@@ -42,9 +43,10 @@
 </div>
 
 <!--MAIN SAVED PAGE-->
-<div th:fragment="main-saved-page" class="row">
+<div th:fragment="main-saved-page"
+     th:id="main-saved-page" class="row">
   <div class="col-4">
-    <div th:replace="~{fragments/saved :: saved-continent-list(continentList=${continentList},continentCountryList=${continentCountryList})}"></div>
+    <div th:replace="~{fragments/saved :: saved-continent-list(continentList=${continentList},continentCountryList=${continentCountryList},continentCountryLocationsList=${continentCountryLocationsList})}"></div>
   </div>
   <div class="col-8">
     <div id="scrollable-content"
@@ -52,14 +54,14 @@
          data-bs-target="#navbar-example3"
          data-bs-smooth-scroll="true"
          class="scrollspy-example-2 overflow-y-scroll"
-         style="height:350px;"
+         style="height:850px;"
          tabindex="0">
       <div th:each="continent,iter : ${continentList}"
            th:id="'continent-locations-'+${continent.name}">
         <div th:each="country,countryIter : ${continentCountryList[iter.index]}"
-             class="card"
+             class="card mb-2"
              th:id="'country-locations-'+${country.code}">
-          <div class="card-body">
+          <div class="card-body" th:with="countryLocationsList=${continentCountryLocationsList[iter.index][countryIter.index]}">
             <h3 class="card-title" th:text="${country.name}"></h3>
             <div th:with="billions=${country.population/1000000000.0},millions=${country.population/1000000.0}">Population:
               <span th:if="${billions.intValue() > 0}" th:text="${#numbers.formatDecimal(billions,1,2,'POINT') + 'B'}"></span>
@@ -70,12 +72,46 @@
             <div>Currency: <span th:text="${country.currencyCode}"></span></div>
             <div>Capital: <span th:text="${country.capitalCity}"></span></div>
             <div>Languages: <span th:text="${#strings.listJoin(country.languages, ', ')}"></span></div>
+            <div class="list-group mt-2">
+              <div class="list-group-item d-flex align-items-center justify-content-between"
+                   th:each="location,locationIter : ${countryLocationsList}">
+                <span th:text="${location.name}+', '+${location.subdivision}"></span>
+                <button th:if="${location.status.name == 'SAVED'}"
+                        class="ms-4 btn btn-outline-danger col-md-3 col-lg-2 float-end"
+                        hx-get="/location-status"
+                        hx-swap="outerHTML transition:true"
+                        th:hx-vals="'{&quot;status&quot;:&quot;ARCHIVED&quot;,&quot;locationId&quot;:'+${location.id}+'}'">Archive</button>
+                <button th:if="${location.status.name == 'ARCHIVED'}"
+                        class="btn btn-outline-danger col-md-3 col-lg-2 float-end"
+                        hx-get="/location-status"
+                        hx-swap="outerHTML transition:true"
+                        th:hx-vals="'{&quot;status&quot;:&quot;SAVED&quot;,&quot;locationId&quot;:'+${location.id}+'}'">Unarchive</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <div id="buffer"
+           style="height:800px"></div>
     </div>
   </div>
 </div>
+
+<!--swapped in ARCHIVED button-->
+<button th:fragment="archive-location-success"
+        class="btn btn-outline-danger col-md-3 col-lg-2"
+        hx-on::after-settle="debouncedRemoveClosestClassFrom(this,'.list-group-item');"
+        disabled>
+  Archived
+</button>
+
+<!--swapped in ARCHIVED button-->
+<button th:fragment="unarchive-location-success"
+        class="btn btn-outline-danger col-md-3 col-lg-2"
+        disabled>
+  Unarchived
+</button>
+
 
 <!--LIST OF SAVED LOCATIONS loaded on SAVED TAB-->
 <div th:fragment="saved-locations"
@@ -87,17 +123,17 @@
            hx-target="#saved-locations-container"
            hx-swap="outerHTML transition:true"
            hx-trigger="change"
-           hx-include="[name='filterArchive']"
+           hx-include="[name='includeArchived']"
            hx-on::after-request="switchEngage(this)"
            class="form-check-input"
            type="checkbox"
            role="switch"
-           id="filterArchive"
-           name="filterArchive"
-           th:field="*{filterArchive}"
-           th:checked="${locationFilter.filterArchive}"
+           id="includeArchived"
+           name="includeArchived"
+           th:field="*{includeArchived}"
+           th:checked="${locationFilter.includeArchived}"
     >
-    <label class="form-check-label" for="filterArchive">Include Archived</label>
+    <label class="form-check-label" for="includeArchived">Include Archived</label>
   </form>
   <div id="saved-locations-container">
     <div th:unless="${locationDetailsList.size > 0}"

@@ -12,17 +12,17 @@
                hx-target="#saved-locations-container"
                hx-swap="outerHTML transition:true"
                hx-trigger="change"
-               hx-include="[name='filterArchive']"
+               hx-include="[name='includeArchived']"
                hx-on::after-request="switchEngage(this)"
                class="form-check-input"
                type="checkbox"
                role="switch"
-               id="filterArchive"
-               name="filterArchive"
-               th:field="*{filterArchive}"
-               th:checked="${locationFilter.filterArchive}"
+               id="includeArchived"
+               name="includeArchived"
+               th:field="*{includeArchived}"
+               th:checked="${locationFilter.includeArchived}"
         >
-        <label class="form-check-label" for="filterArchive">Include Archived</label>
+        <label class="form-check-label" for="includeArchived">Include Archived</label>
     </form>
     <div id="saved-locations-container">
         <div th:unless="${locationDetailsList.size > 0}"

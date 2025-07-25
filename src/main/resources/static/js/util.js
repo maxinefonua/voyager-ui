@@ -10,3 +10,12 @@ function replaceTargetWithLoading(targetElemId) {
             <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
         </div>`
 }
+
+function removeClosestClassFrom(childElem,className) {
+    const targetElem = childElem.closest(className);
+    if (targetElem) targetElem.remove();
+}
+
+function checkForRemoval(childElem,className) {
+    if (childElem.innerHTML.trim() === '') removeClosestClassFrom(childElem,className);
+}
