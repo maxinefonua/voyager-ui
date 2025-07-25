@@ -2,21 +2,18 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml" xmlns:hx-on="http://www.w3.org/1999/xhtml">
 
 <!--SAVED NAV BAR WITH AUTOSCROLL-->
-<nav th:fragment="saved-scroll-nav"
-     id="trips-scroll-nav" class="list-group">
-  <a class="list-group-item list-group-item-action p-2" href="#item-1"
-     onclick="scrollElemToTarget('#item-1')">
-    Item-1
+<div th:fragment="saved-scroll-nav(countryList)"
+     id="trips-scroll-nav"
+     class="d-flex flex-column simple-list-example-scrollspy">
+  <a th:each="country,countryIter : ${countryList}"
+     class="p-1 rounded"
+     th:href="'#country-locations-' + ${country.code}"
+     th:data-country-bounds="${#strings.arrayJoin(
+        #numbers.arrayFormatDecimal(country.bounds, 1, 'POINT', 5, 'POINT'),',')}"
+     onclick="mapToCountry(this)">
+    <span th:text="${country.name}"></span>
   </a>
-  <a class="list-group-item list-group-item-action p-2" href="#item-2"
-     onclick="scrollElemToTarget('#item-2')">
-    Item-2
-  </a>
-  <a class="list-group-item list-group-item-action p-2" href="#item-3"
-     onclick="mapFitTripScrollTo('#item-3');">
-    Item-3
-  </a>
-</nav>
+</div>
 
 <!--SAVED ACCORDION Continents-->
 <div th:fragment="saved-continent-list(continentList,continentCountryList)" class="accordion list-group"
@@ -26,8 +23,11 @@
     <h2 class="accordion-header">
       <button class="accordion-button list-group-item" type="button"
               data-bs-toggle="collapse"
+              th:href="'#continent-locations-'+${continent.name}"
+              onclick="scrollElemToHref(this)"
               th:data-bs-target="'#continent-display-'+${continent.name}"
-              th:text="${continent.displayText}"
+              th:text="${#lists.isEmpty(continentCountryList[iter.index])}?${continent.displayText}+' (none saved)':${continent.displayText}"
+              th:disabled="${#lists.isEmpty(continentCountryList[iter.index])}"
               aria-controls="collapseOne"></button>
     </h2>
     <div th:id="'continent-display-'+${continent.name}"
@@ -35,10 +35,7 @@
          th:classappend="${iter.first}?'show':''"
          data-bs-parent="#continent-list">
       <div class="accordion-body">
-        <div th:each="country,countryIter : ${continentCountryList[iter.index]}">
-          <span th:text="${country.name}"></span>
-        </div>
-<!--        <nav th:replace="~{fragments/saved :: saved-scroll-nav}"></nav>-->
+        <nav th:replace="~{fragments/saved :: saved-scroll-nav(countryList=${continentCountryList[iter.index]})}"></nav>
       </div>
     </div>
   </div>
@@ -49,46 +46,37 @@
   <div class="col-4">
     <div th:replace="~{fragments/saved :: saved-continent-list(continentList=${continentList},continentCountryList=${continentCountryList})}"></div>
   </div>
-
   <div class="col-8">
     <div id="scrollable-content"
          data-bs-spy="scroll"
          data-bs-target="#navbar-example3"
          data-bs-smooth-scroll="true"
-         class="scrollspy-example-2 "
-         style="height:250px;"
+         class="scrollspy-example-2 overflow-y-scroll"
+         style="height:350px;"
          tabindex="0">
-      <div id="item-1">
-        <h4>Item 1</h4>
-        <p>...</p>
-      </div>
-      <div id="item-1-1">
-        <h5>Item 1-1</h5>
-        <p>...</p>
-      </div>
-      <div id="item-1-2">
-        <h5>Item 1-2</h5>
-        <p>...</p>
-      </div>
-      <div id="item-2">
-        <h4>Item 2</h4>
-        <p>...</p>
-      </div>
-      <div id="item-3">
-        <h4>Item 3</h4>
-        <p>...</p>
-      </div>
-      <div id="item-3-1">
-        <h5>Item 3-1</h5>
-        <p>...</p>
-      </div>
-      <div id="item-3-2">
-        <h5>Item 3-2</h5>
-        <p>...</p>
+      <div th:each="continent,iter : ${continentList}"
+           th:id="'continent-locations-'+${continent.name}">
+        <div th:each="country,countryIter : ${continentCountryList[iter.index]}"
+             class="card"
+             th:id="'country-locations-'+${country.code}">
+          <div class="card-body">
+            <h3 class="card-title" th:text="${country.name}"></h3>
+            <div th:with="billions=${country.population/1000000000.0},millions=${country.population/1000000.0}">Population:
+              <span th:if="${billions.intValue() > 0}" th:text="${#numbers.formatDecimal(billions,1,2,'POINT') + 'B'}"></span>
+              <span th:if="${billions.intValue() == 0 and millions.intValue() > 0}" th:text="${#numbers.formatDecimal(millions,1,2,'POINT') + 'M'}"></span>
+              <span th:if="${billions.intValue() == 0 and millions.intValue() == 0}" th:text="${#numbers.formatInteger(country.population,1,'COMMA')}"></span>
+            </div>
+            <div>Area(km^2): <span th:text="${#numbers.formatInteger(country.areaInSqKm,0,'COMMA')}"></span></div>
+            <div>Currency: <span th:text="${country.currencyCode}"></span></div>
+            <div>Capital: <span th:text="${country.capitalCity}"></span></div>
+            <div>Languages: <span th:text="${#strings.listJoin(country.languages, ', ')}"></span></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
 <!--LIST OF SAVED LOCATIONS loaded on SAVED TAB-->
 <div th:fragment="saved-locations"
      id="savedLocations"

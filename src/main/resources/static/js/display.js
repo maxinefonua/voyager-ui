@@ -64,6 +64,32 @@ function zoomToLocation(isStart,targetElemId,reviewElem) {
     scrollElemToTarget(targetElemId);
 }
 
+function mapToCountry(aElem) {
+    event.preventDefault(); // prevents url mod
+    closeMarkerPopups();
+    const stringofBoundsArray = aElem.dataset.countryBounds;
+    if (stringofBoundsArray) {
+        const bounds = stringofBoundsArray.split(',').map(Number);
+        map.fitBounds(bounds);
+    } else recenterMap();
+    scrollElemToHref(aElem);
+}
+
+function scrollElemToHref(aElem) {
+    event.preventDefault();
+    const targetElemId = aElem.getAttribute('href');
+    const target = document.querySelector(targetElemId);
+    const contentContainer = document.getElementById('scrollable-content');
+
+    if (target && contentContainer) {
+        const offset = target.offsetTop - contentContainer.offsetTop;
+        contentContainer.scrollTo({
+            top: offset,
+            behavior: 'smooth'
+        });
+    }
+}
+
 function removeLocationFromMap(isStart) {
     if (isStart) clearStartMarkers();
     else clearEndMarkers();
