@@ -33,7 +33,6 @@
     </h2>
     <div th:id="'continent-display-'+${continent.name}"
          class="accordion-collapse collapse"
-         th:classappend="${iter.first}?'show':''"
          data-bs-parent="#continent-list">
       <div class="accordion-body p-sm-3 p-1">
         <nav th:replace="~{fragments/saved :: saved-scroll-nav(countryList=${continentCountryList[iter.index]})}"></nav>
@@ -61,32 +60,39 @@
         <div th:each="country,countryIter : ${continentCountryList[iter.index]}"
              class="card mb-2"
              th:id="'country-locations-'+${country.code}">
-          <div class="card-body" th:with="countryLocationsList=${continentCountryLocationsList[iter.index][countryIter.index]}">
+          <div class="card-body"
+               th:with="countryLocationsList=${continentCountryLocationsList[iter.index][countryIter.index]}">
             <h3 class="card-title" th:text="${country.name}"></h3>
             <div th:with="billions=${country.population/1000000000.0},millions=${country.population/1000000.0}">Population:
               <span th:if="${billions.intValue() > 0}" th:text="${#numbers.formatDecimal(billions,1,2,'POINT') + 'B'}"></span>
               <span th:if="${billions.intValue() == 0 and millions.intValue() > 0}" th:text="${#numbers.formatDecimal(millions,1,2,'POINT') + 'M'}"></span>
               <span th:if="${billions.intValue() == 0 and millions.intValue() == 0}" th:text="${#numbers.formatInteger(country.population,1,'COMMA')}"></span>
+              <br>Area(km^2): <span th:text="${#numbers.formatInteger(country.areaInSqKm,0,'COMMA')}"></span>
+              <br>Currency: <span th:text="${country.currencyCode}"></span>
+              <br>Capital: <span th:text="${country.capitalCity}"></span>
+              <br>Languages: <span th:text="${#strings.listJoin(country.languages, ', ')}"></span>
             </div>
-            <div>Area(km^2): <span th:text="${#numbers.formatInteger(country.areaInSqKm,0,'COMMA')}"></span></div>
-            <div>Currency: <span th:text="${country.currencyCode}"></span></div>
-            <div>Capital: <span th:text="${country.capitalCity}"></span></div>
-            <div>Languages: <span th:text="${#strings.listJoin(country.languages, ', ')}"></span></div>
             <div class="list-group mt-2">
-              <div class="list-group-item d-flex align-items-center justify-content-between"
+              <div class="list-group-item"
                    th:each="location,locationIter : ${countryLocationsList}">
-                <span th:text="${location.name}+', '+${location.subdivision}"></span>
-                <button th:if="${location.status.name == 'SAVED'}"
-                        class="ms-4 btn btn-outline-danger col-md-3 col-lg-2 float-end"
-                        hx-get="/location-status"
-                        hx-swap="outerHTML transition:true"
-                        th:hx-vals="'{&quot;status&quot;:&quot;ARCHIVED&quot;,&quot;locationId&quot;:'+${location.id}+'}'">Archive</button>
-                <button th:if="${location.status.name == 'ARCHIVED'}"
-                        class="btn btn-outline-danger col-md-3 col-lg-2 float-end"
-                        hx-get="/location-status"
-                        hx-swap="outerHTML transition:true"
-                        th:hx-vals="'{&quot;status&quot;:&quot;SAVED&quot;,&quot;locationId&quot;:'+${location.id}+'}'">Unarchive</button>
-              </div>
+                <div class="row d-block d-md-flex g-2 g-md-0 align-items-center justify-content-center justify-content-sm-between">
+                  <div class="col-auto text-center">
+                    <span th:text="${location.name}+', '+${location.subdivision}"></span>
+                  </div>
+                  <div class="col-auto">
+                    <div class="row m-2 m-md-0 d-flex gap-2 justify-content-evenly">
+                      <div th:replace="~{fragments/saved :: status-update-button(locationFilter=${locationFilter},locationId=${location.id},locationStatusName=${location.status.name})}"></div>
+                      <button class="btn btn-outline-danger col"
+                              hx-get="/location-status"
+                              hx-include="#includeArchived"
+                              hx-swap="outerHTML transition:true"
+                              name="status"
+                              value="DELETE"
+                              th:hx-vals="'{&quot;locationId&quot;:'+${location.id}+'}'">Remove</button>
+                    </div>
+                  </div>
+                </div>
+                </div>
             </div>
           </div>
         </div>
@@ -97,78 +103,93 @@
   </div>
 </div>
 
-<!--swapped in ARCHIVED button-->
-<button th:fragment="archive-location-success"
-        class="btn btn-outline-danger col-md-3 col-lg-2"
-        hx-on::after-settle="debouncedRemoveClosestClassFrom(this,'.list-group-item');"
-        disabled>
-  Archived
-</button>
+<!--ARCHIVE/UNARCHIVE button-->
+<button th:fragment="status-update-button(locationFilter,locationId,locationStatusName)"
+        class="btn btn-outline-primary col"
+        hx-get="/location-status"
+        hx-include="#includeArchived"
+        hx-swap="outerHTML transition:true"
+        name="status"
+        th:value="${locationStatusName == 'SAVED'?'ARCHIVED':'SAVED'}"
+        th:hx-vals="'{&quot;locationId&quot;:'+${locationId}+'}'"
+        th:text="${locationStatusName == 'SAVED'}?'Archive':'Unarchive'"></button>
 
 <!--swapped in ARCHIVED button-->
-<button th:fragment="unarchive-location-success"
-        class="btn btn-outline-danger col-md-3 col-lg-2"
+<button th:fragment="update-location-status-success(locationStatusName,includeArchived,locationId)"
+        th:class="${locationStatusName == 'DELETE'}?'btn btn-outline-danger col':'btn btn-outline-primary col'"
+        th:name="${locationStatusName != 'DELETE'}?'status'"
+        th:value="${locationStatusName != 'DELETE'}?${locationStatusName}"
+        th:hx-include="${locationStatusName != 'DELETE'}?'#includeArchived'"
+        th:hx-swap="${locationStatusName != 'DELETE'}?'outerHTML transition:true'"
+        th:hx-trigger="${locationStatusName != 'DELETE'}?'load delay:1s'"
+        th:hx-vals="${locationStatusName != 'DELETE'}?'{&quot;locationId&quot;:'+${locationId}+'}'"
+        th:hx-get="${includeArchived and (locationStatusName != 'DELETE')}?'/status-button':''"
+        th:hx-on::after-settle="${includeArchived and (locationStatusName != 'DELETE')}?'':'debouncedRemoveClosestClassFrom(this,\'.list-group-item\')'"
         disabled>
-  Unarchived
+  <th th:switch="${locationStatusName}">
+    <span th:case="'SAVED'">Unarchived</span>
+    <span th:case="'ARCHIVED'">Archived</span>
+    <span th:case="'DELETE'">Removed</span>
+  </th>
 </button>
-
 
 <!--LIST OF SAVED LOCATIONS loaded on SAVED TAB-->
-<div th:fragment="saved-locations"
-     id="savedLocations"
-     class="accordion list-group">
-  <form class="form-check form-switch mb-4 mt-2"
-        th:object="${locationFilter}">
-    <input hx-get="/saved-locations"
-           hx-target="#saved-locations-container"
-           hx-swap="outerHTML transition:true"
-           hx-trigger="change"
-           hx-include="[name='includeArchived']"
-           hx-on::after-request="switchEngage(this)"
-           class="form-check-input"
-           type="checkbox"
-           role="switch"
-           id="includeArchived"
-           name="includeArchived"
-           th:field="*{includeArchived}"
-           th:checked="${locationFilter.includeArchived}"
-    >
-    <label class="form-check-label" for="includeArchived">Include Archived</label>
-  </form>
-  <div id="saved-locations-container">
-    <div th:unless="${locationDetailsList.size > 0}"
-         class="list-group-item list-group-item-secondary">No saved locations. 'Browse' to add locations.</div>
-    <div th:each="locationDetail,iter : ${locationDetailsList}"
-         class="accordion item">
-      <button id="location-display-"
-              class="accordion-button list-group-item list-group-item-action list-group-item-light collapsed"
-              type="button"
-              aria-controls="collapse-location-"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapse-location-"
-              aria-expanded="false"
-              th:text="${locationDetail.location.name} + ', ' + ${locationDetail.location.subdivision} + ' | ' + ${locationDetail.location.countryCode}"
-              th:onclick="zoomToLocationMap([[${locationDetail.location.name}]],[[${locationDetail.location.id}]],this)"
-              th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"></button>
-      <div
-              id="collapse-location-"
-              class="accordion-collapse collapse"
-              data-bs-parent="#savedLocations"
-              th:attrappend="id=${iter.index}">
-        <div class="accordion-body">
-          <p th:text="${locationDetail.location.name} +' is a locality of '
-                + ${locationDetail.location.subdivision} + ' in '
-                + ${locationDetail.location.countryCode} + '.'">
-          </p>
-          <div id="airports-container-"
-               class="container mb-2"
-               th:attrappend="id=${iter.index}">
-            <div th:replace="~{fragments/pinned :: pin-airport-form-initial(locationDetail=${locationDetail})}"></div>
-            <form th:replace="~{fragments/form :: archive-location-display}"></form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<!--<div th:fragment="saved-locations"-->
+<!--     id="savedLocations"-->
+<!--     class="accordion list-group">-->
+<!--  <form class="form-check form-switch mb-2 mt-3"-->
+<!--        th:id="location-filter"-->
+<!--        th:object="${locationFilter}">-->
+<!--    <input hx-get="/saved-locations"-->
+<!--           hx-target="#saved-locations-container"-->
+<!--           hx-swap="outerHTML transition:true"-->
+<!--           hx-trigger="change"-->
+<!--           hx-include="[name='includeArchived']"-->
+<!--           hx-on::after-request="switchEngage(this)"-->
+<!--           class="form-check-input"-->
+<!--           type="checkbox"-->
+<!--           role="switch"-->
+<!--           id="includeArchived"-->
+<!--           name="includeArchived"-->
+<!--           th:field="*{includeArchived}"-->
+<!--           th:checked="${locationFilter.includeArchived}"-->
+<!--    >-->
+<!--    <label class="form-check-label" for="includeArchived">Include Archived</label>-->
+<!--  </form>-->
+<!--  <div id="saved-locations-container">-->
+<!--    <div th:unless="${locationDetailsList.size > 0}"-->
+<!--         class="list-group-item list-group-item-secondary">No saved locations. 'Browse' to add locations.</div>-->
+<!--    <div th:each="locationDetail,iter : ${locationDetailsList}"-->
+<!--         class="accordion item">-->
+<!--      <button id="location-display-"-->
+<!--              class="accordion-button list-group-item list-group-item-action list-group-item-light collapsed"-->
+<!--              type="button"-->
+<!--              aria-controls="collapse-location-"-->
+<!--              data-bs-toggle="collapse"-->
+<!--              data-bs-target="#collapse-location-"-->
+<!--              aria-expanded="false"-->
+<!--              th:text="${locationDetail.location.name} + ', ' + ${locationDetail.location.subdivision} + ' | ' + ${locationDetail.location.countryCode}"-->
+<!--              th:onclick="zoomToLocationMap([[${locationDetail.location.name}]],[[${locationDetail.location.id}]],this)"-->
+<!--              th:attrappend="data-bs-target=${iter.index},aria-controls=${iter.index},id=${iter.index}"></button>-->
+<!--      <div-->
+<!--              id="collapse-location-"-->
+<!--              class="accordion-collapse collapse"-->
+<!--              data-bs-parent="#savedLocations"-->
+<!--              th:attrappend="id=${iter.index}">-->
+<!--        <div class="accordion-body">-->
+<!--          <p th:text="${locationDetail.location.name} +' is a locality of '-->
+<!--                + ${locationDetail.location.subdivision} + ' in '-->
+<!--                + ${locationDetail.location.countryCode} + '.'">-->
+<!--          </p>-->
+<!--          <div id="airports-container-"-->
+<!--               class="container mb-2"-->
+<!--               th:attrappend="id=${iter.index}">-->
+<!--            <div th:replace="~{fragments/pinned :: pin-airport-form-initial(locationDetail=${locationDetail})}"></div>-->
+<!--            <form th:replace="~{fragments/form :: archive-location-display}"></form>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
 </html>

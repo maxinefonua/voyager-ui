@@ -19,3 +19,13 @@ function removeClosestClassFrom(childElem,className) {
 function checkForRemoval(childElem,className) {
     if (childElem.innerHTML.trim() === '') removeClosestClassFrom(childElem,className);
 }
+
+function replaceButtonWithFunctions(buttonElem,isArchived,locationId) {
+    const parentElem = buttonElem.parentElement;
+    if (isArchived) {
+        parentElem.innerHTML = `<button class="ms-4 btn btn-outline-primary" hx-get="/location-status" hx-include="#includeArchived" hx-swap="outerHTML transition:true" hx-vals="{&quot;status&quot;:&quot;SAVED&quot;,&quot;locationId&quot;:${locationId}}">Unarchive</button>`;
+    } else {
+        parentElem.innerHTML = `<button class="ms-4 btn btn-outline-danger" hx-get="/location-status" hx-include="#includeArchived" hx-swap="outerHTML transition:true" hx-vals="{&quot;status&quot;:&quot;ARCHIVED&quot;,&quot;locationId&quot;:${locationId}}">Archive</button>`;
+    }
+    htmx.process(parentElem);
+}

@@ -46,7 +46,7 @@
     </li>
 </ul>
 <div th:fragment="saved-tab" class="container mt-2">
-    <form class="form-check form-switch mb-4 mt-2"
+    <form class="form-check form-switch mb-2 mt-3"
           th:object="${locationFilter}">
         <label class="form-check-label" for="includeArchived">Include Archived</label>
         <input hx-get="/saved-locations"
@@ -63,7 +63,6 @@
                th:checked="${locationFilter.includeArchived}">
     </form>
     <div th:replace="~{fragments/saved :: main-saved-page}"></div>
-    <div th:replace="~{fragments/saved :: saved-locations}"></div>
 </div>
 <div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>

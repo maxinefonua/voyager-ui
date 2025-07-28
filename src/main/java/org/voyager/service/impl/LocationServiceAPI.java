@@ -17,11 +17,11 @@ public class LocationServiceAPI {
         this.locationService = locationService;
     }
 
-    public List<Location> getLocations(Source source, Continent continent) {
-        return unwrapEither(locationService.getLocations(source,continent));
-    }
-
     public List<Location> getLocations(Source source, Continent continent, List<Status> statusList) {
         return unwrapEither(locationService.getLocations(source,continent,statusList));
+    }
+
+    public Boolean deleteLocation(Integer id) {
+        return unwrapEither(locationService.deleteLocation(id));
     }
 }

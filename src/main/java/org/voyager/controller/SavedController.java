@@ -32,7 +32,7 @@ public class SavedController {
     private static LocationServiceAPI locationServiceAPI;
 
     @Autowired
-    VoyagerService voyagerService;
+    private VoyagerService voyagerService;
 
     @PostConstruct
     public void init() {
@@ -90,7 +90,7 @@ public class SavedController {
     }
 
     @GetMapping("/saved-locations")
-    public String getSavedLocations(Model model,LocationFilter locationFilter) {
+    public String getSavedLocations(Model model,@ModelAttribute LocationFilter locationFilter) {
         List<List<Country>> continentCountryList = new ArrayList<>();
         List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
         Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
@@ -116,6 +116,7 @@ public class SavedController {
             continentCountryList.add(countryList);
             continentCountryLocationsList.add(countryLocationsList);
         }
+        model.addAttribute("locationFilter",locationFilter);
         model.addAttribute("continentList", Continent.values());
         model.addAttribute("continentCountryList", continentCountryList);
         model.addAttribute("continentCountryLocationsList", continentCountryLocationsList);
@@ -157,18 +158,38 @@ public class SavedController {
         return "fragments/pinned :: pinned-airport";
     }
 
+    @GetMapping("/status-button")
+    public String getStatusButton(Model model, @NonNull LocationFilter locationFilter,
+                                  @NonNull Integer locationId, @NonNull Status status) {
+        model.addAttribute("locationFilter",locationFilter);
+        model.addAttribute("locationId",locationId);
+        model.addAttribute("locationStatusName",status.name());
+        return "fragments/saved :: status-update-button";
+    }
+
     @GetMapping("/location-status")
-    public String updateLocationStatus(Model model, @NonNull Status status, @NonNull Integer locationId) {
-        Location location = voyagerService.getLocation(locationId);
-        if (!location.getStatus().equals(status)) {
-            LocationPatch locationPatch = LocationPatch.builder().status(status.name()).build();
-            LOGGER.debug(String.format("patch request %s to location %s",locationPatch,location));
-            Location patched = voyagerService.patchLocation(locationId,locationPatch);
-            LOGGER.info(String.format("patched location %s",patched));
+    public String updateLocationStatus(Model model, @NonNull Status status,
+                                       @NonNull Integer locationId,
+                                       @NonNull LocationFilter locationFilter) {
+        if (status.equals(Status.DELETE)) {
+            Boolean deleted = locationServiceAPI.deleteLocation(locationId);
+            if (deleted)
+                LOGGER.info(String.format("successfully deleted location with id: %d",locationId));
+            else LOGGER.error(String.format("error deleting location with id: %d",locationId));
+        } else {
+            Location location = voyagerService.getLocation(locationId);
+            if (!location.getStatus().equals(status)) {
+                LocationPatch locationPatch = LocationPatch.builder().status(status.name()).build();
+                LOGGER.debug(String.format("patch request %s to location %s", locationPatch, location));
+                Location patched = voyagerService.patchLocation(locationId, locationPatch);
+                LOGGER.info(String.format("patched location %s", patched));
+            } else {
+                LOGGER.info(String.format("skipping location update of matching status: %s",location));
+            }
         }
-        model.addAttribute("status",location.getStatus());
-        if (status.equals(Status.ARCHIVED))
-            return "fragments/saved :: archive-location-success";
-        return "fragments/saved :: unarchive-location-success";
+        model.addAttribute("locationStatusName",status.name());
+        model.addAttribute("includeArchived",locationFilter.getIncludeArchived());
+        model.addAttribute("locationId",locationId);
+        return "fragments/saved :: update-location-status-success";
     }
 }
