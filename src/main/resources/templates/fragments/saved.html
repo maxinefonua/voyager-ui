@@ -43,11 +43,11 @@
 
 <!--MAIN SAVED PAGE-->
 <div th:fragment="main-saved-page"
-     th:id="main-saved-page" class="row">
-  <div class="col-4">
+     th:id="main-saved-page" class="row justify-content-center">
+  <div class="col-4 col-lg-2">
     <div th:replace="~{fragments/saved :: saved-continent-list(continentList=${continentList},continentCountryList=${continentCountryList},continentCountryLocationsList=${continentCountryLocationsList})}"></div>
   </div>
-  <div class="col-8">
+  <div class="col-7">
     <div id="scrollable-content"
          data-bs-spy="scroll"
          data-bs-target="#navbar-example3"
@@ -76,11 +76,11 @@
               <div class="list-group-item"
                    th:each="location,locationIter : ${countryLocationsList}">
                 <div class="row d-block d-md-flex g-2 g-md-0 align-items-center justify-content-center justify-content-sm-between">
-                  <div class="col-auto text-center">
+                  <div class="col-auto col-md-4 col-lg-5 text-center text-md-start">
                     <span th:text="${location.name}+', '+${location.subdivision}"></span>
                   </div>
-                  <div class="col-auto">
-                    <div class="row m-2 m-md-0 d-flex gap-2 justify-content-evenly">
+                  <div class="m-2 col-auto col-md-7 col-lg-6 col-xl-4">
+                    <div class="row d-flex gap-2 justify-content-evenly">
                       <div th:replace="~{fragments/saved :: status-update-button(locationFilter=${locationFilter},locationId=${location.id},locationStatusName=${location.status.name})}"></div>
                       <button class="btn btn-outline-danger col"
                               hx-get="/location-status"
