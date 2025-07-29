@@ -66,13 +66,27 @@ function zoomToLocation(isStart,targetElemId,reviewElem) {
 
 function mapToCountry(aElem) {
     event.preventDefault(); // prevents url mod
-    closeMarkerPopups();
+    clearMarkers();
     const stringofBoundsArray = aElem.dataset.countryBounds;
     if (stringofBoundsArray) {
         const bounds = stringofBoundsArray.split(',').map(Number);
         map.fitBounds(bounds);
     } else recenterMap();
     scrollElemToHref(aElem);
+}
+
+function mapToLocation(aElem) {
+    event.preventDefault(); // prevents url mod
+    clearMarkers();
+    const stringofBoundsArray = aElem.dataset.countryBounds;
+    if (stringofBoundsArray) {
+        const bounds = stringofBoundsArray.split(',').map(Number);
+        map.fitBounds(bounds);
+    } else recenterMap();
+    const longitude = aElem.dataset.lng;
+    const latitude = aElem.dataset.lat;
+    if (lookupMarker) lookupMarker.remove();
+    lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
 }
 
 function scrollElemToHref(aElem) {

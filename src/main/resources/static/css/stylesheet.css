@@ -27,24 +27,6 @@
     background-color: var(--bs-tertiary-bg);
 }
 
-.responsive-btn {
-  @include button-size(
-    $btn-padding-y,
-    $btn-padding-x,
-    $btn-font-size,
-    $btn-border-radius
-  );
-
-  @include media-breakpoint-down(xs) {
-    @include button-size(
-      $btn-padding-y-sm,
-      $btn-padding-x-sm,
-      $btn-font-size-sm,
-      $btn-border-radius-sm
-    );
-  }
-}
-
 .btn-airport-code:hover {
     background-color: var(--bs-secondary-bg);
     cursor: pointer;
@@ -85,4 +67,16 @@ a.list-group-item-action.active .scroll-nav-icon {
 
 .airport-marker path {
   fill: #fd0d6e;
+}
+
+.btn:hover svg path {
+  fill: #ffffff;
+}
+
+.btn-primary svg path {
+  fill: #ffffff;
+}
+
+.btn-outline-danger svg path {
+  fill: #dc3545;
 }
