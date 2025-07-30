@@ -107,6 +107,7 @@ function scrollElemToHref(aElem) {
 function removeLocationFromMap(isStart) {
     if (isStart) clearStartMarkers();
     else clearEndMarkers();
+    checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'));
 }
 
 function mapFitTripScrollTo(targetElemId) {
@@ -118,11 +119,10 @@ function mapFitTripScrollTo(targetElemId) {
 }
 
 
-function addLocationToMap(isStart,longitude,latitude,bounds,stringOfCodesArray) {
+function addLocationToMap(divElem,isStart,longitude,latitude,bounds,stringOfCodesArray) {
     const trimmedArray = stringOfCodesArray.replace(/[\[\]]/g, '');
     const airportCodes = trimmedArray.split(', '); // Split by comma and space
     const targetMarkers = isStart ? airportStartMarkers : airportEndMarkers;
-
     if (isStart) {
         if (startMarker) startMarker.remove();
         startMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
@@ -151,6 +151,9 @@ function addLocationToMap(isStart,longitude,latitude,bounds,stringOfCodesArray) 
         if (airportEndMarkers.length > 0) mapFit(airportEndMarkers,endMarker);
         else map.fitBounds(bounds);
     }
+    divElem.removeAttribute('hx-on::after-settle');
+    htmx.process(divElem);
+    checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'));
 }
 
 function mapFit(targetMarkersArray,locationMarker) {

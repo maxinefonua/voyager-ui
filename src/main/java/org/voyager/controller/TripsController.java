@@ -100,8 +100,8 @@ public class TripsController {
         Location endLocation = null;
         List<String> startAirportCodes = List.of();
         List<String> endAirportCodes = List.of();
-        if (StringUtils.isNotBlank(sourceIds[1])) startLocation = voyagerService.getLocation(source,sourceIds[1]);
-        if (StringUtils.isNotBlank(sourceIds[0])) endLocation = voyagerService.getLocation(source,sourceIds[0]);
+        if (StringUtils.isNotBlank(sourceIds[0])) startLocation = voyagerService.getLocation(source,sourceIds[0]);
+        if (StringUtils.isNotBlank(sourceIds[1])) endLocation = voyagerService.getLocation(source,sourceIds[1]);
         if (startLocation != null && endLocation != null) {
             startAirportCodes = startLocation.getAirports();
             endAirportCodes = endLocation.getAirports();
@@ -485,14 +485,11 @@ public class TripsController {
         model.addAttribute("isStart", isStart);
         model.addAttribute("optionList", optionList);
 
-
-        ModelAndView reviewMap = buildUpdatedReview(isStart,tripFilter,null);
-        return List.of(new ModelAndView("fragments/options :: trip-input-options", model.asMap()),
-                reviewMap);
+        return List.of(new ModelAndView("fragments/options :: trip-input-options", model.asMap()));
     }
 
     @GetMapping("/update-review")
-    public Collection<ModelAndView> updateReview(Boolean isStart, String sourceId) {
+    public String updateReview(Model model, Boolean isStart, String sourceId) {
         Location location = null;
         if (StringUtils.isNotBlank(sourceId)) {
             Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
@@ -506,9 +503,14 @@ public class TripsController {
             recentLocations.remove(location);
             recentLocations.push(location);
         }
-        ModelAndView airportsMap = buildPinAirports(isStart,location,null);
-        ModelAndView reviewMap = buildUpdatedReview(isStart,TripFilter.LOCATION,location);
-        return List.of(reviewMap,airportsMap);
+        model.addAttribute("isStart",isStart);
+        List<Option> nearbyAirportOptionList = resolveNearbyAirportOptionList(location,null);
+        model.addAttribute("nearbyAirportOptionList",nearbyAirportOptionList);
+        AirportCodes airportCodes = new AirportCodes();
+        if (location!= null) airportCodes.setCodes(location.getAirports());
+        model.addAttribute("airportCodes",airportCodes);
+        model.addAttribute("location",location);
+        return "fragments/trips :: pin-airports";
     }
 
     @GetMapping("/location-options")
@@ -902,6 +904,7 @@ public class TripsController {
         AirportCodes airportCodes = new AirportCodes();
         if (location!= null) airportCodes.setCodes(location.getAirports());
         airportAttributes.put("airportCodes",airportCodes);
+        airportAttributes.put("location",location);
         return new ModelAndView("fragments/trips :: pin-airports",airportAttributes);
     }
 

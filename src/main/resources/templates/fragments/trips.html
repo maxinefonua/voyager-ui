@@ -4,22 +4,22 @@
 <!--TRIPS NAV BAR WITH AUTOSCROLL-->
 <nav th:fragment="trips-scroll-nav"
      id="trips-scroll-nav" class="list-group">
-    <a class="list-group-item list-group-item-action p-2" href="#to-city"
-       onclick="zoomToLocation(false, '#to-city',document.getElementById('end-display-review'))">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 180 160"
-             style="width:100%; height:auto;">
-            <path class="scroll-nav-icon"
-                  d="M 50.841 3.023 L 63.413 7.746 L 99.235 73.564 L 148.492 91.835 C 154.757 94.862 174.832 105.348 170.872 118.529 C 169.267 122.821 164.77 125.041 157.176 122.92 L 18.151 72.552 C 6.548 66.478 9.39 67.242 3.118 21.881 C 4.186 15.383 9.327 17.327 12.657 23.698 L 29.734 48.695 L 58.555 58.764 Z m 18.604 95.594 C 59.432 98.715 60.797 112.016 68.957 111.903 C 79.019 111.401 76.375 98.97 69.48 98.595 Z m -18.844 -6.866 C 42.044 91.114 40.461 103.149 48.557 104.655 C 58.209 105.242 58.379 93.306 50.629 91.722 Z m 17.149 58.399 C 61.94 149.84 59.74 158.81 67.6 160.19 L 162.48 159.93 C 170.03 160.27 170.35 150.47 163.15 150.15 Z"/>
-        </svg>
-    </a>
     <a class="list-group-item list-group-item-action p-2" href="#from-city"
-       onclick="zoomToLocation(true, '#from-city',document.getElementById('start-display-review'))">
+       onclick="zoomToLocation(true, '#from-city',document.getElementById('include-airports-start'))">
         <svg xmlns="http://www.w3.org/2000/svg"
              viewBox="0 0 200 160"
              style="width:100%; height:auto;">
             <path class="scroll-nav-icon"
                   d="M 26.42 13.21 L 38.65 7.66 L 110.52 28.87 L 158.27 6.96 C 164.84 4.67 186.45 -2.11 192.97 10.01 C 194.87 14.18 193.26 18.93 186.39 22.8 L 52.47 85.49 C 39.97 89.4 42.52 87.93 6.01 60.29 C 2.17 54.94 7.18 52.68 14.04 54.83 L 43.79 60.43 L 71.29 47.17 Z m 80.75 54.44 C 100.16 74.8 110.53 83.24 116.22 77.39 C 122.98 69.92 112.32 63 107.18 67.61 Z m -18.18 8.47 C 82.49 81.72 89.88 91.35 96.67 86.69 C 103.91 80.28 95.59 71.72 88.99 76.08 Z m -77.53 39.34 C 5.03 117.72 7.11 125.82 13.64 125.61 L 111.19 125.57 C 119.14 124.6 117.05 115.78 112.13 115.4 Z"/>
+        </svg>
+    </a>
+    <a class="list-group-item list-group-item-action p-2" href="#to-city"
+       onclick="zoomToLocation(false, '#to-city',document.getElementById('include-airports-end'))">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 180 160"
+             style="width:100%; height:auto;">
+            <path class="scroll-nav-icon"
+                  d="M 50.841 3.023 L 63.413 7.746 L 99.235 73.564 L 148.492 91.835 C 154.757 94.862 174.832 105.348 170.872 118.529 C 169.267 122.821 164.77 125.041 157.176 122.92 L 18.151 72.552 C 6.548 66.478 9.39 67.242 3.118 21.881 C 4.186 15.383 9.327 17.327 12.657 23.698 L 29.734 48.695 L 58.555 58.764 Z m 18.604 95.594 C 59.432 98.715 60.797 112.016 68.957 111.903 C 79.019 111.401 76.375 98.97 69.48 98.595 Z m -18.844 -6.866 C 42.044 91.114 40.461 103.149 48.557 104.655 C 58.209 105.242 58.379 93.306 50.629 91.722 Z m 17.149 58.399 C 61.94 149.84 59.74 158.81 67.6 160.19 L 162.48 159.93 C 170.03 160.27 170.35 150.47 163.15 150.15 Z"/>
         </svg>
     </a>
     <a class="list-group-item list-group-item-action p-2" href="#review"
@@ -80,52 +80,56 @@
                  data-bs-spy="scroll"
                  data-bs-target="#trips-scroll-nav"
                  data-bs-smooth-scroll="true"
-                 class="scrollspy-example overflow-y-scroll"
+                 class="container scrollspy-example overflow-y-scroll"
                  style="height:250px;"
                  tabindex="0">
-                <h4 id="to-city">Destination</h4>
-                <div style="height:180px"
-                     class="overflow-auto ps-4 pe-4">
-                    <div id="trip-input-start">
-                        <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${endOptionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
-                        <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=false)}"></div>
+                <div class="row d-block d-lg-flex">
+                    <div class="col-auto col-lg-5">
+                        <h4 id="from-city">Origin</h4>
+                        <div style="height:165px"
+                             class="overflow-auto ps-4 pe-4">
+                            <div id="trip-input-start">
+                                <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${startOptionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
+                                <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto d-flex align-items-center">
+                        <button class="vr btn-reverse container"
+                                onclick="reverseTrip('start-input-text','start-input-value','end-input-text','end-input-value')"
+                                id="reverse-button"
+                                hx-on::after-request="reverseTripMarkers()"
+                                th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="1.13991 3.51996 122.8 148.6">
+                                <path d="M 59.87 16.15 C 59.87 0.57 58.86 0.32 72.46 10.4 L 97.15 28.53 C 107.48 34.83 109.12 34.05 97.91 43.4 L 69.36 66.17 C 60.75 73.02 60.3 73.76 60.43 62.13 V 46.74 C 40.31 47.99 24.23 51.55 6.19 62.77 C 0.9 67.22 0.5 67.62 1.7 62.38 C 15.6 26.92 51.23 24.79 60.02 25.86 Z M 64 107.2 V 89.08 C 63.75 83.25 62 84.98 58.68 87.29 L 21.37 113.03 C 15.5 117.86 15.5 117.86 21.46 122.11 L 60.51 151.03 C 63.09 152.84 64.02 152.49 64.02 148.67 V 129.26 C 97.53 130.95 112.47 113.44 123.37 94.06 C 124.66 89.3 124.55 89.41 116.75 93.42 C 94.19 105.92 76.32 107.31 64 107.32 Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="col-auto col-lg-5">
+                        <h4 id="to-city">Destination</h4>
+                        <div style="height:165px"
+                             class="overflow-auto ps-4 pe-4">
+                            <div id="trip-input-start">
+                                <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${endOptionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
+                                <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=false)}"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <h4 id="from-city">Origin</h4>
-                <div style="height:180px"
-                     class="overflow-auto ps-4 pe-4">
-                    <div id="trip-input-start">
-                        <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${startOptionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
-                        <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
+                <div>
+                    <div>
+                        <h4 id="review">Review</h4>
+                    </div>
+                    <div>
+
                     </div>
                 </div>
-                <h4 id="review">Review</h4>
                 <div id="review-summary"
                      style="height:200px"
                      class="overflow-auto p-2">
                     <div id="review-path"
                          class="container text-center">
-                        <div class="row justify-content-center"
-                             id="review-locations"
-                             hx-get="/build-path"
-                             hx-include="#start-input-value,#end-input-value,#display-path"
-                             hx-target="#display-path"
-                             hx-swap="outerHTML"
-                             hx-trigger="htmx:afterSettle from:#review-locations"
-                             hx-on::after-request="checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'))">
-                            <div th:replace="~{fragments/trips :: display-review-initial(isStart=true,tripFilter='LOCATION',location=${startLocation},airport=${startAirport})}"></div>
-                            <button class="vr btn-reverse container"
-                                    onclick="reverseTrip('start-input-text','start-input-value','end-input-text','end-input-value')"
-                                    id="reverse-button"
-                                    hx-on::after-request="reverseTripMarkers()"
-                                    th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="1.13991 3.51996 122.8 148.6">
-                                    <path d="M 59.87 16.15 C 59.87 0.57 58.86 0.32 72.46 10.4 L 97.15 28.53 C 107.48 34.83 109.12 34.05 97.91 43.4 L 69.36 66.17 C 60.75 73.02 60.3 73.76 60.43 62.13 V 46.74 C 40.31 47.99 24.23 51.55 6.19 62.77 C 0.9 67.22 0.5 67.62 1.7 62.38 C 15.6 26.92 51.23 24.79 60.02 25.86 Z M 64 107.2 V 89.08 C 63.75 83.25 62 84.98 58.68 87.29 L 21.37 113.03 C 15.5 117.86 15.5 117.86 21.46 122.11 L 60.51 151.03 C 63.09 152.84 64.02 152.49 64.02 148.67 V 129.26 C 97.53 130.95 112.47 113.44 123.37 94.06 C 124.66 89.3 124.55 89.41 116.75 93.42 C 94.19 105.92 76.32 107.31 64 107.32 Z"/>
-                                </svg>
-                            </button>
-                            <div th:replace="~{fragments/trips :: display-review-initial(isStart=false,tripFilter='LOCATION',location=${endLocation},airport=${endAirport})}"></div>
-                        </div>
                         <div th:replace="~{fragments/trips :: display-path(airlineOptionList=null,pathExclusions=null,pathAirlineList=null,pathAirportsList=null,startLocation=null,endLocation=null,startAirportCodes=null,endAirportCodes=null)}"></div>
                     </div>
                 </div>
@@ -144,12 +148,12 @@
            th:value="${inputValue}"
            type="hidden"
            hx-get="/update-review"
+           hx-swap="outerHTML transition:true"
            name="sourceId"
-           style="max-width:80px"
            th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
            hx-trigger="input changed"
-           class="input-group-text"
-           th:hx-target="${isStart}?'#start-display-review':'#end-display-review'">
+           th:hx-target="${isStart}?'#include-airports-start':'#include-airports-end'"
+           class="input-group-text">
     <datalist th:id="${isStart}?'input-start-options':'input-end-options'">
         <option th:each="option,iter : ${optionList}"
                 th:value="${option.display}"
@@ -182,12 +186,15 @@
 </div>
 
 <!--swapping in PIN AIRPORTS on NEW LOCATION-->
-<div th:fragment="pin-airports(isStart,nearbyAirportOptionList,airportCodes)"
-     th:hx-swap-oob="${isStart}?'outerHTML:#include-airports-start':'outerHTML:#include-airports-end'"
+<div th:fragment="pin-airports(isStart,nearbyAirportOptionList,airportCodes,location)"
      th:id="${isStart}?'include-airports-start':'include-airports-end'"
+     th:data-location-bounds="${location}?${#strings.arrayJoin(
+            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}"
+     th:hx-on::after-settle="${location}?'addLocationToMap(this,'+${isStart}+','+${location.longitude}+','+${location.latitude}+',['+${#strings.arrayJoin(
+            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}+'],\'' + ${location.airports} + '\')':'removeLocationFromMap(' + ${isStart} + ')'"
      class="input-group row mt-2">
     <div class="d-md-flex p-0 pb-2" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
-        <form th:replace="~{fragments/trips :: airport-codes(isStart=${isStart},airportCodes=${airportCodes})}"></form>
+        <form th:replace="~{fragments/trips :: airport-codes(isStart=${isStart},airportCodes=${airportCodes},location=${location})}"></form>
         <input th:id="${isStart}?'pin-airport-input-start':'pin-airport-input-end'"
                class="mt-1 col-auto col-md form-control"
                type="text" aria-label="Airport"
@@ -214,13 +221,13 @@
 </div>
 
 <!--UPDATING airport codes form add/remove-->
-<form th:fragment="airport-codes(isStart, airportCodes)"
+<form th:fragment="airport-codes(isStart,airportCodes,location)"
       class="mt-1 d-flex overflow-x-auto pb-2 pb-md-0"
       hx-get="/build-path"
       hx-include="#start-input-value,#end-input-value,#display-path"
       hx-target="#display-path"
       hx-swap="outerHTML"
-      th:hx-trigger="${isStart}?'htmx:afterSettle from:#airport-codes-start':'htmx:afterSettle from:#airport-codes-end'"
+      th:hx-trigger="${isStart}?'load,htmx:afterSettle from:#airport-codes-start':'load,htmx:afterSettle from:#airport-codes-end'"
       th:id="${isStart} ? 'airport-codes-start' : 'airport-codes-end'"
       name="airportCodes"
       th:object="${airportCodes}">
@@ -245,8 +252,23 @@
     </div>
 </form>
 
-<!--NEW DISPLAY REVIEW start/end-->
+<!--phasing out DISPLAY REVIEW start/end-->
 <div th:fragment="display-review(isStart,tripFilter,location,airport)"
+     th:id="${isStart}?'start-display-review':'end-display-review'"
+     class="col-5">
+    <figure>
+        <blockquote class="blockquote" style="font-size:large">
+            <span th:if="${location}"
+                  th:text="${location.name} + ', ' + ${location.subdivision}"></span>
+            <i th:if="${tripFilter == 'LOCATION' && location == null && airport == null}"
+               th:text="${isStart}?'Select Start Location':'Select End Location'"></i>
+        </blockquote>
+    </figure>
+    <figcaption th:if=${location} class="blockquote-footer" th:text="${location.countryCode}"></figcaption>
+</div>
+
+<!--ORIGINAL DISPLAY REVIEW start/end-->
+<div th:fragment="display-review2(isStart,tripFilter,location,airport)"
      th:id="${isStart}?'start-display-review':'end-display-review'"
      th:data-location-bounds="${location}?${#strings.arrayJoin(
             #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}"
