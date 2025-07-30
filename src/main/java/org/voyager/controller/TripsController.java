@@ -204,9 +204,6 @@ public class TripsController {
 
     @GetMapping("/trips")
     public String getTrips(Model model, Integer endLocationId) {
-        List<Location> locations = voyagerService.getLocations();
-        model.addAttribute("locations", locations);
-        model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
         addDefaultAttributes(model);
         if (endLocationId != null) {
             Location endLocation = locationServiceAPI.getLocation(endLocationId);

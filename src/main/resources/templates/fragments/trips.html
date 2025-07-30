@@ -174,7 +174,7 @@
      th:id="${isStart}?'include-airports-start':'include-airports-end'"
      class="input-group row mt-2">
     <div class="col p-0 pt-1">
-        <input placeholder="Enter Airport" class="form-control" disabled>
+        <input placeholder="Nearby Airports" class="form-control" disabled>
     </div>
     <button class="btn btn-secondary pe-0 ps-0" style="display:none" disabled>+</button>
 </div>
@@ -193,7 +193,7 @@
                class="mt-1 col-auto col-md form-control"
                type="text" aria-label="Airport"
                name="airportCode"
-               th:placeholder="${#lists.isEmpty(airportCodes.codes)}?'Enter Airport':'Enter Additional Airport'"
+               th:placeholder="${#lists.isEmpty(airportCodes.codes)}?'Enter Nearby Airport':'Enter Additional Airport'"
                th:list="${isStart}?'nearby-airports-start':'nearby-airports-end'"
                required
                th:oninput="${isStart}?'debouncedProcessAirportInput(true,this,\'include-button-start\',startMarker)':'debouncedProcessAirportInput(false,this,\'include-button-end\',endMarker)'"
@@ -314,7 +314,7 @@
                     hx-include="#start-location-id,#end-location-id"
                     hx-target="#path-airline-list"
                     hx-swap="outerHTML" style="max-width:130px"
-                    hx-on::before-request="replaceTargetWithLoading('path-airline-list')"
+                    hx-on::before-request="if (routeAirportMarker) routeAirportMarker.remove();recenterMap();replaceTargetWithLoading('path-airline-list');"
                     name="airlineSelection" class="form-select">
                 <option selected value="ALL">All Airlines</option>
                 <option th:each="option,iter : ${airlineOptionList}"
@@ -362,6 +362,7 @@
             </span>
         </button>
         <div class="accordion-collapse collapse"
+             data-bs-parent="#path-airline-list"
              th:id="'path-info-'+${iter.index}">
             <div class="accordion-body">
                 <div th:unless="${pathAirline.airline.name} == 'DELTA'"
@@ -392,6 +393,7 @@
                                             <span style="width:105px"
                                                     class="input-group-text">Origin</span>
                                             <button class="btn-airport-code col input-group-text text-truncate"
+                                                    type="button"
                                                     onclick="mapToAirportPopup(this)"
                                                     th:data-airport-name="${pathAirportsList[iter.index][routeIter.index].name}"
                                                     th:data-airport-city="${pathAirportsList[iter.index][routeIter.index].city}"
@@ -406,9 +408,10 @@
                                             <span style="width:105px"
                                                     class="input-group-text">Destination</span>
                                             <button class="btn-airport-code col input-group-text text-truncate"
-                                                  onclick="mapToAirportPopup(this)"
-                                                  th:data-airport-code="${route.destination}"
-                                                  th:data-airport-name="${pathAirportsList[iter.index][routeIter.index+1].name}"
+                                                    type="button"
+                                                    onclick="mapToAirportPopup(this)"
+                                                    th:data-airport-code="${route.destination}"
+                                                    th:data-airport-name="${pathAirportsList[iter.index][routeIter.index+1].name}"
                                                   th:data-airport-city="${pathAirportsList[iter.index][routeIter.index+1].city}"
                                                   th:data-airport-subd="${pathAirportsList[iter.index][routeIter.index+1].subdivision}"
                                                   th:data-airport-country="${pathAirportsList[iter.index][routeIter.index+1].countryCode}"
