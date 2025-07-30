@@ -488,6 +488,9 @@ public class TripsController {
                 location = voyagerService.getLocation(source, sourceId);
             } catch (ResponseStatusException e) {
                 ResultSearchFull resultSearchFull = voyagerService.getResultSearchFull(sourceId);
+                if (resultSearchFull.getBbox() == null)
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            String.format("Failed to create location form for sourceId: %s",sourceId));
                 LocationForm locationForm = LocationMapperUtils.toLocationForm(resultSearchFull);
                 location = voyagerService.addLocation(locationForm);
             }

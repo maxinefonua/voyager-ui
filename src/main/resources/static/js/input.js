@@ -5,6 +5,7 @@ function processLocationInput(inputElem,inputValueElemId,datalistElemId) {
         inputValueElem.dispatchEvent(new Event('input'));
         return;
     }
+    if (inputElem.value.trim().length < 5) return;
     const selectedOption = Array.from(inputElem.list.options)
         .find(option => option.value === inputElem.value);
     if (selectedOption && inputValueElem) {
