@@ -29,3 +29,30 @@ function replaceButtonWithFunctions(buttonElem,isArchived,locationId) {
     }
     htmx.process(parentElem);
 }
+
+function tripToEndLocation(tabElemId,locationId) {
+    const tabElem = document.getElementById(tabElemId);
+    const values = {
+      endLocationId: locationId
+    };
+    tabElem.setAttribute('hx-vals', JSON.stringify(values));
+    htmx.process(tabElem); // Re-process for HTMX
+    tabElem.click();
+    tabElem.removeAttribute('hx-vals');
+}
+
+function dispatchInputEnd(inputValueElemId,aElem) {
+    const inputValueElem = document.getElementById(inputValueElemId);
+    const inputTextElem = document.getElementById('end-input-text');
+    const locationSourceId = aElem.getAttribute('')
+    if (inputTextElem.value.trim() != '') {
+        const datalistElem = document.getElementById('input-end-options');
+        const match = Array.from(datalistElem.options)
+            .find(option => option.value === inputTextElem.value);
+        if (inputValueElem.value.trim() == '') {
+            htmx.process(inputValueElem);
+            inputValueElem.value = match.dataset.value;
+            inputValueElem.dispatchEvent(new Event('input'));
+        }
+    }
+}

@@ -15,7 +15,7 @@
            hx-get="/trips"
            hx-target="#tabContent"
            hx-on::before-request="activate(this)"
-           hx-on::after-request="reloadTrips('scrollable-content')"
+           hx-on::after-request="reloadTrips('scrollable-content');dispatchInputEnd('end-input-value',this)"
            hx-swap="innerHTML">
             Trips
         </a>

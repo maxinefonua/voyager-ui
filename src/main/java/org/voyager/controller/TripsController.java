@@ -1,5 +1,6 @@
 package org.voyager.controller;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
 import org.voyager.service.*;
+import org.voyager.service.impl.LocationServiceAPI;
 import org.voyager.utils.LocationMapperUtils;
 
 import java.time.*;
@@ -40,11 +42,18 @@ public class TripsController {
     private static final AirportFilter DEFAULT_AIRPORT_FILTER = AirportFilter.CIVIL;
     private static final AirportFilter DEFAULT_CLOSER_FILTER = AirportFilter.CIVIL;
     private static final Logger LOGGER = LoggerFactory.getLogger(TripsController.class);
+    private static LocationServiceAPI locationServiceAPI;
+
     private Stack<Location> recentLocations = new Stack<>();
 
 
     @Autowired
     private VoyagerService voyagerService;
+
+    @PostConstruct
+    public void init() {
+        locationServiceAPI = voyagerService.getLocationServiceAPI();
+    }
 
     void addDefaultAttributes(Model model) {
         model.addAttribute("tripFilterStart", DEFAULT_TRIP_FILTER.name());
@@ -91,8 +100,8 @@ public class TripsController {
         Location endLocation = null;
         List<String> startAirportCodes = List.of();
         List<String> endAirportCodes = List.of();
-        if (StringUtils.isNotBlank(sourceIds[0])) startLocation = voyagerService.getLocation(source,sourceIds[0]);
-        if (StringUtils.isNotBlank(sourceIds[1])) endLocation = voyagerService.getLocation(source,sourceIds[1]);
+        if (StringUtils.isNotBlank(sourceIds[1])) startLocation = voyagerService.getLocation(source,sourceIds[1]);
+        if (StringUtils.isNotBlank(sourceIds[0])) endLocation = voyagerService.getLocation(source,sourceIds[0]);
         if (startLocation != null && endLocation != null) {
             startAirportCodes = startLocation.getAirports();
             endAirportCodes = endLocation.getAirports();
@@ -190,11 +199,30 @@ public class TripsController {
     }
 
     @GetMapping("/trips")
-    public String getTrips(Model model) {
+    public String getTrips(Model model, Integer endLocationId) {
         List<Location> locations = voyagerService.getLocations();
         model.addAttribute("locations", locations);
         model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
         addDefaultAttributes(model);
+        if (endLocationId != null) {
+            Location endLocation = voyagerService.getLocation(endLocationId);
+            SearchResult<ResultDetails> voyagerResponse = voyagerService.lookupWithDetails(
+                    String.format("%s %s",endLocation.getName(),endLocation.getCountryCode()), 0, 10);
+            List<ResultDetails> lookupResults = voyagerResponse.getResults();
+            // TODO: ensure only one result?
+//        Integer totalResultsCount = voyagerResponse.getResultCount();
+            List<Option> endOptionList = lookupResults.stream().map(resultDetails -> {
+                ResultSearch resultSearch = resultDetails.getResultSearch();
+                String displayText = String.format("%s, %s | %s",resultSearch.getName(),
+                        resultSearch.getSubdivision(),resultSearch.getCountryName());
+                String valueText = resultSearch.getSourceId();
+                if (endLocation.getSourceId().equals(valueText)) {
+                    model.addAttribute("endInputText", displayText);
+                }
+                return Option.builder().display(displayText).value(valueText).build();
+            }).toList();
+            model.addAttribute("endOptionList",endOptionList);
+        }
         return "fragments/tab :: trips-tab";
     }
 
@@ -375,7 +403,7 @@ public class TripsController {
         List<Option> optionList = new ArrayList<>();
         SearchResult<ResultDetails> voyagerResponse = voyagerService.lookupWithDetails(inputText, 0, 10);
         List<ResultDetails> lookupResults = voyagerResponse.getResults();
-        Integer totalResultsCount = voyagerResponse.getResultCount();
+//        Integer totalResultsCount = voyagerResponse.getResultCount();
         optionList.addAll(lookupResults.stream().map(resultDetails -> {
             ResultSearch resultSearch = resultDetails.getResultSearch();
             String displayText = String.format("%s, %s | %s",resultSearch.getName(),

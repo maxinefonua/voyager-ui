@@ -4,15 +4,6 @@
 <!--TRIPS NAV BAR WITH AUTOSCROLL-->
 <nav th:fragment="trips-scroll-nav"
      id="trips-scroll-nav" class="list-group">
-    <a class="list-group-item list-group-item-action p-2" href="#from-city"
-       onclick="zoomToLocation(true, '#from-city',document.getElementById('start-display-review'))">
-        <svg xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 200 160"
-             style="width:100%; height:auto;">
-            <path class="scroll-nav-icon"
-                  d="M 26.42 13.21 L 38.65 7.66 L 110.52 28.87 L 158.27 6.96 C 164.84 4.67 186.45 -2.11 192.97 10.01 C 194.87 14.18 193.26 18.93 186.39 22.8 L 52.47 85.49 C 39.97 89.4 42.52 87.93 6.01 60.29 C 2.17 54.94 7.18 52.68 14.04 54.83 L 43.79 60.43 L 71.29 47.17 Z m 80.75 54.44 C 100.16 74.8 110.53 83.24 116.22 77.39 C 122.98 69.92 112.32 63 107.18 67.61 Z m -18.18 8.47 C 82.49 81.72 89.88 91.35 96.67 86.69 C 103.91 80.28 95.59 71.72 88.99 76.08 Z m -77.53 39.34 C 5.03 117.72 7.11 125.82 13.64 125.61 L 111.19 125.57 C 119.14 124.6 117.05 115.78 112.13 115.4 Z"/>
-        </svg>
-    </a>
     <a class="list-group-item list-group-item-action p-2" href="#to-city"
        onclick="zoomToLocation(false, '#to-city',document.getElementById('end-display-review'))">
         <svg xmlns="http://www.w3.org/2000/svg"
@@ -20,6 +11,15 @@
              style="width:100%; height:auto;">
             <path class="scroll-nav-icon"
                   d="M 50.841 3.023 L 63.413 7.746 L 99.235 73.564 L 148.492 91.835 C 154.757 94.862 174.832 105.348 170.872 118.529 C 169.267 122.821 164.77 125.041 157.176 122.92 L 18.151 72.552 C 6.548 66.478 9.39 67.242 3.118 21.881 C 4.186 15.383 9.327 17.327 12.657 23.698 L 29.734 48.695 L 58.555 58.764 Z m 18.604 95.594 C 59.432 98.715 60.797 112.016 68.957 111.903 C 79.019 111.401 76.375 98.97 69.48 98.595 Z m -18.844 -6.866 C 42.044 91.114 40.461 103.149 48.557 104.655 C 58.209 105.242 58.379 93.306 50.629 91.722 Z m 17.149 58.399 C 61.94 149.84 59.74 158.81 67.6 160.19 L 162.48 159.93 C 170.03 160.27 170.35 150.47 163.15 150.15 Z"/>
+        </svg>
+    </a>
+    <a class="list-group-item list-group-item-action p-2" href="#from-city"
+       onclick="zoomToLocation(true, '#from-city',document.getElementById('start-display-review'))">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 200 160"
+             style="width:100%; height:auto;">
+            <path class="scroll-nav-icon"
+                  d="M 26.42 13.21 L 38.65 7.66 L 110.52 28.87 L 158.27 6.96 C 164.84 4.67 186.45 -2.11 192.97 10.01 C 194.87 14.18 193.26 18.93 186.39 22.8 L 52.47 85.49 C 39.97 89.4 42.52 87.93 6.01 60.29 C 2.17 54.94 7.18 52.68 14.04 54.83 L 43.79 60.43 L 71.29 47.17 Z m 80.75 54.44 C 100.16 74.8 110.53 83.24 116.22 77.39 C 122.98 69.92 112.32 63 107.18 67.61 Z m -18.18 8.47 C 82.49 81.72 89.88 91.35 96.67 86.69 C 103.91 80.28 95.59 71.72 88.99 76.08 Z m -77.53 39.34 C 5.03 117.72 7.11 125.82 13.64 125.61 L 111.19 125.57 C 119.14 124.6 117.05 115.78 112.13 115.4 Z"/>
         </svg>
     </a>
     <a class="list-group-item list-group-item-action p-2" href="#review"
@@ -83,20 +83,20 @@
                  class="scrollspy-example overflow-y-scroll"
                  style="height:250px;"
                  tabindex="0">
-                <h4 id="from-city">Origin</h4>
-                <div style="height:180px"
-                     class="overflow-auto ps-4 pe-4">
-                    <div id="trip-input-start">
-                        <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${optionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
-                        <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
-                    </div>
-                </div>
                 <h4 id="to-city">Destination</h4>
                 <div style="height:180px"
                      class="overflow-auto ps-4 pe-4">
                     <div id="trip-input-start">
-                        <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${optionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
+                        <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${endOptionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
                         <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=false)}"></div>
+                    </div>
+                </div>
+                <h4 id="from-city">Origin</h4>
+                <div style="height:180px"
+                     class="overflow-auto ps-4 pe-4">
+                    <div id="trip-input-start">
+                        <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${startOptionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
+                        <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
                     </div>
                 </div>
                 <h4 id="review">Review</h4>
@@ -150,7 +150,11 @@
            hx-trigger="input changed"
            class="input-group-text"
            th:hx-target="${isStart}?'#start-display-review':'#end-display-review'">
-    <datalist th:id="${isStart}?'input-start-options':'input-end-options'"></datalist>
+    <datalist th:id="${isStart}?'input-start-options':'input-end-options'">
+        <option th:each="option,iter : ${optionList}"
+                th:value="${option.display}"
+                th:data-value="${option.value}"></option>
+    </datalist>
     <input th:id="${isStart}?'start-input-text':'end-input-text'"
            class="form-control"
            name="inputText"
