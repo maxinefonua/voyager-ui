@@ -17,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.voyager.model.*;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
+import org.voyager.model.country.Country;
 import org.voyager.model.flight.Flight;
 import org.voyager.model.location.*;
 import org.voyager.model.response.SearchResult;
@@ -26,6 +27,7 @@ import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
 import org.voyager.service.*;
+import org.voyager.service.impl.CountryServiceAPI;
 import org.voyager.service.impl.LocationServiceAPI;
 import org.voyager.utils.LocationMapperUtils;
 
@@ -43,6 +45,7 @@ public class TripsController {
     private static final AirportFilter DEFAULT_CLOSER_FILTER = AirportFilter.CIVIL;
     private static final Logger LOGGER = LoggerFactory.getLogger(TripsController.class);
     private static LocationServiceAPI locationServiceAPI;
+    private static CountryServiceAPI countryServiceAPI;
 
     private Stack<Location> recentLocations = new Stack<>();
 
@@ -53,6 +56,7 @@ public class TripsController {
     @PostConstruct
     public void init() {
         locationServiceAPI = voyagerService.getLocationServiceAPI();
+        countryServiceAPI = voyagerService.getCountryServiceAPI();
     }
 
     void addDefaultAttributes(Model model) {
@@ -205,22 +209,12 @@ public class TripsController {
         model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
         addDefaultAttributes(model);
         if (endLocationId != null) {
-            Location endLocation = voyagerService.getLocation(endLocationId);
-            SearchResult<ResultDetails> voyagerResponse = voyagerService.lookupWithDetails(
-                    String.format("%s %s",endLocation.getName(),endLocation.getCountryCode()), 0, 10);
-            List<ResultDetails> lookupResults = voyagerResponse.getResults();
-            // TODO: ensure only one result?
-//        Integer totalResultsCount = voyagerResponse.getResultCount();
-            List<Option> endOptionList = lookupResults.stream().map(resultDetails -> {
-                ResultSearch resultSearch = resultDetails.getResultSearch();
-                String displayText = String.format("%s, %s | %s",resultSearch.getName(),
-                        resultSearch.getSubdivision(),resultSearch.getCountryName());
-                String valueText = resultSearch.getSourceId();
-                if (endLocation.getSourceId().equals(valueText)) {
-                    model.addAttribute("endInputText", displayText);
-                }
-                return Option.builder().display(displayText).value(valueText).build();
-            }).toList();
+            Location endLocation = locationServiceAPI.getLocation(endLocationId);
+            Country country = countryServiceAPI.getCountry(endLocation.getCountryCode());
+            String displayText = String.format("%s, %s | %s",endLocation.getName(),endLocation.getSubdivision(),country.getName());
+            String valueText = endLocation.getSourceId();
+            List<Option> endOptionList = List.of(Option.builder().display(displayText).value(valueText).build());
+            model.addAttribute("endInputText", displayText);
             model.addAttribute("endOptionList",endOptionList);
         }
         return "fragments/tab :: trips-tab";

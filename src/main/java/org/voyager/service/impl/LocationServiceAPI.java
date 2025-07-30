@@ -21,6 +21,10 @@ public class LocationServiceAPI {
         return unwrapEither(locationService.getLocations(source,continent,statusList));
     }
 
+    public Location getLocation(Integer id) {
+        return unwrapEither(locationService.getLocation(id));
+    }
+
     public Boolean deleteLocation(Integer id) {
         return unwrapEither(locationService.deleteLocation(id));
     }

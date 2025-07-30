@@ -71,11 +71,11 @@
 
 <!--TRIPS MAIN PAGE-->
 <div th:fragment="trips" class="container">
-    <div class="row justify-content-around">
+    <div class="row justify-content-center">
         <div class="col-1 col-md-auto p-0" style="width:40px">
             <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
         </div>
-        <div class="col-10 col-md">
+        <div class="col-10 col-md p-0">
             <div id="scrollable-content"
                  data-bs-spy="scroll"
                  data-bs-target="#trips-scroll-nav"
@@ -83,33 +83,34 @@
                  class="container scrollspy-example overflow-y-scroll"
                  style="height:250px;"
                  tabindex="0">
-                <div class="row d-block d-lg-flex">
+                <div class="row mb-4 d-block d-lg-flex">
                     <div class="col-auto col-lg-5">
                         <h4 id="from-city">Origin</h4>
-                        <div style="height:165px"
-                             class="overflow-auto ps-4 pe-4">
+                        <div style="height:auto"
+                             class="mb-2 ps-4 pe-4">
                             <div id="trip-input-start">
                                 <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${startOptionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
                                 <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-auto d-flex align-items-center">
+                    <div class="col-auto d-flex pb-1 pt-1 align-items-center">
                         <button class="vr btn-reverse container"
                                 onclick="reverseTrip('start-input-text','start-input-value','end-input-text','end-input-value')"
                                 id="reverse-button"
                                 hx-on::after-request="reverseTripMarkers()"
                                 th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                 viewBox="1.13991 3.51996 122.8 148.6">
+                            <svg viewBox="-10 0 150 150"
+                                 transform="translate(-15,0)"
+                                 width="30">
                                 <path d="M 59.87 16.15 C 59.87 0.57 58.86 0.32 72.46 10.4 L 97.15 28.53 C 107.48 34.83 109.12 34.05 97.91 43.4 L 69.36 66.17 C 60.75 73.02 60.3 73.76 60.43 62.13 V 46.74 C 40.31 47.99 24.23 51.55 6.19 62.77 C 0.9 67.22 0.5 67.62 1.7 62.38 C 15.6 26.92 51.23 24.79 60.02 25.86 Z M 64 107.2 V 89.08 C 63.75 83.25 62 84.98 58.68 87.29 L 21.37 113.03 C 15.5 117.86 15.5 117.86 21.46 122.11 L 60.51 151.03 C 63.09 152.84 64.02 152.49 64.02 148.67 V 129.26 C 97.53 130.95 112.47 113.44 123.37 94.06 C 124.66 89.3 124.55 89.41 116.75 93.42 C 94.19 105.92 76.32 107.31 64 107.32 Z"/>
                             </svg>
                         </button>
                     </div>
                     <div class="col-auto col-lg-5">
                         <h4 id="to-city">Destination</h4>
-                        <div style="height:165px"
-                             class="overflow-auto ps-4 pe-4">
+                        <div style="height:auto"
+                             class="mb-2 ps-4 pe-4">
                             <div id="trip-input-start">
                                 <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${endOptionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
                                 <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=false)}"></div>
@@ -117,16 +118,9 @@
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div>
-                        <h4 id="review">Review</h4>
-                    </div>
-                    <div>
-
-                    </div>
-                </div>
+                <h4 id="review">Review</h4>
                 <div id="review-summary"
-                     style="height:200px"
+                     style="height:auto"
                      class="overflow-auto p-2">
                     <div id="review-path"
                          class="container text-center">
@@ -193,7 +187,7 @@
      th:hx-on::after-settle="${location}?'addLocationToMap(this,'+${isStart}+','+${location.longitude}+','+${location.latitude}+',['+${#strings.arrayJoin(
             #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}+'],\'' + ${location.airports} + '\')':'removeLocationFromMap(' + ${isStart} + ')'"
      class="input-group row mt-2">
-    <div class="d-md-flex p-0 pb-2" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
+    <div class="d-md-flex p-0" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
         <form th:replace="~{fragments/trips :: airport-codes(isStart=${isStart},airportCodes=${airportCodes},location=${location})}"></form>
         <input th:id="${isStart}?'pin-airport-input-start':'pin-airport-input-end'"
                class="mt-1 col-auto col-md form-control"
@@ -375,7 +369,8 @@
                     <span th:utext="'Airline: ' + ${pathAirline.airline.displayText}"></span>
                 </div>
                 <div th:id="'route-carousel-'+${iter.index}" class="carousel carousel-dark slide">
-                    <div th:if="${pathAirline.routeList?.size > 1}" class="carousel-indicators mb-0">
+                    <div th:if="${pathAirline.routeList?.size > 1}"
+                         class="carousel-indicators mb-0">
                         <button th:each="route,routeIter : ${pathAirline.routeList}"
                                 type="button"
                                 th:data-bs-target="'#route-carousel-'+${iter.index}"
@@ -388,59 +383,65 @@
                         <div th:each="route,routeIter : ${pathAirline.routeList}"
                              class="carousel-item"
                              th:classappend="${routeIter.first}?'active':''">
-                            <div class="row justify-content-center mb-3">
-                                <div class="card col-auto col-md-8 pt-3"
-                                     th:classappend="${pathAirline.routeList?.size > 1}?'mb-3':''"
+                            <div class="row justify-content-center m-1">
+                                <div class="card col-auto col-md-9 pt-3"
+                                     th:classappend="${pathAirline.routeList?.size > 1}?'mb-4':''"
                                      th:id="'path-airline-values-'+${iter.index}+'-route-'+${route.id}">
-                                    <div class="row justify-content-center mb-3">
-                                        <div class="col-6 col-lg-4">
+                                    <div class="row justify-content-center m-3">
+                                        <div class="col-6 col-xl-4">
                                             <span th:utext="'<strong>' + ${route.origin} + '</strong> ' + ${pathAirportsList[iter.index][routeIter.index].name}"></span>
                                         </div>
-                                        <div class="col-6 col-lg-4" th:utext="'<strong>' + ${route.destination} + '</strong> ' + ${pathAirportsList[iter.index][routeIter.index+1].name}"></div>
+                                        <div class="col-6 col-xl-4" th:utext="'<strong>' + ${route.destination} + '</strong> ' + ${pathAirportsList[iter.index][routeIter.index+1].name}"></div>
                                     </div>
-                                    <input name="pathIterIndex"
-                                           type="hidden"
-                                           th:value="${iter.index}">
-                                    <input name="airline"
-                                           type="hidden"
-                                           th:value="${pathAirline.airline.name}">
-                                    <input name="startZoneId"
-                                           type="hidden"
-                                           th:value="${pathAirportsList[iter.index][routeIter.index].zoneId}">
-                                    <input name="endZoneId"
-                                           type="hidden"
-                                           th:value="${pathAirportsList[iter.index][(routeIter.index)+1].zoneId}">
-                                    <input hx-get="/flights"
-                                           type="hidden"
-                                           name="routeId"
-                                           th:value="${route.id}"
-                                           th:hx-include="'#path-airline-values-'+${iter.index}+'-route-'+${route.id}"
-                                           hx-trigger="load"
-                                           th:hx-target="'#path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"
-                                           hx-swap="outerHTML transition:true" />
-                                    <table class="table table-hover mb-3">
-                                        <thead class="table-light">
-                                        <tr>
-                                            <th scope="col">Flight Number</th>
-                                            <th scope="col">Departure Time</th>
-                                            <th scope="col">Arrival Time</th>
-                                            <th scope="col">Duration</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody th:id="'path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"></tbody>
-                                    </table>
+                                    <div class="input-group">
+                                        <input name="pathIterIndex"
+                                               type="hidden"
+                                               th:value="${iter.index}">
+                                        <input name="airline"
+                                               type="hidden"
+                                               th:value="${pathAirline.airline.name}">
+                                        <input name="startZoneId"
+                                               type="hidden"
+                                               th:value="${pathAirportsList[iter.index][routeIter.index].zoneId}">
+                                        <input name="endZoneId"
+                                               type="hidden"
+                                               th:value="${pathAirportsList[iter.index][(routeIter.index)+1].zoneId}">
+                                        <input hx-get="/flights"
+                                               type="hidden"
+                                               name="routeId"
+                                               th:value="${route.id}"
+                                               th:hx-include="'#path-airline-values-'+${iter.index}+'-route-'+${route.id}"
+                                               hx-trigger="load"
+                                               th:hx-target="'#path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"
+                                               hx-swap="outerHTML transition:true" />
+                                    </div>
+                                    <div class="container-fluid overflow-auto">
+                                        <table class="table table-hover mb-3">
+                                            <thead class="table-light">
+                                            <tr>
+                                                <th scope="col">Flight Number</th>
+                                                <th scope="col">Departure Time</th>
+                                                <th scope="col">Arrival Time</th>
+                                                <th scope="col">Duration</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody th:id="'path-airline-' + ${iter.index} + '-route-' + ${routeIter.index}"></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <button th:if="${pathAirline.routeList?.size > 1}" class="carousel-control-prev" type="button" th:data-bs-target="'#route-carousel-'+${iter.index}" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button th:if="${pathAirline.routeList?.size > 1}" class="carousel-control-next" type="button" th:data-bs-target="'#route-carousel-'+${iter.index}" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
+                    <div class="d-none d-md-block">
+                        <button th:if="${pathAirline.routeList?.size > 1}" class="carousel-control-prev" type="button" th:data-bs-target="'#route-carousel-'+${iter.index}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button th:if="${pathAirline.routeList?.size > 1}" class="carousel-control-next" type="button" th:data-bs-target="'#route-carousel-'+${iter.index}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
