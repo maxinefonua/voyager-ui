@@ -19,6 +19,10 @@ function closeMarkerPopups() {
     airportEndMarkers.forEach((marker, index) => {
         if (marker.getPopup().isOpen()) marker.getPopup().remove();
     });
+    if (routeAirportMarker) {
+        routeAirportMarker.remove();
+        routeAirportMarker = null;
+    }
 }
 
 function reverseMarkers() {
@@ -156,6 +160,34 @@ function addLocationToMap(divElem,isStart,longitude,latitude,bounds,stringOfCode
     checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'));
 }
 
+var routeAirportMarker = null;
+
+function mapToAirportPopup(buttonElem) {
+    event.preventDefault();
+    closeMarkerPopups();
+    if (routeAirportMarker) routeAirportMarker.remove();
+    const latitude = buttonElem.dataset.airportLat;
+    const longitude = buttonElem.dataset.airportLng;
+    const markerMatch = findMarkerAt(latitude,longitude);
+    if (markerMatch != null) {
+        markerMatch.togglePopup();
+        centerMapOnMarker(markerMatch);
+    } else {
+        routeAirportMarker = addRouteAirportMarkerToMap(buttonElem);
+        routeAirportMarker.togglePopup();
+        centerMapOnMarker(routeAirportMarker);
+    }
+}
+
+function findMarkerAt(latitude,longitude) {
+    var match = Array.from(airportStartMarkers)
+        .find(marker => marker.getLngLat().lat == latitude && marker.getLngLat().lng == longitude);
+    if (match != null) return match;
+    match = Array.from(airportEndMarkers)
+            .find(marker => marker.getLngLat().lat == latitude && marker.getLngLat().lng == longitude);
+    return match;
+}
+
 function mapFit(targetMarkersArray,locationMarker) {
     const mapboxBounds = new mapboxgl.LngLatBounds().extend(locationMarker.getLngLat());
     for (const marker of targetMarkersArray) {
@@ -164,12 +196,14 @@ function mapFit(targetMarkersArray,locationMarker) {
     map.fitBounds(mapboxBounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
 }
 
-function addPlainAirportMarkerToMap(airportOptionElem) {
-    var airportPopup =  new mapboxgl.Popup({ offset: 16 }) // add popups
-              .setHTML(`<strong data-name='${airportOptionElem.dataset.value}'>${airportOptionElem.dataset.value}</strong> <i>${airportOptionElem.dataset.airport}</i>
-                in ${airportOptionElem.dataset.city}, ${airportOptionElem.dataset.subdivision}
-                 of ${airportOptionElem.dataset.country}`);
-    // Create a custom HTML element for the marker
+function buildPopup(airportCode,airportName,airportCity,airportSubdivision,airportCountry) {
+    return new mapboxgl.Popup({ offset: 16 }) // add popups
+                         .setHTML(`<strong data-name='${airportCode}'>${airportCode}</strong> <i>${airportName}</i>
+                           in ${airportCity}, ${airportSubdivision}
+                            of ${airportCountry}`);
+}
+
+function buildMarkerElement() {
     const markerElement = document.createElement('div');
     markerElement.className = 'airport-marker';
     markerElement.innerHTML = `<svg display="block" height="41" width="27" viewBox="0 0 27 41" xmlns="http://www.w3.org/2000/svg">
@@ -200,12 +234,36 @@ function addPlainAirportMarkerToMap(airportOptionElem) {
                                          d="m34.228 12.148c1.368-15.768 10.112-16.112 11.312 0v16.428l34.36 17.136v5.78l-34.368-6.156v17.672l11.596 11.224v5.772l-17.12-5.708-17.12 5.732v-5.756l11.424-11.424v-17.512L.004 51.408v-5.692l34.228-17.048V12.176" />
 
                                </svg>`;
+    return markerElement;
+}
+
+function addPlainAirportMarkerToMap(airportOptionElem) {
+    var airportPopup = buildPopup(airportOptionElem.dataset.value,airportOptionElem.dataset.airport,
+        airportOptionElem.dataset.city,airportOptionElem.dataset.subdivision,airportOptionElem.dataset.country);
+    // Create a custom HTML element for the marker
+    const markerElement = buildMarkerElement();
 
     // Create marker with custom element
     var airportMarker = new mapboxgl.Marker({
       element: markerElement
     })
         .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
+        .setPopup(airportPopup)
+        .addTo(map);
+    return airportMarker;
+}
+
+function addRouteAirportMarkerToMap(buttonElem) {
+    var airportPopup = buildPopup(buttonElem.dataset.airportCode,buttonElem.dataset.airportName,
+        buttonElem.dataset.airportCity,buttonElem.dataset.airportSubd, buttonElem.dataset.airportCountry);
+    // Create a custom HTML element for the marker
+    const markerElement = buildMarkerElement();
+
+    // Create marker with custom element
+    var airportMarker = new mapboxgl.Marker({
+      element: markerElement
+    })
+        .setLngLat([buttonElem.dataset.airportLng,buttonElem.dataset.airportLat])
         .setPopup(airportPopup)
         .addTo(map);
     return airportMarker;

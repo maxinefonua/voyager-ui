@@ -266,6 +266,10 @@ function clearStartMarkers() {
         marker.remove();
     });
     airportStartMarkers.length = 0;
+    if (routeAirportMarker) {
+        routeAirportMarker.remove();
+        routeAirportMarker = null;
+    }
 }
 
 function clearEndMarkers() {
@@ -285,6 +289,10 @@ function clearEndMarkers() {
         marker.remove();
     });
     airportEndMarkers.length = 0;
+    if (routeAirportMarker) {
+        routeAirportMarker.remove();
+        routeAirportMarker = null;
+    }
 }
 
 function clearAirportMarkerMapFitToLocation(isStart) {
