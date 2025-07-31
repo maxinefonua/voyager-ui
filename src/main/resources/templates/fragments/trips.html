@@ -120,7 +120,7 @@
                 </div>
                 <h4 id="review">Review</h4>
                 <div id="review-summary"
-                     style="height:auto"
+                     style="height:auto;max-height:215px"
                      class="overflow-auto p-2">
                     <div id="review-path"
                          class="container text-center">
@@ -391,7 +391,7 @@
                                     <div class="row align-items-center d-flex gap-2 justify-content-center m-0 m-lg-3 mb-3">
                                         <div class="input-group col-10 col-md-5">
                                             <span style="width:105px"
-                                                    class="input-group-text">Origin</span>
+                                                    class="d-none d-sm-block input-group-text">Origin</span>
                                             <button class="btn-airport-code col input-group-text text-truncate"
                                                     type="button"
                                                     onclick="mapToAirportPopup(this)"
@@ -404,9 +404,9 @@
                                                     th:data-airport-lng="${pathAirportsList[iter.index][routeIter.index].longitude}"
                                                     th:utext="'<strong>' + ${route.origin} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index].subdivision}"></button>
                                         </div>
-                                        <div class="input-group col-10 col-md-5">
+                                        <div class="input-group col-10 col-sm-5">
                                             <span style="width:105px"
-                                                    class="input-group-text">Destination</span>
+                                                    class="d-none d-md-block input-group-text">Destination</span>
                                             <button class="btn-airport-code col input-group-text text-truncate"
                                                     type="button"
                                                     onclick="mapToAirportPopup(this)"

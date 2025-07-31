@@ -56,6 +56,7 @@ public class VoyagerServiceImpl implements VoyagerService {
 
     private CountryServiceAPI countryServiceAPI;
     private LocationServiceAPI locationServiceAPI;
+    private SearchServiceAPI searchServiceAPI;
 
     @PostConstruct
     public void init() {
@@ -238,6 +239,12 @@ public class VoyagerServiceImpl implements VoyagerService {
     public LocationServiceAPI getLocationServiceAPI() {
         if (locationServiceAPI == null) locationServiceAPI = new LocationServiceAPI(voyager.getLocationService());
         return locationServiceAPI;
+    }
+
+    @Override
+    public SearchServiceAPI getSearchServiceAPI() {
+        if (searchServiceAPI == null) searchServiceAPI = new SearchServiceAPI(voyager.getSearchService());
+        return searchServiceAPI;
     }
 
     private List<Flight> fetchFlights(Integer routeId, boolean isActive) {

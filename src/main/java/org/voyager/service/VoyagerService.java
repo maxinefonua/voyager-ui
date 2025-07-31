@@ -15,6 +15,7 @@ import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
 import org.voyager.service.impl.CountryServiceAPI;
 import org.voyager.service.impl.LocationServiceAPI;
+import org.voyager.service.impl.SearchServiceAPI;
 
 import java.util.List;
 import java.util.Map;
@@ -52,4 +53,5 @@ public interface VoyagerService {
 
     CountryServiceAPI getCountryServiceAPI();
     LocationServiceAPI getLocationServiceAPI();
+    SearchServiceAPI getSearchServiceAPI();
 }
