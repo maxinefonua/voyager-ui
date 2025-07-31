@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerAPIConfig;
-import org.voyager.config.VoyagerConfig;
 import org.voyager.error.HttpStatus;
 import org.voyager.error.ServiceError;
 import org.voyager.model.Airline;
@@ -57,6 +56,7 @@ public class VoyagerServiceImpl implements VoyagerService {
     private CountryServiceAPI countryServiceAPI;
     private LocationServiceAPI locationServiceAPI;
     private SearchServiceAPI searchServiceAPI;
+    private AirportServiceAPI airportServiceAPI;
 
     @PostConstruct
     public void init() {
@@ -245,6 +245,12 @@ public class VoyagerServiceImpl implements VoyagerService {
     public SearchServiceAPI getSearchServiceAPI() {
         if (searchServiceAPI == null) searchServiceAPI = new SearchServiceAPI(voyager.getSearchService());
         return searchServiceAPI;
+    }
+
+    @Override
+    public AirportServiceAPI getAirportServiceAPI() {
+        if (airportServiceAPI == null) airportServiceAPI = new AirportServiceAPI(voyager.getAirportService());
+        return airportServiceAPI;
     }
 
     private List<Flight> fetchFlights(Integer routeId, boolean isActive) {

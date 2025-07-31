@@ -25,6 +25,7 @@ import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
 import org.voyager.service.*;
+import org.voyager.service.impl.AirportServiceAPI;
 import org.voyager.service.impl.CountryServiceAPI;
 import org.voyager.service.impl.LocationServiceAPI;
 import org.voyager.service.impl.SearchServiceAPI;
@@ -45,6 +46,7 @@ public class TripsController {
     private static LocationServiceAPI locationServiceAPI;
     private static CountryServiceAPI countryServiceAPI;
     private static SearchServiceAPI searchServiceAPI;
+    private static AirportServiceAPI airportServiceAPI;
 
     private Stack<Location> recentLocations = new Stack<>();
 
@@ -57,6 +59,7 @@ public class TripsController {
         locationServiceAPI = voyagerService.getLocationServiceAPI();
         countryServiceAPI = voyagerService.getCountryServiceAPI();
         searchServiceAPI = voyagerService.getSearchServiceAPI();
+        airportServiceAPI = voyagerService.getAirportServiceAPI();
     }
 
     void addDefaultAttributes(Model model) {
@@ -146,9 +149,13 @@ public class TripsController {
             if (!pathAirlineList.isEmpty()) {
                 for (PathAirline pathAirline : pathAirlineList) {
                     List<Airport> pathAirports = new ArrayList<>();
-                    pathAirports.add(voyagerService.getAirport(pathAirline.getRouteList().get(0).getOrigin()));
+                    Airport toAdd = airportServiceAPI.getAirport(pathAirline.getRouteList().get(0).getOrigin());
+                    toAdd.setCountryCode(countryServiceAPI.getCountry(toAdd.getCountryCode()).getName());
+                    pathAirports.add(toAdd);
                     for (Route route : pathAirline.getRouteList()) {
-                        pathAirports.add(voyagerService.getAirport(route.getDestination()));
+                        toAdd = airportServiceAPI.getAirport(route.getDestination());
+                        toAdd.setCountryCode(countryServiceAPI.getCountry(toAdd.getCountryCode()).getName());
+                        pathAirports.add(toAdd);
                     }
                     pathAirportsList.add(pathAirports);
                 }
@@ -160,7 +167,7 @@ public class TripsController {
     }
 
     @GetMapping("/trips")
-    public String getTrips(Model model, Integer endLocationId) {
+    public String getTrips(Model model, Integer endLocationId, Boolean mapHidden) {
         addDefaultAttributes(model);
         if (endLocationId != null) {
             Location endLocation = locationServiceAPI.getLocation(endLocationId);
@@ -171,6 +178,7 @@ public class TripsController {
             model.addAttribute("endInputText", displayText);
             model.addAttribute("endOptionList",endOptionList);
         }
+        model.addAttribute("mapHidden",mapHidden);
         return "fragments/tab :: trips-tab";
     }
 

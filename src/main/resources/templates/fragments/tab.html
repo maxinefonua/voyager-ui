@@ -13,9 +13,10 @@
            th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'TRIPS')} ? 'active' : ''"
            id="trips-tab-link"
            hx-get="/trips"
+           hx-vals='js:{ mapHidden: getMapHidden()}'
            hx-target="#tabContent"
            hx-on::before-request="activate(this)"
-           hx-on::after-request="reloadTrips('scrollable-content');dispatchInputEnd('end-input-value',this)"
+           hx-on::after-request="reloadTrips('scrollable-content');dispatchInputEnd('end-input-value',this);"
            hx-swap="innerHTML">
             Trips
         </a>
@@ -43,6 +44,16 @@
                 hx-swap="innerHTML">
             Browse
         </a>
+    </li>
+    <li class="nav-item ms-3 row align-items-center">
+        <button class="btn btn-primary btn-sm"
+                id="toggle-map-button"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseExample"
+                aria-expanded="false"
+                onclick="toggleMap(this)"
+                aria-controls="collapseExample">Hide Map</button>
     </li>
 </ul>
 <div th:fragment="saved-tab" class="container mt-2">

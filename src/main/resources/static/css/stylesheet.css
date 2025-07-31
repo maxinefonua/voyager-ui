@@ -29,14 +29,17 @@
     cursor: pointer;
 }
 
-.btn-airport-code:has(.btn-close:hover) {
+.btn-airport-code:has(.btn-close:hover),
+.btn-airport-code:has(.btn:hover),.btn-airport-code:has(a:hover) {
     background-color: var(--bs-tertiary-bg);
-    pointer-events: none; /* This prevents clicks on the parent */
+    pointer-events: none; /* Prevents clicks on the parent */
 }
 
-.btn-close {
-    pointer-events: auto; /* But allows clicks on the child */
+.btn-close,
+.btn,a {
+    pointer-events: auto; /* Allows clicks on the child elements */
 }
+
 
 .airport-marker {
   background-image: url(../images/delta-marker.svg);

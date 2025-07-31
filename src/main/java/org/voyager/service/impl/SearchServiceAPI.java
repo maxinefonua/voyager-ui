@@ -11,7 +11,7 @@ import static org.voyager.service.impl.VoyagerServiceImpl.unwrapEither;
 
 public class SearchServiceAPI {
     private final SearchService searchService;
-    public SearchServiceAPI(SearchService searchService) {
+    SearchServiceAPI(SearchService searchService) {
         this.searchService = searchService;
     }
 

@@ -22,7 +22,7 @@ public class LocationServiceAPI {
     private final LocationService locationService;
     private final Logger LOGGER = LoggerFactory.getLogger(LocationServiceAPI.class);
 
-    public LocationServiceAPI(LocationService locationService) {
+    LocationServiceAPI(LocationService locationService) {
         this.locationService = locationService;
     }
 

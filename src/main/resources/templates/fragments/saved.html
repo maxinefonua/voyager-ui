@@ -17,12 +17,13 @@
 
 <!--SAVED ACCORDION Continents-->
 <div th:fragment="saved-continent-list(continentList,continentCountryList)"
-     class="accordion list-group"
+     class="accordion list-group overflow-auto"
+     style="height:350px"
      id="continent-list">
   <div th:each="continent,iter : ${continentList}"
           class="accordion-item">
     <h2 class="accordion-header">
-      <button class="accordion-button list-group-item" type="button"
+      <button class="accordion-button list-group-item p-2" type="button"
               data-bs-toggle="collapse"
               th:href="'#continent-locations-'+${continent.name}"
               onclick="clearMarkers();recenterMap();scrollElemToHref(this);"
@@ -53,7 +54,7 @@
          data-bs-target="#navbar-example3"
          data-bs-smooth-scroll="true"
          class="scrollspy-example-2 overflow-y-scroll"
-         style="height:850px;"
+         style="height:auto;max-height:350px;"
          tabindex="0">
       <div th:each="continent,iter : ${continentList}"
            th:id="'continent-locations-'+${continent.name}">
@@ -73,13 +74,15 @@
               <br>Languages: <span th:text="${#strings.listJoin(country.languages, ', ')}"></span>
             </div>
             <div class="list-group mt-2">
-              <div class="list-group-item"
-                   th:each="location,locationIter : ${countryLocationsList}">
+              <div class="list-group-item btn-airport-code"
+                   th:each="location,locationIter : ${countryLocationsList}"
+                   th:data-lat="${location.latitude}" th:data-lng="${location.longitude}"
+                   th:data-country-bounds="${#strings.arrayJoin(#numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 5, 'POINT'),',')}"
+                   onclick="mapToLocation(this);">
                 <div class="row d-block d-md-flex g-2 g-md-0 align-items-center justify-content-center justify-content-sm-between">
                   <div class="col-auto col-md-4 col-lg-5 text-center text-md-start">
-                    <a href="" th:data-lat="${location.latitude}" th:data-lng="${location.longitude}"
-                       th:data-country-bounds="${#strings.arrayJoin(#numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 5, 'POINT'),',')}"
-                       onclick="mapToLocation(this)">
+                    <a href=""
+                       onclick="event.stopPropagation()">
                       <span th:text="${location.name}+', '+${location.subdivision}"></span>
                     </a>
                   </div>
@@ -109,6 +112,7 @@
         hx-include="#includeArchived"
         hx-swap="outerHTML transition:true"
         name="status"
+        onclick="event.stopPropagation()"
         th:value="${locationStatusName == 'SAVED'?'ARCHIVED':(locationStatusName == 'ARCHIVED')?'SAVED':'DELETE'}"
         th:hx-vals="'{&quot;locationId&quot;:'+${locationId}+'}'">
   <th th:switch="${locationStatusName}">
@@ -129,7 +133,7 @@
 <!--FLY TO button -->
 <button th:fragment="trip-to-button(locationId)"
         class="btn btn-outline-primary col"
-        th:onclick="'tripToEndLocation(\'trips-tab-link\','+${locationId}+')'">
+        th:onclick="'event.stopPropagation();tripToEndLocation(\'trips-tab-link\','+${locationId}+')'">
   <svg viewBox="5 -15 190 160"
        width="23" transform="scale(.9,1.1)">
     <path d="M 26.42 13.21 L 38.65 7.66 L 110.52 28.87 L 158.27 6.96 C 164.84 4.67 186.45 -2.11 192.97 10.01 C 194.87 14.18 193.26 18.93 186.39 22.8 L 52.47 85.49 C 39.97 89.4 42.52 87.93 6.01 60.29 C 2.17 54.94 7.18 52.68 14.04 54.83 L 43.79 60.43 L 71.29 47.17 Z m 80.75 54.44 C 100.16 74.8 110.53 83.24 116.22 77.39 C 122.98 69.92 112.32 63 107.18 67.61 Z m -18.18 8.47 C 82.49 81.72 89.88 91.35 96.67 86.69 C 103.91 80.28 95.59 71.72 88.99 76.08 Z m -77.53 39.34 C 5.03 117.72 7.11 125.82 13.64 125.61 L 111.19 125.57 C 119.14 124.6 117.05 115.78 112.13 115.4 Z"></path>

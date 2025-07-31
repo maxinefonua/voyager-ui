@@ -72,7 +72,8 @@
 <!--TRIPS MAIN PAGE-->
 <div th:fragment="trips" class="container">
     <div class="row justify-content-center">
-        <div class="col-1 col-md-auto p-0" style="width:40px">
+        <div class="col-1 col-md-auto p-0" style="width:40px"
+             th:classappend="${mapHidden != null && mapHidden}?'d-none':''">
             <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
         </div>
         <div class="col-10 col-md p-0">
@@ -81,20 +82,20 @@
                  data-bs-target="#trips-scroll-nav"
                  data-bs-smooth-scroll="true"
                  class="container scrollspy-example overflow-y-scroll"
-                 style="height:250px;"
+                 style="height:350px;"
                  tabindex="0">
-                <div class="row mb-4 d-block d-lg-flex">
+                <div class="row mb-4 d-block d-lg-flex justify-content-between">
                     <div class="col-auto col-lg-5">
                         <h4 id="from-city">Origin</h4>
                         <div style="height:auto"
-                             class="mb-2 ps-4 pe-4">
-                            <div id="trip-input-start">
+                             class="container">
+                            <div id="trip-input-start" class="d-grid gap-2">
                                 <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${startOptionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
                                 <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-auto d-flex pb-1 pt-1 align-items-center">
+                    <div class="col-auto d-flex p-3 align-items-center">
                         <button class="vr btn-reverse container"
                                 onclick="reverseTrip('start-input-text','start-input-value','end-input-text','end-input-value')"
                                 id="reverse-button"
@@ -110,8 +111,8 @@
                     <div class="col-auto col-lg-5">
                         <h4 id="to-city">Destination</h4>
                         <div style="height:auto"
-                             class="mb-2 ps-4 pe-4">
-                            <div id="trip-input-start">
+                             class="container">
+                            <div id="trip-input-start" class="d-grid gap-2">
                                 <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${endOptionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
                                 <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=false)}"></div>
                             </div>
@@ -120,7 +121,7 @@
                 </div>
                 <h4 id="review">Review</h4>
                 <div id="review-summary"
-                     style="height:auto;max-height:215px"
+                     style="height:auto;max-height:315px"
                      class="overflow-auto p-2">
                     <div id="review-path"
                          class="container text-center">
@@ -135,7 +136,7 @@
 <!--replacing LOCATION INPUT from/to-->
 <div th:fragment="location-input(isStart,optionList)"
      th:id="${isStart}?'location-input-start':'location-input-end'"
-     class="input-group row mt-2">
+     class="input-group">
     <span class="input-group-text col-auto"
           th:text="${isStart}?'From':'To'"></span>
     <input th:id="${isStart}?'start-input-value':'end-input-value'"
@@ -171,11 +172,8 @@
 
 <!--replace INITIAL PIN AIRPORTS start/end-->
 <div th:fragment="pin-airports-initial(isStart)"
-     th:id="${isStart}?'include-airports-start':'include-airports-end'"
-     class="input-group row mt-2">
-    <div class="col p-0 pt-1">
-        <input placeholder="Nearby Airports" class="form-control" disabled>
-    </div>
+     th:id="${isStart}?'include-airports-start':'include-airports-end'">
+    <input placeholder="Nearby Airports" class="form-control" disabled>
     <button class="btn btn-secondary pe-0 ps-0" style="display:none" disabled>+</button>
 </div>
 
@@ -185,12 +183,11 @@
      th:data-location-bounds="${location}?${#strings.arrayJoin(
             #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}"
      th:hx-on::after-settle="${location}?'addLocationToMap(this,'+${isStart}+','+${location.longitude}+','+${location.latitude}+',['+${#strings.arrayJoin(
-            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}+'],\'' + ${location.airports} + '\')':'removeLocationFromMap(' + ${isStart} + ')'"
-     class="input-group row mt-2">
-    <div class="d-md-flex p-0" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
+            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}+'],\'' + ${location.airports} + '\')':'removeLocationFromMap(' + ${isStart} + ')'">
+    <div class="d-grid d-md-flex p-0 gap-2" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
         <form th:replace="~{fragments/trips :: airport-codes(isStart=${isStart},airportCodes=${airportCodes},location=${location})}"></form>
         <input th:id="${isStart}?'pin-airport-input-start':'pin-airport-input-end'"
-               class="mt-1 col-auto col-md form-control"
+               class="col-auto col-md form-control"
                type="text" aria-label="Airport"
                name="airportCode"
                th:placeholder="${#lists.isEmpty(airportCodes.codes)}?'Enter Nearby Airport':'Enter Additional Airport'"
@@ -216,7 +213,7 @@
 
 <!--UPDATING airport codes form add/remove-->
 <form th:fragment="airport-codes(isStart,airportCodes,location)"
-      class="mt-1 d-flex overflow-x-auto pb-2 pb-md-0"
+      class="d-flex gap-2 overflow-x-auto pb-2 pb-md-0 order-last order-md-first"
       hx-get="/build-path"
       hx-include="#start-input-value,#end-input-value,#display-path"
       hx-target="#display-path"
@@ -227,7 +224,7 @@
       th:object="${airportCodes}">
     <div th:each="code, iter : *{codes}"
             th:onclick="${isStart}?'mapFitToMarkerToggleAirport(true,' + ${iter.index} + ')':'mapFitToMarkerToggleAirport(false,' + ${iter.index} + ')'"
-            class="input-group-text pe-2 me-2 btn-airport-code">
+            class="input-group-text pe-2 btn-airport-code">
         <span th:text="${code}"></span>
         <input type="hidden" th:field="*{codes[__${iter.index}__]}" th:value="${code}" />
         <button class="btn-close"
@@ -245,55 +242,6 @@
         </button>
     </div>
 </form>
-
-<!--phasing out DISPLAY REVIEW start/end-->
-<div th:fragment="display-review(isStart,tripFilter,location,airport)"
-     th:id="${isStart}?'start-display-review':'end-display-review'"
-     class="col-5">
-    <figure>
-        <blockquote class="blockquote" style="font-size:large">
-            <span th:if="${location}"
-                  th:text="${location.name} + ', ' + ${location.subdivision}"></span>
-            <i th:if="${tripFilter == 'LOCATION' && location == null && airport == null}"
-               th:text="${isStart}?'Select Start Location':'Select End Location'"></i>
-        </blockquote>
-    </figure>
-    <figcaption th:if=${location} class="blockquote-footer" th:text="${location.countryCode}"></figcaption>
-</div>
-
-<!--ORIGINAL DISPLAY REVIEW start/end-->
-<div th:fragment="display-review2(isStart,tripFilter,location,airport)"
-     th:id="${isStart}?'start-display-review':'end-display-review'"
-     th:data-location-bounds="${location}?${#strings.arrayJoin(
-            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}"
-     th:hx-swap-oob="${isStart}?'outerHTML:#start-display-review':'outerHTML:#end-display-review'"
-     th:hx-on::after-settle="${location}?'addLocationToMap('+${isStart}+','+${location.longitude}+','+${location.latitude}+',['+${#strings.arrayJoin(
-            #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}+'],\'' + ${location.airports} + '\')':'removeLocationFromMap(' + ${isStart} + ')'"
-     class="col-5">
-    <figure>
-        <blockquote class="blockquote" style="font-size:large">
-            <span th:if="${location}"
-                  th:text="${location.name} + ', ' + ${location.subdivision}"></span>
-            <i th:if="${tripFilter == 'LOCATION' && location == null && airport == null}"
-               th:text="${isStart}?'Select Start Location':'Select End Location'"></i>
-        </blockquote>
-    </figure>
-    <figcaption th:if=${location} class="blockquote-footer" th:text="${location.countryCode}"></figcaption>
-</div>
-
-<!--replacing initial DISPLAY REVIEW start/end-->
-<div th:fragment="display-review-initial(isStart,tripFilter,location,airport)"
-     th:id="${isStart}?'start-display-review':'end-display-review'"
-     class="col-5">
-    <figure>
-        <blockquote class="blockquote" style="font-size:large">
-            <span th:if="${location}"
-                  th:text="${location.name} + ', ' + ${location.subdivision}"></span>
-            <i th:if="${tripFilter == 'LOCATION' && location == null && airport == null}"
-               th:text="${isStart}?'Select Start Location':'Select End Location'"></i>
-        </blockquote>
-    </figure>
-</div>
 
 <!--updating DISPLAY PATH with start and end locations + airports -->
 <div th:fragment="display-path(airlineOptionList,startLocation,endLocation,startAirportCodes,endAirportCodes)"
@@ -314,7 +262,7 @@
                     hx-include="#start-location-id,#end-location-id"
                     hx-target="#path-airline-list"
                     hx-swap="outerHTML" style="max-width:130px"
-                    hx-on::before-request="if (routeAirportMarker) routeAirportMarker.remove();recenterMap();replaceTargetWithLoading('path-airline-list');"
+                    hx-on::before-request="closeMarkerPopups();if (routeAirportMarker) routeAirportMarker.remove();recenterMap();replaceTargetWithLoading('path-airline-list');"
                     name="airlineSelection" class="form-select">
                 <option selected value="ALL">All Airlines</option>
                 <option th:each="option,iter : ${airlineOptionList}"
@@ -391,7 +339,7 @@
                                     <div class="row align-items-center d-flex gap-2 justify-content-center m-0 m-lg-3 mb-3">
                                         <div class="input-group col-10 col-md-5">
                                             <span style="width:105px"
-                                                    class="d-none d-sm-block input-group-text">Origin</span>
+                                                    class="d-none d-md-block input-group-text">Origin</span>
                                             <button class="btn-airport-code col input-group-text text-truncate"
                                                     type="button"
                                                     onclick="mapToAirportPopup(this)"
@@ -402,7 +350,7 @@
                                                     th:data-airport-country="${pathAirportsList[iter.index][routeIter.index].countryCode}"
                                                     th:data-airport-lat="${pathAirportsList[iter.index][routeIter.index].latitude}"
                                                     th:data-airport-lng="${pathAirportsList[iter.index][routeIter.index].longitude}"
-                                                    th:utext="'<strong>' + ${route.origin} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index].subdivision}"></button>
+                                                    th:utext="'<strong>' + ${route.origin} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index].subdivision} + ' of ' + ${pathAirportsList[iter.index][routeIter.index].countryCode}"></button>
                                         </div>
                                         <div class="input-group col-10 col-sm-5">
                                             <span style="width:105px"
@@ -417,7 +365,7 @@
                                                   th:data-airport-country="${pathAirportsList[iter.index][routeIter.index+1].countryCode}"
                                                   th:data-airport-lat="${pathAirportsList[iter.index][routeIter.index+1].latitude}"
                                                   th:data-airport-lng="${pathAirportsList[iter.index][routeIter.index+1].longitude}"
-                                                  th:utext="'<strong>' + ${route.destination} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index+1].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index+1].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index+1].subdivision}"></button>
+                                                  th:utext="'<strong>' + ${route.destination} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index+1].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index+1].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index+1].subdivision} + ' of ' + ${pathAirportsList[iter.index][routeIter.index+1].countryCode}"></button>
                                         </div>
                                     </div>
                                     <div class="input-group">

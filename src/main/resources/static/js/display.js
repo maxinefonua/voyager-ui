@@ -160,6 +160,26 @@ function addLocationToMap(divElem,isStart,longitude,latitude,bounds,stringOfCode
     checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'));
 }
 
+function toggleMap(buttonElem) {
+    const scrollable = document.getElementById('scrollable-content');
+    const reviewScrollable = document.getElementById('review-summary');
+    const continentList = document.getElementById('continent-list');
+    const scrollNavParent = document.getElementById('trips-scroll-nav').parentElement;
+    if (buttonElem.getAttribute('aria-expanded') == 'false') {
+        buttonElem.innerHTML = 'Show Map';
+        if (scrollable) scrollable.style = 'height:auto;max-height:850px';
+        if (reviewScrollable) reviewScrollable.style = 'height:auto;max-height:815px';
+        if (scrollNavParent) scrollNavParent.classList.add('d-none');
+        if (continentList) continentList.classList.remove('overflow-auto');
+    } else {
+        buttonElem.innerHTML = 'Hide Map';
+        if (scrollable) scrollable.style = 'height:auto;max-height:350px';
+        if (reviewScrollable) reviewScrollable.style = 'height:auto;max-height:315px';
+        if (scrollNavParent) scrollNavParent.classList.remove('d-none');
+        if (continentList) continentList.classList.add('overflow-auto');
+    }
+}
+
 var routeAirportMarker = null;
 
 function mapToAirportPopup(buttonElem) {

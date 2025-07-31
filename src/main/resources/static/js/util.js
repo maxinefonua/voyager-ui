@@ -30,15 +30,25 @@ function replaceButtonWithFunctions(buttonElem,isArchived,locationId) {
     htmx.process(parentElem);
 }
 
+function getMapHidden() {
+    return document.getElementById('toggle-map-button').getAttribute('aria-expanded');
+}
+
 function tripToEndLocation(tabElemId,locationId) {
     const tabElem = document.getElementById(tabElemId);
-    const values = {
-      endLocationId: locationId
+    const isHidden = getMapHidden();
+    var values = {
+      endLocationId: locationId,
+      mapHidden: isHidden
     };
     tabElem.setAttribute('hx-vals', JSON.stringify(values));
     htmx.process(tabElem); // Re-process for HTMX
     tabElem.click();
-    tabElem.removeAttribute('hx-vals');
+    values = {
+        endLocationId: locationId
+    };
+    tabElem.setAttribute('hx-vals', JSON.stringify(values));
+    htmx.process(tabElem); // Re-process for HTMX
 }
 
 function dispatchInputEnd(inputValueElemId,aElem) {
