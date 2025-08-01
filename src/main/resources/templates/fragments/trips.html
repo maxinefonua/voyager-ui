@@ -210,10 +210,11 @@
                 th:hx-on::after-request="${isStart}?'airportIncluded(this,\'pin-airport-input-start\')':'airportIncluded(this,\'pin-airport-input-end\')'">+</button>
         </div>
 </div>
-
+<!--TODO: check d-none vs d-flex when no airport codes (for initial loading) needs update after airport added, all removed -->
 <!--UPDATING airport codes form add/remove-->
 <form th:fragment="airport-codes(isStart,airportCodes,location)"
-      class="d-flex gap-2 overflow-x-auto pb-2 pb-md-0 order-last order-md-first"
+      class="gap-2 overflow-x-auto pb-2 pb-md-0 order-last order-md-first"
+      th:classappend="${#lists.isEmpty(airportCodes.codes)} ? 'd-none' : 'd-flex'"
       hx-get="/build-path"
       hx-include="#start-input-value,#end-input-value,#display-path"
       hx-target="#display-path"
