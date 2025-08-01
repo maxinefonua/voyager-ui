@@ -112,6 +112,7 @@ function removeLocationFromMap(isStart) {
     if (isStart) clearStartMarkers();
     else clearEndMarkers();
     checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'));
+    updateTabHxVals('trips-tab-link',isStart,null);
 }
 
 function mapFitTripScrollTo(targetElemId) {
@@ -123,7 +124,7 @@ function mapFitTripScrollTo(targetElemId) {
 }
 
 
-function addLocationToMap(divElem,isStart,longitude,latitude,bounds,stringOfCodesArray) {
+function addLocationToMap(divElem,locationId,isStart,longitude,latitude,bounds,stringOfCodesArray) {
     const trimmedArray = stringOfCodesArray.replace(/[\[\]]/g, '');
     const airportCodes = trimmedArray.split(', '); // Split by comma and space
     const targetMarkers = isStart ? airportStartMarkers : airportEndMarkers;
@@ -158,6 +159,8 @@ function addLocationToMap(divElem,isStart,longitude,latitude,bounds,stringOfCode
     divElem.removeAttribute('hx-on::after-settle');
     htmx.process(divElem);
     checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'));
+
+    updateTabHxVals('trips-tab-link',isStart,locationId);
 }
 
 function toggleMap(buttonElem) {
@@ -171,12 +174,14 @@ function toggleMap(buttonElem) {
         if (reviewScrollable) reviewScrollable.style = 'height:auto;max-height:815px';
         if (scrollNavParent) scrollNavParent.classList.add('d-none');
         if (continentList) continentList.classList.remove('overflow-auto');
+        updateTabShowMap('trips-tab-link',true);
     } else {
         buttonElem.innerHTML = 'Hide Map';
         if (scrollable) scrollable.style = 'height:auto;max-height:350px';
         if (reviewScrollable) reviewScrollable.style = 'height:auto;max-height:315px';
         if (scrollNavParent) scrollNavParent.classList.remove('d-none');
         if (continentList) continentList.classList.add('overflow-auto');
+        updateTabShowMap('trips-tab-link',false);
     }
 }
 

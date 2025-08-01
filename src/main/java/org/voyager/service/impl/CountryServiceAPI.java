@@ -14,14 +14,6 @@ public class CountryServiceAPI {
         this.countryService = countryService;
     }
 
-    public List<Country> getCountries() {
-        return unwrapEither(countryService.getCountries());
-    }
-
-    public List<Country> getCountries(List<Continent> continentList) {
-        return unwrapEither(countryService.getCountries(continentList));
-    }
-
     public Country getCountry(String countryCode) {
         return unwrapEither(countryService.getCountry(countryCode));
     }

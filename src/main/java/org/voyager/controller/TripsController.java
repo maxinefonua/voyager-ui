@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,10 +26,7 @@ import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
 import org.voyager.service.*;
-import org.voyager.service.impl.AirportServiceAPI;
-import org.voyager.service.impl.CountryServiceAPI;
-import org.voyager.service.impl.LocationServiceAPI;
-import org.voyager.service.impl.SearchServiceAPI;
+import org.voyager.service.impl.*;
 import org.voyager.utils.LocationMapperUtils;
 
 import java.time.*;
@@ -47,6 +45,7 @@ public class TripsController {
     private static CountryServiceAPI countryServiceAPI;
     private static SearchServiceAPI searchServiceAPI;
     private static AirportServiceAPI airportServiceAPI;
+    private static PathServiceAPI pathServiceAPI;
 
     private Stack<Location> recentLocations = new Stack<>();
 
@@ -60,21 +59,20 @@ public class TripsController {
         countryServiceAPI = voyagerService.getCountryServiceAPI();
         searchServiceAPI = voyagerService.getSearchServiceAPI();
         airportServiceAPI = voyagerService.getAirportServiceAPI();
+        pathServiceAPI = voyagerService.getPathServiceAPI();
     }
 
     void addDefaultAttributes(Model model) {
-        model.addAttribute("tripFilterStart", DEFAULT_TRIP_FILTER.name());
-        model.addAttribute("tripFilterEnd", DEFAULT_TRIP_FILTER.name());
-        if (DEFAULT_TRIP_FILTER.equals(TripFilter.LOCATION)) {
-            populateLocationDefaults(model);
-        } else if (DEFAULT_TRIP_FILTER.equals(TripFilter.AIRPORT)) {
-            model.addAttribute("optionList", getDefaultAirportOptionListForInput());
-        } else {
-            LOGGER.error(String.format("addDefaultAttributes w %s - but not yet implemented",
-                    DEFAULT_TRIP_FILTER.name()));
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Internal error fetching from selection options");
-        }
+        recentLocations.clear();
+        Long before = System.currentTimeMillis();
+        recentLocations.addAll(locationServiceAPI.getLocations(10));
+        Long duration = System.currentTimeMillis() - before;
+        LOGGER.info(String.format("locationServiceAPI getLocations returned after %d ms",duration));
+        List<Option> optionList = recentLocations.stream()
+                .map(this::buildLocationOptionForInput)
+                .toList();
+        model.addAttribute("startOptionList", optionList);
+        model.addAttribute("endOptionList", optionList);
     }
 
     @GetMapping("/exclude-route")
@@ -133,16 +131,16 @@ public class TripsController {
     @GetMapping("/path")
     public String path(Model model, Integer startLocationId, Integer endLocationId,
                        PathExclusions pathExclusions, String airlineSelection) {
-        Location startLocation = voyagerService.getLocation(startLocationId);
-        Location endLocation = voyagerService.getLocation(endLocationId);
+        Location startLocation = locationServiceAPI.getLocation(startLocationId);
+        Location endLocation = locationServiceAPI.getLocation(endLocationId);
         List<String> originList = startLocation.getAirports();
         List<String> destinationList = endLocation.getAirports();
         if (!originList.isEmpty() && !destinationList.isEmpty()) {
             PathResponse<PathAirline> pathResponse;
             if (airlineSelection.equals("ALL"))
-                pathResponse = voyagerService.getPath(originList, destinationList,
+                pathResponse = pathServiceAPI.getPathAirlineList(originList, destinationList,
                         pathExclusions.getAirports(), pathExclusions.getRouteIds());
-            else pathResponse = voyagerService.getPath(originList, destinationList,
+            else pathResponse = pathServiceAPI.getPathAirlineList(originList, destinationList,
                     pathExclusions.getAirports(), pathExclusions.getRouteIds(), Airline.valueOf(airlineSelection));
             List<PathAirline> pathAirlineList = pathResponse.getResponseList();
             List<List<Airport>> pathAirportsList = new ArrayList<>();
@@ -167,16 +165,21 @@ public class TripsController {
     }
 
     @GetMapping("/trips")
-    public String getTrips(Model model, Integer endLocationId, Boolean mapHidden) {
-        addDefaultAttributes(model);
-        if (endLocationId != null) {
-            Location endLocation = locationServiceAPI.getLocation(endLocationId);
-            Country country = countryServiceAPI.getCountry(endLocation.getCountryCode());
-            String displayText = String.format("%s, %s | %s",endLocation.getName(),endLocation.getSubdivision(),country.getName());
-            String valueText = endLocation.getSourceId();
-            List<Option> endOptionList = List.of(Option.builder().display(displayText).value(valueText).build());
-            model.addAttribute("endInputText", displayText);
-            model.addAttribute("endOptionList",endOptionList);
+    public String getTrips(Model model, Integer endLocationId, Integer startLocationId, Boolean mapHidden) {
+        if (startLocationId == null && endLocationId == null) addDefaultAttributes(model);
+        else {
+            if (startLocationId != null) {
+                Location startLocation = locationServiceAPI.getLocation(startLocationId);
+                Option locationOption = buildLocationOptionForInput(startLocation);
+                model.addAttribute("startInputText", locationOption.getDisplay());
+                model.addAttribute("startOptionList", List.of(locationOption));
+            }
+            if (endLocationId != null) {
+                Location endLocation = locationServiceAPI.getLocation(endLocationId);
+                Option locationOption = buildLocationOptionForInput(endLocation);
+                model.addAttribute("endInputText", locationOption.getDisplay());
+                model.addAttribute("endOptionList", List.of(locationOption));
+            }
         }
         model.addAttribute("mapHidden",mapHidden);
         return "fragments/tab :: trips-tab";
@@ -184,14 +187,13 @@ public class TripsController {
 
     @GetMapping("/lookup")
     public String lookup(Model model, String inputText)  {
-        List<Option> optionList = new ArrayList<>();
         SearchResult<ResultDetails> voyagerResponse = voyagerService.lookupWithDetails(inputText, 0, 10);
         List<ResultDetails> lookupResults = voyagerResponse.getResults();
 //        Integer totalResultsCount = voyagerResponse.getResultCount();
-        optionList.addAll(lookupResults.stream().map(resultDetails -> {
+        List<Option> optionList = new ArrayList<>(lookupResults.stream().map(resultDetails -> {
             ResultSearch resultSearch = resultDetails.getResultSearch();
-            String displayText = String.format("%s, %s | %s",resultSearch.getName(),
-                    resultSearch.getSubdivision(),resultSearch.getCountryName());
+            String displayText = String.format("%s, %s | %s", resultSearch.getName(),
+                    resultSearch.getSubdivision(), resultSearch.getCountryName());
             String valueText = resultSearch.getSourceId();
             return Option.builder().display(displayText).value(valueText).build();
         }).toList());
@@ -304,6 +306,15 @@ public class TripsController {
         return "fragments/trips :: flights-body";
     }
 
+    private Option buildLocationOptionForInput(Location location) {
+        Country country = countryServiceAPI.getCountry(location.getCountryCode());
+        String displayText = String.format("%s, %s | %s",location.getName(),location.getSubdivision(),country.getName());
+        String valueText = location.getSourceId();
+        return Option.builder()
+                .display(displayText)
+                .value(valueText).build();
+    }
+
     private Option buildAirportOptionForInput(Airport airport) {
         return Option.builder()
                 .elementName(airport.getIata())
@@ -375,19 +386,6 @@ public class TripsController {
         return airportList.stream()
                 .map(this::buildAirportOption)
                 .toList();
-    }
-
-
-    private void populateLocationDefaults(Model model) {
-        recentLocations.clear();
-        recentLocations.addAll(voyagerService.getLocations().stream().limit(10).toList());
-        List<Option> optionList = recentLocations.stream()
-                .map(location -> Option.builder().elementName(String.format("%s-%s",
-                                location.getName(), location.getId())).display(String.format("%s, %s in %s",
-                                location.getName(), location.getSubdivision(), location.getCountryCode()))
-                        .value(String.valueOf(location.getId().intValue())).build())
-                .toList();
-        model.addAttribute("optionList", optionList);
     }
 
     private List<Option> resolveNearbyAirportOptionList(Location location, Airline airline) {

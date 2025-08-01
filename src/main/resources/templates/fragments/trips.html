@@ -70,7 +70,8 @@
 </nav>
 
 <!--TRIPS MAIN PAGE-->
-<div th:fragment="trips" class="container">
+<div th:fragment="trips" class="container"
+     hx-on::after-request="dispatchInput()">
     <div class="row justify-content-center">
         <div class="col-1 col-md-auto p-0" style="width:40px"
              th:classappend="${mapHidden != null && mapHidden}?'d-none':''">
@@ -182,7 +183,7 @@
      th:id="${isStart}?'include-airports-start':'include-airports-end'"
      th:data-location-bounds="${location}?${#strings.arrayJoin(
             #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}"
-     th:hx-on::after-settle="${location}?'addLocationToMap(this,'+${isStart}+','+${location.longitude}+','+${location.latitude}+',['+${#strings.arrayJoin(
+     th:hx-on::after-settle="${location}?'addLocationToMap(this,' + ${location.id} +',' + ${isStart}+','+${location.longitude}+','+${location.latitude}+',['+${#strings.arrayJoin(
             #numbers.arrayFormatDecimal(location.bbox, 1, 'POINT', 7, 'POINT'),',')}+'],\'' + ${location.airports} + '\')':'removeLocationFromMap(' + ${isStart} + ')'">
     <div class="d-grid d-md-flex p-0 gap-2" th:id="${isStart}?'pinned-airports-start':'pinned-airports-end'">
         <form th:replace="~{fragments/trips :: airport-codes(isStart=${isStart},airportCodes=${airportCodes},location=${location})}"></form>
@@ -210,7 +211,7 @@
                 th:hx-on::after-request="${isStart}?'airportIncluded(this,\'pin-airport-input-start\')':'airportIncluded(this,\'pin-airport-input-end\')'">+</button>
         </div>
 </div>
-<!--TODO: check d-none vs d-flex when no airport codes (for initial loading) needs update after airport added, all removed -->
+
 <!--UPDATING airport codes form add/remove-->
 <form th:fragment="airport-codes(isStart,airportCodes,location)"
       class="gap-2 overflow-x-auto pb-2 pb-md-0 order-last order-md-first"
@@ -256,8 +257,10 @@
     <div th:unless="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
          class="list-group">
         <div class="row justify-content-center">
-            <input type="hidden" id="start-location-id" name="startLocationId" th:value="${startLocation.id}">
-            <input type="hidden" id="end-location-id" name="endLocationId" th:value="${endLocation.id}">
+            <input type="hidden" id="start-location-id" name="startLocationId"
+                   th:value="${startLocation.id}">
+            <input type="hidden" id="end-location-id" name="endLocationId"
+                   th:value="${endLocation.id}">
             <select hx-get="/path"
                     hx-trigger="load,change"
                     hx-include="#start-location-id,#end-location-id"

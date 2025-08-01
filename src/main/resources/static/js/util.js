@@ -34,29 +34,58 @@ function getMapHidden() {
     return document.getElementById('toggle-map-button').getAttribute('aria-expanded');
 }
 
-function tripToEndLocation(tabElemId,locationId) {
+function updateTabShowMap(tabElemId,isHidden) {
     const tabElem = document.getElementById(tabElemId);
-    const isHidden = getMapHidden();
-    var values = {
-      endLocationId: locationId,
-      mapHidden: isHidden
-    };
-    tabElem.setAttribute('hx-vals', JSON.stringify(values));
-    htmx.process(tabElem); // Re-process for HTMX
-    tabElem.click();
-    values = {
-        endLocationId: locationId
-    };
-    tabElem.setAttribute('hx-vals', JSON.stringify(values));
+    const currentVals = JSON.parse(tabElem.getAttribute('hx-vals') || '{}');
+    currentVals.mapHidden = isHidden;
+    tabElem.setAttribute('hx-vals', JSON.stringify(currentVals));
     htmx.process(tabElem); // Re-process for HTMX
 }
 
-function dispatchInputEnd(inputValueElemId,aElem) {
-    const inputValueElem = document.getElementById(inputValueElemId);
-    const inputTextElem = document.getElementById('end-input-text');
-    const locationSourceId = aElem.getAttribute('')
+function updateTabHxVals(tabElemId,isStart,locationId) {
+    const tabElem = document.getElementById(tabElemId);
+    const currentVals = JSON.parse(tabElem.getAttribute('hx-vals') || '{}');
+    if (isStart) {
+        if (locationId == null) delete currentVals.startLocationId;
+        else currentVals.startLocationId = locationId;
+    } else {
+        if (locationId == null) delete currentVals.endLocationId;
+        else currentVals.endLocationId = locationId;
+    }
+    tabElem.setAttribute('hx-vals', JSON.stringify(currentVals));
+    htmx.process(tabElem); // Re-process for HTMX
+}
+
+function tripToEndLocation(tabElemId,locationId) {
+    const tabElem = document.getElementById(tabElemId);
+    const isHidden = getMapHidden();
+    const currentVals = JSON.parse(tabElem.getAttribute('hx-vals') || '{}');
+    if (currentVals.startLocationId != null) {
+        if (currentVals.startLocationId == locationId) {
+            currentVals.startLocationId = currentVals.endLocationId;
+        }
+    }
+    currentVals.endLocationId = locationId;
+    currentVals.mapHidden = isHidden;
+    tabElem.setAttribute('hx-vals', JSON.stringify(currentVals));
+    htmx.process(tabElem); // Re-process for HTMX
+    tabElem.click();
+}
+
+function dispatchInput() {
+    var inputValueElem = document.getElementById('end-input-value');
+    var inputTextElem = document.getElementById('end-input-text');
+    var datalistElem = document.getElementById('input-end-options');
+    dispatchInputEvent(inputValueElem,inputTextElem,datalistElem);
+
+    inputValueElem = document.getElementById('start-input-value');
+    inputTextElem = document.getElementById('start-input-text');
+    datalistElem = document.getElementById('input-start-options');
+    dispatchInputEvent(inputValueElem,inputTextElem,datalistElem);
+}
+
+function dispatchInputEvent(inputValueElem,inputTextElem,datalistElem) {
     if (inputTextElem.value.trim() != '') {
-        const datalistElem = document.getElementById('input-end-options');
         const match = Array.from(datalistElem.options)
             .find(option => option.value === inputTextElem.value);
         if (inputValueElem.value.trim() == '') {

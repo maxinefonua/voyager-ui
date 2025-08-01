@@ -24,12 +24,15 @@ import org.voyager.service.impl.LocationServiceAPI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class SavedController {
     private static final Logger LOGGER = LoggerFactory.getLogger(SavedController.class);
     private static CountryServiceAPI countryServiceAPI;
     private static LocationServiceAPI locationServiceAPI;
+    private Source source;
 
     @Autowired
     private VoyagerService voyagerService;
@@ -38,47 +41,31 @@ public class SavedController {
     public void init() {
         countryServiceAPI = voyagerService.getCountryServiceAPI();
         locationServiceAPI = voyagerService.getLocationServiceAPI();
+        source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
     }
 
     void addDefaultAttributes(Model model) {
         List<List<Country>> continentCountryList = new ArrayList<>();
         List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
-        Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
         for (Continent continent : Continent.values()) {
-            List<String> countryCodes = new ArrayList<>();
             List<Country> countryList = new ArrayList<>();
             List<List<Location>> countryLocationsList = new ArrayList<>();
             List<Location> continentLocations = locationServiceAPI.getLocations(source,continent,List.of(Status.SAVED));
-            continentLocations.forEach(location -> {
-                String countryCode = location.getCountryCode();
-                if (countryCodes.contains(countryCode)) {
-                    countryLocationsList.get(countryCodes.indexOf(countryCode)).add(location);
-                } else {
-                    Country country = countryServiceAPI.getCountry(countryCode);
-                    countryList.add(country);
-                    countryList.sort(Comparator.comparing(Country::getName));
-                    int insertIndex = countryList.indexOf(country);
-                    countryCodes.add(insertIndex,countryCode);
-                    countryLocationsList.add(insertIndex,new ArrayList<>(List.of(location)));
-                }
+            Map<String,List<Location>> locationListGroupedByCountryCode = continentLocations.stream()
+                            .collect(Collectors.groupingBy(Location::getCountryCode));
+            locationListGroupedByCountryCode.forEach((countryCode,countryLocations) -> {
+                Country country = countryServiceAPI.getCountry(countryCode);
+                countryList.add(country);
+                countryLocations.sort(Comparator.comparing(Location::getName));
+                countryLocationsList.add(countryLocations);
             });
+            countryList.sort(Comparator.comparing(Country::getName));
             continentCountryList.add(countryList);
             continentCountryLocationsList.add(countryLocationsList);
         }
         model.addAttribute("continentList", Continent.values());
         model.addAttribute("continentCountryList", continentCountryList);
         model.addAttribute("continentCountryLocationsList", continentCountryLocationsList);
-
-            // TODO: add country details for airports
-        List<Location> locations = voyagerService.getLocations(Status.SAVED);
-        List<LocationDetails> locationDetailsList = new ArrayList<>();
-        locations.forEach(location-> { // TODO: add country details for airports
-            List<Airport> airportList = new ArrayList<>(location.getAirports().stream()
-                    .map(iata -> voyagerService.getAirport(iata)).toList());
-            locationDetailsList.add(LocationDetails.builder().airportList(airportList).location(location).build());
-            location.setCountryCode(countryServiceAPI.getCountry(location.getCountryCode()).getCode());
-        });
-        model.addAttribute("locationDetailsList",locationDetailsList);
         model.addAttribute("locationFilter",new LocationFilter());
     }
 

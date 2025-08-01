@@ -13,10 +13,9 @@
            th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'TRIPS')} ? 'active' : ''"
            id="trips-tab-link"
            hx-get="/trips"
-           hx-vals='js:{ mapHidden: getMapHidden()}'
            hx-target="#tabContent"
            hx-on::before-request="activate(this)"
-           hx-on::after-request="reloadTrips('scrollable-content');dispatchInputEnd('end-input-value',this);"
+           hx-on::after-request="reloadTrips('scrollable-content');dispatchInput();"
            hx-swap="innerHTML">
             Trips
         </a>

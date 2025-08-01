@@ -13,10 +13,7 @@ import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.PathResponse;
 import org.voyager.model.route.Route;
-import org.voyager.service.impl.AirportServiceAPI;
-import org.voyager.service.impl.CountryServiceAPI;
-import org.voyager.service.impl.LocationServiceAPI;
-import org.voyager.service.impl.SearchServiceAPI;
+import org.voyager.service.impl.*;
 
 import java.util.List;
 import java.util.Map;
@@ -56,4 +53,5 @@ public interface VoyagerService {
     LocationServiceAPI getLocationServiceAPI();
     SearchServiceAPI getSearchServiceAPI();
     AirportServiceAPI getAirportServiceAPI();
+    PathServiceAPI getPathServiceAPI();
 }

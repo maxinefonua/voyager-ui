@@ -26,8 +26,16 @@ public class LocationServiceAPI {
         this.locationService = locationService;
     }
 
+    public List<Location> getLocations(Status status) {
+        return unwrapEither(locationService.getLocations(status));
+    }
+
     public List<Location> getLocations(Source source, Continent continent, List<Status> statusList) {
         return unwrapEither(locationService.getLocations(source,continent,statusList));
+    }
+
+    public List<Location> getLocations(Integer limit) {
+        return unwrapEither(locationService.getLocations(limit));
     }
 
     public Location getLocation(Integer id) {
