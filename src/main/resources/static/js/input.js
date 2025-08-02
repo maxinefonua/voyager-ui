@@ -1,26 +1,33 @@
-function processLocationInput(inputElem,inputValueElemId,datalistElemId) {
+function processLocationInput(inputElem,inputValueElemId,datalistElemId,oppositeInputValueElemId) {
     const inputValueElem = document.getElementById(inputValueElemId);
     if (inputElem.value.trim().length == 0) {
-        inputValueElem.value = '';
-        inputValueElem.dispatchEvent(new Event('input'));
+        if (inputValueElem.value.trim().length > 0) {
+            inputValueElem.value = '';
+            inputValueElem.dispatchEvent(new Event('input'));
+        }
         return;
     }
     if (inputElem.value.trim().length < 5) return;
     const selectedOption = Array.from(inputElem.list.options)
         .find(option => option.value === inputElem.value);
     if (selectedOption && inputValueElem) {
-        inputValueElem.value = selectedOption.dataset.value;
-        inputValueElem.dispatchEvent(new Event('input'));
+        if (inputValueElem.value != selectedOption.dataset.value) {
+            inputValueElem.value = selectedOption.dataset.value;
+            inputValueElem.dispatchEvent(new Event('input'));
+        }
         return;
     }
     const datalistElem = document.getElementById(datalistElemId);
+    const oppositeInputValueElem = document.getElementById(oppositeInputValueElemId);
     // update datalist
-    fetch(`/lookup?inputText=${encodeURIComponent(inputElem.value)}`)
+    fetch(`/lookup?inputText=${encodeURIComponent(inputElem.value)}&excludeSourceId=${oppositeInputValueElem.value}`)
             .then(response => response.text())
             .then(html => {
                 // Create temporary container to parse the fragment
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
+
+                // TODO: disable or send opposite location to disable already selected option
 
                 // Replace datalist contents
                 if (temp.querySelectorAll('option').length > 0) {
@@ -34,13 +41,15 @@ function processLocationInput(inputElem,inputValueElemId,datalistElemId) {
                             inputValueElem.value = datalistElem.options[0].dataset.value;
                             inputValueElem.dispatchEvent(new Event('input'));
                         }
-                    } else {
+                    } else if (inputValueElem.value.trim().length > 0) {
                         inputValueElem.value = '';
                         inputValueElem.dispatchEvent(new Event('input'));
                     }
                 } else {
-                    inputValueElem.value = '';
-                    inputValueElem.dispatchEvent(new Event('input'));
+                    if (inputValueElem.value.trim().length > 0) {
+                        inputValueElem.value = '';
+                        inputValueElem.dispatchEvent(new Event('input'));
+                    }
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -61,11 +70,7 @@ function airportIncluded(includeButtonElem,inputElemId) {
 }
 
 function checkReverse(reverseButtonElem,startInputValueElem,endInputValueElem) {
-    if (startInputValueElem.value.length > 0 && endInputValueElem.value.length > 0) {
-        reverseButtonElem.disabled = false;
-    } else {
-        reverseButtonElem.disabled = true;
-    }
+    reverseButtonElem.disabled = startInputValueElem.value.length == 0 && endInputValueElem.value.length == 0;
 }
 
 function processAirportInput(isStart,inputElem,includeButtonElemId,locationMarker) {
@@ -91,18 +96,41 @@ function processAirportInput(isStart,inputElem,includeButtonElemId,locationMarke
 function reverseTrip(startTextElemId,startValueElemId,endTextElemId,endValueElemId) {
     const startTextElem = document.getElementById(startTextElemId);
     const startValueElem = document.getElementById(startValueElemId);
+    const startDatalistElem = document.getElementById('input-start-options');
+
     const endTextElem = document.getElementById(endTextElemId);
     const endValueElem = document.getElementById(endValueElemId);
+    const endDatalistElem = document.getElementById('input-end-options');
 
     const tempText = startTextElem.value;
     const tempValue = startValueElem.value;
+    const tempDatalist = startDatalistElem.innerHTML;
+
     startTextElem.value = endTextElem.value;
     startValueElem.value = endValueElem.value;
     startValueElem.dispatchEvent(new Event('input'));
+    startDatalistElem.innerHTML = endDatalistElem.innerHTML;
+
     endTextElem.value = tempText;
     endValueElem.value = tempValue;
     endValueElem.dispatchEvent(new Event('input'));
+    endDatalistElem.innerHTML = tempDatalist;
+
     reverseMarkers();
+}
+
+function filterLocationOption(isStart,filterInputValueElem) {
+    var datalistElem;
+    if (isStart) datalistElem = document.getElementById('input-end-options');
+    else datalistElem = document.getElementById('input-start-options');
+
+    if (filterInputValueElem.length > 0) {
+        const matchingLocation = Array.from(datalistElem.options)
+            .find(option => option.dataset.value === filterInputValueElem.value);
+        if (matchingLocation) matchingLocation.disabled = true;
+    } else {
+        Array.from(datalistElem.options).forEach(option => option.disabled = false);
+    }
 }
 
 function includeAirport(includeButtonElem,inputElemId) {

@@ -47,7 +47,7 @@ public class TripsController {
     private static AirportServiceAPI airportServiceAPI;
     private static PathServiceAPI pathServiceAPI;
 
-    private Stack<Location> recentLocations = new Stack<>();
+    private Deque<Location> recentLocations = new ArrayDeque<>();
 
 
     @Autowired
@@ -63,7 +63,6 @@ public class TripsController {
     }
 
     void addDefaultAttributes(Model model) {
-        recentLocations.clear();
         Long before = System.currentTimeMillis();
         recentLocations.addAll(locationServiceAPI.getLocations(10));
         Long duration = System.currentTimeMillis() - before;
@@ -105,8 +104,8 @@ public class TripsController {
         Location endLocation = null;
         List<String> startAirportCodes = List.of();
         List<String> endAirportCodes = List.of();
-        if (StringUtils.isNotBlank(sourceIds[0])) startLocation = voyagerService.getLocation(source,sourceIds[0]);
-        if (StringUtils.isNotBlank(sourceIds[1])) endLocation = voyagerService.getLocation(source,sourceIds[1]);
+        if (StringUtils.isNotBlank(sourceIds[0])) startLocation = locationServiceAPI.getLocation(source,sourceIds[0]);
+        if (StringUtils.isNotBlank(sourceIds[1])) endLocation = locationServiceAPI.getLocation(source,sourceIds[1]);
         if (startLocation != null && endLocation != null) {
             startAirportCodes = startLocation.getAirports();
             endAirportCodes = endLocation.getAirports();
@@ -166,36 +165,42 @@ public class TripsController {
 
     @GetMapping("/trips")
     public String getTrips(Model model, Integer endLocationId, Integer startLocationId, Boolean mapHidden) {
-        if (startLocationId == null && endLocationId == null) addDefaultAttributes(model);
-        else {
-            if (startLocationId != null) {
-                Location startLocation = locationServiceAPI.getLocation(startLocationId);
-                Option locationOption = buildLocationOptionForInput(startLocation);
-                model.addAttribute("startInputText", locationOption.getDisplay());
-                model.addAttribute("startOptionList", List.of(locationOption));
-            }
-            if (endLocationId != null) {
-                Location endLocation = locationServiceAPI.getLocation(endLocationId);
-                Option locationOption = buildLocationOptionForInput(endLocation);
-                model.addAttribute("endInputText", locationOption.getDisplay());
-                model.addAttribute("endOptionList", List.of(locationOption));
-            }
+        if (recentLocations.isEmpty()) {
+            recentLocations.addAll(locationServiceAPI.getLocations(10));
+        }
+        List<Option> optionList = recentLocations.stream()
+                .map(this::buildLocationOptionForInput)
+                .toList();
+        if (startLocationId != null) {
+            Location startLocation = locationServiceAPI.getLocation(startLocationId);
+            Option locationOption = buildLocationOptionForInput(startLocation);
+            model.addAttribute("startInputText", locationOption.getDisplay());
+            model.addAttribute("startOptionList", List.of(locationOption));
+        } else {
+            model.addAttribute("startOptionList", optionList);
+        }
+        if (endLocationId != null) {
+            Location endLocation = locationServiceAPI.getLocation(endLocationId);
+            Option locationOption = buildLocationOptionForInput(endLocation);
+            model.addAttribute("endInputText", locationOption.getDisplay());
+            model.addAttribute("endOptionList", List.of(locationOption));
+        } else {
+            model.addAttribute("endOptionList", optionList);
         }
         model.addAttribute("mapHidden",mapHidden);
         return "fragments/tab :: trips-tab";
     }
 
     @GetMapping("/lookup")
-    public String lookup(Model model, String inputText)  {
-        SearchResult<ResultDetails> voyagerResponse = voyagerService.lookupWithDetails(inputText, 0, 10);
-        List<ResultDetails> lookupResults = voyagerResponse.getResults();
-//        Integer totalResultsCount = voyagerResponse.getResultCount();
-        List<Option> optionList = new ArrayList<>(lookupResults.stream().map(resultDetails -> {
-            ResultSearch resultSearch = resultDetails.getResultSearch();
+    public String lookup(Model model, String inputText, String excludeSourceId)  {
+        SearchResult<ResultSearch> searchResult = searchServiceAPI.search(inputText,10);
+        List<ResultSearch> lookupResults = searchResult.getResults();
+        List<Option> optionList = new ArrayList<>(lookupResults.stream().map(resultSearch -> {
             String displayText = String.format("%s, %s | %s", resultSearch.getName(),
                     resultSearch.getSubdivision(), resultSearch.getCountryName());
             String valueText = resultSearch.getSourceId();
-            return Option.builder().display(displayText).value(valueText).build();
+            Boolean disabled = !StringUtils.isBlank(excludeSourceId) && excludeSourceId.equals(resultSearch.getSourceId());
+            return Option.builder().display(displayText).value(valueText).disabled(disabled).build();
         }).toList());
         model.addAttribute("optionList",optionList);
         model.addAttribute("tripFilter",TripFilter.LOCATION);
@@ -217,7 +222,11 @@ public class TripsController {
                 LocationForm locationForm = LocationMapperUtils.toLocationForm(resultSearchFull);
                 location = locationServiceAPI.addLocation(locationForm);
             }
-            recentLocations.remove(location);
+            if (recentLocations.contains(location)) {
+                recentLocations.remove(location);
+            } else {
+                recentLocations.removeLast();
+            }
             recentLocations.push(location);
         }
         model.addAttribute("isStart",isStart);
@@ -243,9 +252,9 @@ public class TripsController {
         if (voyagerService.isValidIataCode(airportCode) && !airportCodes.getCodes().contains(airportCode))
             airportCodes.getCodes().add(airportCode);
         Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
-        Location location = voyagerService.getLocation(source,sourceId);
+        Location location = locationServiceAPI.getLocation(source,sourceId);
         LocationPatch locationPatch = LocationPatch.builder().airports(airportCodes.getCodes()).build();
-        voyagerService.patchLocation(location.getId(),locationPatch);
+        locationServiceAPI.patchLocation(location.getId(),locationPatch);
         model.addAttribute("airportCodes",airportCodes);
         model.addAttribute("isStart",isStart);
         return "fragments/trips :: airport-codes";
@@ -256,9 +265,9 @@ public class TripsController {
                                     String airportCode, String sourceId) {
         airportCodes.getCodes().remove(airportCode);
         Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
-        Location location = voyagerService.getLocation(source,sourceId);
+        Location location = locationServiceAPI.getLocation(source,sourceId);
         LocationPatch locationPatch = LocationPatch.builder().airports(airportCodes.getCodes()).build();
-        voyagerService.patchLocation(location.getId(),locationPatch);
+        locationServiceAPI.patchLocation(location.getId(),locationPatch);
         model.addAttribute("airportCodes",airportCodes);
         model.addAttribute("isStart",isStart);
         return "fragments/trips :: airport-codes";

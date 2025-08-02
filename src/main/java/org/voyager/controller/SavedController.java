@@ -114,12 +114,12 @@ public class SavedController {
     public String unpinAirport(Model model, @NonNull String airportCode, @NonNull Integer locationId) {
         LOGGER.debug(String.format("/unpin-airport-location called from locationId %d and airportCode %s",
                 locationId, airportCode));
-        Location location = voyagerService.getLocation(locationId);
+        Location location = locationServiceAPI.getLocation(locationId);
         if (voyagerService.isValidIataCode(airportCode) && location.hasAirport(airportCode)) {
             location.removeAirport(airportCode);
             LocationPatch locationPatch = LocationPatch.builder().airports(location.getAirports()).build();
             LOGGER.debug(String.format("patch request %s to location %s", locationPatch, location));
-            Location patched = voyagerService.patchLocation(locationId, locationPatch);
+            Location patched = locationServiceAPI.patchLocation(locationId, locationPatch);
             model.addAttribute("location", patched);
         } else
             model.addAttribute("location", location);
@@ -131,12 +131,12 @@ public class SavedController {
         airportCode = airportCode.toUpperCase();
         LOGGER.debug(String.format("/pin-airport-location called from locationId %d and airportCode %s",
                 locationId,airportCode));
-        Location location = voyagerService.getLocation(locationId);
+        Location location = locationServiceAPI.getLocation(locationId);
         if (voyagerService.isValidIataCode(airportCode) && !location.hasAirport(airportCode)) {
             location.addAirport(airportCode);
             LocationPatch locationPatch = LocationPatch.builder().airports(location.getAirports()).build();
             LOGGER.debug(String.format("patch request %s to location %s",locationPatch,location));
-            Location patched = voyagerService.patchLocation(locationId,locationPatch);
+            Location patched = locationServiceAPI.patchLocation(locationId,locationPatch);
             model.addAttribute("location",patched);
             Airport airport = voyagerService.getAirport(airportCode);
             model.addAttribute("airport",airport);
@@ -164,11 +164,11 @@ public class SavedController {
                 LOGGER.info(String.format("successfully deleted location with id: %d",locationId));
             else LOGGER.error(String.format("error deleting location with id: %d",locationId));
         } else {
-            Location location = voyagerService.getLocation(locationId);
+            Location location = locationServiceAPI.getLocation(locationId);
             if (!location.getStatus().equals(status)) {
                 LocationPatch locationPatch = LocationPatch.builder().status(status.name()).build();
                 LOGGER.debug(String.format("patch request %s to location %s", locationPatch, location));
-                Location patched = voyagerService.patchLocation(locationId, locationPatch);
+                Location patched = locationServiceAPI.patchLocation(locationId, locationPatch);
                 LOGGER.info(String.format("patched location %s", patched));
             } else {
                 LOGGER.info(String.format("skipping location update of matching status: %s",location));

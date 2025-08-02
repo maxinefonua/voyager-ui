@@ -88,7 +88,7 @@ function dispatchInputEvent(inputValueElem,inputTextElem,datalistElem) {
     if (inputTextElem.value.trim() != '') {
         const match = Array.from(datalistElem.options)
             .find(option => option.value === inputTextElem.value);
-        if (inputValueElem.value.trim() == '') {
+        if (match) {
             htmx.process(inputValueElem);
             inputValueElem.value = match.dataset.value;
             inputValueElem.dispatchEvent(new Event('input'));

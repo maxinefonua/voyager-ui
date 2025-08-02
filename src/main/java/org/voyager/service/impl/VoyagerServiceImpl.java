@@ -129,16 +129,6 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
-    public Location getLocation(Source source, String sourceId) {
-        return fetchLocation(source,sourceId);
-    }
-
-    @Override
-    public Location patchLocation(Integer id, LocationPatch locationPatch) {
-        return fetchPatchedLocation(id,locationPatch);
-    }
-
-    @Override
     public Location addLocation(LocationForm locationForm) {
         return createLocation(locationForm);
     }
@@ -291,26 +281,7 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     private Location fetchLocation(Source source, String sourceId) {
-        Either<ServiceError, List<Location>> either = locationService.getLocations(source,sourceId);
-        if (either.isLeft()) resolveServiceError(either.getLeft());
-        List<Location> matches = either.get();
-        if (matches.size() > 1) {
-            // TODO: handle exception correctly
-            String message = String.format("Multiple locations returned for source '%s' and sourceId '%s'. Alerting not yet implemented",
-                    source,sourceId);
-            LOGGER.error(message);
-            throw new ResponseStatusException(HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.getCode()),
-                    message);
-        }
-        if (matches.isEmpty()) {
-            // TODO: handle exception correctly
-            String message = String.format("No locations returned for source '%s' and sourceId '%s'. Alerting not yet implemented",
-                    source,sourceId);
-            LOGGER.error(message);
-            throw new ResponseStatusException(HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.getCode()),
-                    message);
-        }
-        return matches.get(0);
+        return unwrapEither(locationService.getLocation(source,sourceId));
     }
 
     private List<Location> fetchLocations() {

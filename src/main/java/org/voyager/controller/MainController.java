@@ -13,9 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
-import org.voyager.model.route.Path;
-import org.voyager.model.route.PathAirline;
-import org.voyager.model.route.Route;
 import org.voyager.service.VoyagerService;
 
 import java.util.*;

@@ -146,6 +146,7 @@
            hx-get="/update-review"
            hx-swap="outerHTML transition:true"
            name="sourceId"
+           th:oninput="'filterLocationOption('+${isStart}+',this)'"
            th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
            hx-trigger="input changed"
            th:hx-target="${isStart}?'#include-airports-start':'#include-airports-end'"
@@ -161,13 +162,13 @@
            placeholder="Lookup location"
            th:list="${isStart}?'input-start-options':'input-end-options'"
            th:oninput="${isStart}?
-           'debouncedProcessLocationInput(this,\'start-input-value\',\'input-start-options\')'
+           'debouncedProcessLocationInput(this,\'start-input-value\',\'input-start-options\',\'end-input-value\')'
            :
-           'debouncedProcessLocationInput(this,\'end-input-value\',\'input-end-options\')'"
+           'debouncedProcessLocationInput(this,\'end-input-value\',\'input-end-options\',\'start-input-value\')'"
            th:onkeydown="${isStart}?
-           'if(event.key === \'Enter\') processLocationInput(this,\'start-input-value\',\'input-start-options\')'
+           'if(event.key === \'Enter\') processLocationInput(this,\'start-input-value\',\'input-start-options\',\'end-input-value\')'
            :
-           'if(event.key === \'Enter\') processLocationInput(this,\'end-input-value\',\'input-end-options\')'"
+           'if(event.key === \'Enter\') processLocationInput(this,\'end-input-value\',\'input-end-options\',\'start-input-value\')'"
            th:value="${inputText}">
 </div>
 

@@ -28,8 +28,6 @@ public interface VoyagerService {
     List<Location> getLocations();
     List<Location> getLocations(Status status);
     Location getLocation(Integer id);
-    Location getLocation(Source source, String sourceId);
-    Location patchLocation(Integer id, LocationPatch locationPatch);
     Location addLocation(LocationForm locationForm);
     List<Airport> airports(AirportType type, Airline airline);
     List<Airport> airports(AirportType type);
