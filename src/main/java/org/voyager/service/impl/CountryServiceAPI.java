@@ -1,10 +1,8 @@
 package org.voyager.service.impl;
 
 import lombok.NonNull;
-import org.voyager.model.country.Continent;
 import org.voyager.model.country.Country;
 import org.voyager.service.CountryService;
-import java.util.List;
 import static org.voyager.service.impl.VoyagerServiceImpl.unwrapEither;
 
 public class CountryServiceAPI {

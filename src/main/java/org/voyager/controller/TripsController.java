@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +45,7 @@ public class TripsController {
     private static SearchServiceAPI searchServiceAPI;
     private static AirportServiceAPI airportServiceAPI;
     private static PathServiceAPI pathServiceAPI;
+    private Source source;
 
     private Deque<Location> recentLocations = new ArrayDeque<>();
 
@@ -60,6 +60,7 @@ public class TripsController {
         searchServiceAPI = voyagerService.getSearchServiceAPI();
         airportServiceAPI = voyagerService.getAirportServiceAPI();
         pathServiceAPI = voyagerService.getPathServiceAPI();
+        source = searchServiceAPI.getSource();
     }
 
     void addDefaultAttributes(Model model) {
@@ -71,7 +72,6 @@ public class TripsController {
                 .map(this::buildLocationOptionForInput)
                 .toList();
         model.addAttribute("startOptionList", optionList);
-        model.addAttribute("endOptionList", optionList);
     }
 
     @GetMapping("/exclude-route")
@@ -99,7 +99,6 @@ public class TripsController {
     @GetMapping("/build-path")
     public String buildPath(Model model, @RequestParam(name = SOURCE_ID_PARAM_NAME) String[] sourceIds,
                             PathExclusions pathExclusions) {
-        Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
         Location startLocation = null;
         Location endLocation = null;
         List<String> startAirportCodes = List.of();
@@ -168,25 +167,37 @@ public class TripsController {
         if (recentLocations.isEmpty()) {
             recentLocations.addAll(locationServiceAPI.getLocations(10));
         }
-        List<Option> optionList = recentLocations.stream()
-                .map(this::buildLocationOptionForInput)
-                .toList();
-        if (startLocationId != null) {
-            Location startLocation = locationServiceAPI.getLocation(startLocationId);
-            Option locationOption = buildLocationOptionForInput(startLocation);
-            model.addAttribute("startInputText", locationOption.getDisplay());
-            model.addAttribute("startOptionList", List.of(locationOption));
-        } else {
-            model.addAttribute("startOptionList", optionList);
+        Location startLocation = startLocationId == null ? null : locationServiceAPI.getLocation(startLocationId);
+        Location endLocation = endLocationId == null ? null : locationServiceAPI.getLocation(endLocationId);
+        if (startLocation != null) {
+            if (recentLocations.contains(startLocation)) recentLocations.remove(startLocation);
+            else recentLocations.removeLast();
+            recentLocations.push(startLocation);
         }
-        if (endLocationId != null) {
-            Location endLocation = locationServiceAPI.getLocation(endLocationId);
-            Option locationOption = buildLocationOptionForInput(endLocation);
-            model.addAttribute("endInputText", locationOption.getDisplay());
-            model.addAttribute("endOptionList", List.of(locationOption));
-        } else {
-            model.addAttribute("endOptionList", optionList);
+        if (endLocation != null) {
+            if (recentLocations.contains(endLocation)) recentLocations.remove(endLocation);
+            else recentLocations.removeLast();
+            recentLocations.push(endLocation);
         }
+        List<Option> startOptionList = recentLocations.stream()
+                .map(location -> {
+                    Option option = buildLocationOptionForInput(location);
+                    option.setDisabled(endLocation != null && endLocation.getId().equals(location.getId()));
+                    if (startLocation != null && location.getId().equals(startLocation.getId()))
+                        model.addAttribute("startInputText", option.getDisplay());
+                    return option;
+                }).toList();
+        List<Option> endOptionList =  recentLocations.stream()
+                .map(location -> {
+                    Option option = buildLocationOptionForInput(location);
+                    option.setDisabled(startLocation != null && startLocation.getId().equals(location.getId()));
+                    if (endLocation != null && location.getId().equals(endLocation.getId()))
+                        model.addAttribute("endInputText", option.getDisplay());
+                    return option;
+                }).toList();
+
+        model.addAttribute("startOptionList", startOptionList);
+        model.addAttribute("endOptionList", endOptionList);
         model.addAttribute("mapHidden",mapHidden);
         return "fragments/tab :: trips-tab";
     }
@@ -211,7 +222,6 @@ public class TripsController {
     public String updateReview(Model model, Boolean isStart, String sourceId) {
         Location location = null;
         if (StringUtils.isNotBlank(sourceId)) {
-            Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
             try {
                 location = locationServiceAPI.getLocation(source, sourceId);
             } catch (ResponseStatusException e) {
@@ -230,7 +240,7 @@ public class TripsController {
             recentLocations.push(location);
         }
         model.addAttribute("isStart",isStart);
-        List<Option> nearbyAirportOptionList = resolveNearbyAirportOptionList(location,null);
+        List<Option> nearbyAirportOptionList = resolveNearbyAirportOptionList(location);
         model.addAttribute("nearbyAirportOptionList",nearbyAirportOptionList);
         AirportCodes airportCodes = new AirportCodes();
         if (location!= null) airportCodes.setCodes(location.getAirports());
@@ -251,7 +261,6 @@ public class TripsController {
                                  String airportCode,String sourceId) {
         if (voyagerService.isValidIataCode(airportCode) && !airportCodes.getCodes().contains(airportCode))
             airportCodes.getCodes().add(airportCode);
-        Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
         Location location = locationServiceAPI.getLocation(source,sourceId);
         LocationPatch locationPatch = LocationPatch.builder().airports(airportCodes.getCodes()).build();
         locationServiceAPI.patchLocation(location.getId(),locationPatch);
@@ -264,7 +273,6 @@ public class TripsController {
     public String removeAirportCode(Model model, Boolean isStart, @ModelAttribute AirportCodes airportCodes,
                                     String airportCode, String sourceId) {
         airportCodes.getCodes().remove(airportCode);
-        Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
         Location location = locationServiceAPI.getLocation(source,sourceId);
         LocationPatch locationPatch = LocationPatch.builder().airports(airportCodes.getCodes()).build();
         locationServiceAPI.patchLocation(location.getId(),locationPatch);
@@ -397,13 +405,11 @@ public class TripsController {
                 .toList();
     }
 
-    private List<Option> resolveNearbyAirportOptionList(Location location, Airline airline) {
+    private List<Option> resolveNearbyAirportOptionList(Location location) {
         if (location == null) return null;
         Double longitude = location.getLongitude();
         Double latitude = location.getLatitude();
-        List<Airport> nearbyAirportList;
-        if (airline != null) nearbyAirportList = voyagerService.nearbyAirports(latitude,longitude,5,airline);
-        else nearbyAirportList = voyagerService.nearbyAirportsAllActiveAirlines(latitude,longitude,5);
+        List<Airport> nearbyAirportList = airportServiceAPI.nearbyAirports(latitude,longitude,5);
         return nearbyAirportList.stream().map(nearbyAirport -> {
             Option option = buildAirportOptionForInput(nearbyAirport);
             option.setDisabled(location.getAirports().contains(nearbyAirport.getIata()));

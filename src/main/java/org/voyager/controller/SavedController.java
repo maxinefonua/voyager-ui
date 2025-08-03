@@ -20,6 +20,7 @@ import org.voyager.model.location.Status;
 import org.voyager.service.VoyagerService;
 import org.voyager.service.impl.CountryServiceAPI;
 import org.voyager.service.impl.LocationServiceAPI;
+import org.voyager.service.impl.SearchServiceAPI;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,6 +33,7 @@ public class SavedController {
     private static final Logger LOGGER = LoggerFactory.getLogger(SavedController.class);
     private static CountryServiceAPI countryServiceAPI;
     private static LocationServiceAPI locationServiceAPI;
+    private static SearchServiceAPI searchServiceAPI;
     private Source source;
 
     @Autowired
@@ -41,7 +43,8 @@ public class SavedController {
     public void init() {
         countryServiceAPI = voyagerService.getCountryServiceAPI();
         locationServiceAPI = voyagerService.getLocationServiceAPI();
-        source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
+        searchServiceAPI = voyagerService.getSearchServiceAPI();
+        source = searchServiceAPI.getSource();
     }
 
     void addDefaultAttributes(Model model) {
@@ -80,7 +83,6 @@ public class SavedController {
     public String getSavedLocations(Model model,@ModelAttribute LocationFilter locationFilter) {
         List<List<Country>> continentCountryList = new ArrayList<>();
         List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
-        Source source = Source.valueOf(voyagerService.lookupAttribution().getName().toUpperCase());
         for (Continent continent : Continent.values()) {
             List<String> countryCodes = new ArrayList<>();
             List<Country> countryList = new ArrayList<>();

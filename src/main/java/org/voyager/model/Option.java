@@ -2,11 +2,12 @@ package org.voyager.model;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder @Data
+@Builder @Data @ToString
 public class Option {
     Double longitude;
     Double latitude;

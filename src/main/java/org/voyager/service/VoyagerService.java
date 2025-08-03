@@ -16,10 +16,8 @@ import org.voyager.model.route.Route;
 import org.voyager.service.impl.*;
 
 import java.util.List;
-import java.util.Map;
 
 public interface VoyagerService {
-    SearchResult<ResultSearch> lookup(String query, int skipRows, int limit);
     SearchResult<ResultDetails> lookupWithDetails(String query, int skipRows, int limit);
     LookupAttribution lookupAttribution();
     List<Airport> nearbyAirports(double latitude, double longitude, int limit,AirportType type);

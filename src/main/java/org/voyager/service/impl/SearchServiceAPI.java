@@ -1,11 +1,12 @@
 package org.voyager.service.impl;
 
-import io.vavr.control.Either;
-import org.voyager.error.ServiceError;
+import org.voyager.model.location.Source;
 import org.voyager.model.response.SearchResult;
+import org.voyager.model.result.LookupAttribution;
 import org.voyager.model.result.ResultSearch;
 import org.voyager.model.result.ResultSearchFull;
 import org.voyager.service.SearchService;
+
 
 import static org.voyager.service.impl.VoyagerServiceImpl.unwrapEither;
 
@@ -21,5 +22,13 @@ public class SearchServiceAPI {
 
     public ResultSearchFull fetchResultSearchFull(String sourceId) {
         return unwrapEither(searchService.fetchResultSearchFull(sourceId));
+    }
+
+    public LookupAttribution getLookupAttribution() {
+        return unwrapEither(searchService.attribution());
+    }
+
+    public Source getSource() {
+        return Source.valueOf(unwrapEither(searchService.attribution()).getName().toUpperCase());
     }
 }

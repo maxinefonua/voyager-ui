@@ -83,11 +83,6 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
-    public SearchResult<ResultSearch> lookup(String query, int skipRows, int limit) {
-        return fetchSearchResults(query,skipRows,limit);
-    }
-
-    @Override
     public SearchResult<ResultDetails> lookupWithDetails(String query, int skipRows, int limit) {
         return fetchSearchResultsWithDetails(query,skipRows,limit);
     }

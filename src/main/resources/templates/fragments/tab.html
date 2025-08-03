@@ -82,6 +82,6 @@
     <div th:replace="~{fragments/search :: lookupContainer}"></div>
 </div>
 <div th:fragment="trips-tab" class="container mt-2">
-    <div th:replace="~{fragments/trips :: trips}"></div>
+    <div th:replace="~{fragments/trips :: trips(startOptionList=${startOptionList},startInputText=${startInputText},startInputValue=${startInputValue},endOptionList=${endOptionList},endInputText=${endInputText},endInputValue=${endInputValue})}"></div>
 </div>
 </html>

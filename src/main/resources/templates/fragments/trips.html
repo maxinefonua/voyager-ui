@@ -70,7 +70,7 @@
 </nav>
 
 <!--TRIPS MAIN PAGE-->
-<div th:fragment="trips" class="container"
+<div th:fragment="trips(startOptionList,startInputText,startInputValue,endOptionList,endInputText,endInputValue)" class="container"
      hx-on::after-request="dispatchInput()">
     <div class="row justify-content-center">
         <div class="col-1 col-md-auto p-0" style="width:40px"
@@ -146,15 +146,13 @@
            hx-get="/update-review"
            hx-swap="outerHTML transition:true"
            name="sourceId"
-           th:oninput="'filterLocationOption('+${isStart}+',this)'"
+           hx-on::after-request="console.log('after-request called')"
            th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
            hx-trigger="input changed"
            th:hx-target="${isStart}?'#include-airports-start':'#include-airports-end'"
            class="input-group-text">
     <datalist th:id="${isStart}?'input-start-options':'input-end-options'">
-        <option th:each="option,iter : ${optionList}"
-                th:value="${option.display}"
-                th:data-value="${option.value}"></option>
+        <option th:replace="~{fragments/options :: location-input-options(optionList=${optionList})}"></option>
     </datalist>
     <input th:id="${isStart}?'start-input-text':'end-input-text'"
            class="form-control"
