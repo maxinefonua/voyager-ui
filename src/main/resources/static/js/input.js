@@ -119,18 +119,17 @@ function reverseTrip(startTextElemId,startValueElemId,endTextElemId,endValueElem
     reverseMarkers();
 }
 
-function filterLocationOption(isStart,filterInputValueElem) {
-    var datalistElem;
-    if (isStart) datalistElem = document.getElementById('input-end-options');
-    else datalistElem = document.getElementById('input-start-options');
-
-    if (filterInputValueElem.length > 0) {
-        const matchingLocation = Array.from(datalistElem.options)
-            .find(option => option.dataset.value === filterInputValueElem.value);
-        if (matchingLocation) matchingLocation.disabled = true;
-    } else {
-        Array.from(datalistElem.options).forEach(option => option.disabled = false);
-    }
+function filterLocationOption(isStart,excludeSourceId) {
+    var oppositeDatalistElem;
+    if (isStart) oppositeDatalistElem = document.getElementById('input-end-options');
+    else oppositeDatalistElem = document.getElementById('input-start-options');
+    var excludeOption = null;
+    Array.from(oppositeDatalistElem.options)
+        .forEach(option => {
+            if (option.dataset.value === excludeSourceId) excludeOption = option;
+            else option.disabled = false;
+        });
+    if (excludeOption) excludeOption.disabled = true;
 }
 
 function includeAirport(includeButtonElem,inputElemId) {

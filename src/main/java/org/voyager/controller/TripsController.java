@@ -64,14 +64,13 @@ public class TripsController {
     }
 
     void addDefaultAttributes(Model model) {
-        Long before = System.currentTimeMillis();
-        recentLocations.addAll(locationServiceAPI.getLocations(10));
-        Long duration = System.currentTimeMillis() - before;
-        LOGGER.info(String.format("locationServiceAPI getLocations returned after %d ms",duration));
+        if (recentLocations.isEmpty())
+            recentLocations.addAll(locationServiceAPI.getLocations(10));
         List<Option> optionList = recentLocations.stream()
                 .map(this::buildLocationOptionForInput)
                 .toList();
         model.addAttribute("startOptionList", optionList);
+        model.addAttribute("endOptionList", optionList);
     }
 
     @GetMapping("/exclude-route")
@@ -164,40 +163,27 @@ public class TripsController {
 
     @GetMapping("/trips")
     public String getTrips(Model model, Integer endLocationId, Integer startLocationId, Boolean mapHidden) {
-        if (recentLocations.isEmpty()) {
-            recentLocations.addAll(locationServiceAPI.getLocations(10));
-        }
+        if (recentLocations.isEmpty()) recentLocations.addAll(locationServiceAPI.getLocations(10));
         Location startLocation = startLocationId == null ? null : locationServiceAPI.getLocation(startLocationId);
         Location endLocation = endLocationId == null ? null : locationServiceAPI.getLocation(endLocationId);
         if (startLocation != null) {
             if (recentLocations.contains(startLocation)) recentLocations.remove(startLocation);
             else recentLocations.removeLast();
             recentLocations.push(startLocation);
+            Option startOption = buildLocationOptionForInput(startLocation);
+            model.addAttribute("startInputText", startOption.getDisplay());
         }
         if (endLocation != null) {
             if (recentLocations.contains(endLocation)) recentLocations.remove(endLocation);
             else recentLocations.removeLast();
             recentLocations.push(endLocation);
+            Option endOption = buildLocationOptionForInput(endLocation);
+            model.addAttribute("endInputText", endOption.getDisplay());
         }
-        List<Option> startOptionList = recentLocations.stream()
-                .map(location -> {
-                    Option option = buildLocationOptionForInput(location);
-                    option.setDisabled(endLocation != null && endLocation.getId().equals(location.getId()));
-                    if (startLocation != null && location.getId().equals(startLocation.getId()))
-                        model.addAttribute("startInputText", option.getDisplay());
-                    return option;
-                }).toList();
-        List<Option> endOptionList =  recentLocations.stream()
-                .map(location -> {
-                    Option option = buildLocationOptionForInput(location);
-                    option.setDisabled(startLocation != null && startLocation.getId().equals(location.getId()));
-                    if (endLocation != null && location.getId().equals(endLocation.getId()))
-                        model.addAttribute("endInputText", option.getDisplay());
-                    return option;
-                }).toList();
-
-        model.addAttribute("startOptionList", startOptionList);
-        model.addAttribute("endOptionList", endOptionList);
+        List<Option> optionList = recentLocations.stream()
+                .map(this::buildLocationOptionForInput).toList();
+        model.addAttribute("startOptionList", optionList);
+        model.addAttribute("endOptionList", optionList);
         model.addAttribute("mapHidden",mapHidden);
         return "fragments/tab :: trips-tab";
     }

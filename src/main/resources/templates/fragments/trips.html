@@ -146,7 +146,7 @@
            hx-get="/update-review"
            hx-swap="outerHTML transition:true"
            name="sourceId"
-           hx-on::after-request="console.log('after-request called')"
+           th:hx-on::after-request="'filterLocationOption('+${isStart}+',this.value)'"
            th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
            hx-trigger="input changed"
            th:hx-target="${isStart}?'#include-airports-start':'#include-airports-end'"
