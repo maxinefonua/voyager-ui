@@ -58,7 +58,6 @@ function updateTabHxVals(tabElemId,isStart,locationId) {
 
 function tripToEndLocation(tabElemId,locationId) {
     const tabElem = document.getElementById(tabElemId);
-    const isHidden = getMapHidden();
     const currentVals = JSON.parse(tabElem.getAttribute('hx-vals') || '{}');
     if (currentVals.startLocationId != null) {
         if (currentVals.startLocationId == locationId) {
@@ -66,7 +65,6 @@ function tripToEndLocation(tabElemId,locationId) {
         }
     }
     currentVals.endLocationId = locationId;
-    currentVals.mapHidden = isHidden;
     tabElem.setAttribute('hx-vals', JSON.stringify(currentVals));
     htmx.process(tabElem); // Re-process for HTMX
     tabElem.click();
