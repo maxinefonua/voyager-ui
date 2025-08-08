@@ -32,7 +32,7 @@ import org.voyager.service.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.voyager.utils.ConstantsUtils.IATA_CODE_REGEX;
+import static org.voyager.utils.ConstantsUtils.ALPHA3_CODE_REGEX;
 
 @Service
 public class VoyagerServiceImpl implements VoyagerService {
@@ -58,6 +58,8 @@ public class VoyagerServiceImpl implements VoyagerService {
     private SearchServiceAPI searchServiceAPI;
     private AirportServiceAPI airportServiceAPI;
     private PathServiceAPI pathServiceAPI;
+    private CurrencyServiceAPI currencyServiceAPI;
+    private LanguageServiceAPI languageServiceAPI;
 
     @PostConstruct
     public void init() {
@@ -98,14 +100,8 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
-    public List<Airport> nearbyAirports(double latitude, double longitude, int limit, Airline airline) {
-        return fetchNearbyAirports(latitude,longitude,limit,airline);
-    }
-
-    @Override
-    public List<Airport> nearbyAirportsAllActiveAirlines(double latitude, double longitude, int limit) {
-        List<Airline> airlines = Arrays.asList(Airline.values());
-        return fetchNearbyAirports(latitude,longitude,limit,airlines);
+    public List<Airport> nearbyAirports(double latitude, double longitude, int limit, List<Airline> airlineList) {
+        return fetchNearbyAirports(latitude,longitude,limit,airlineList);
     }
 
     @Override
@@ -168,13 +164,13 @@ public class VoyagerServiceImpl implements VoyagerService {
 
     @Override
     public Boolean isValidIataCode(String airportCode) {
-        if (StringUtils.isBlank(airportCode) || !airportCode.matches(IATA_CODE_REGEX)) return false;
+        if (StringUtils.isBlank(airportCode) || !airportCode.matches(ALPHA3_CODE_REGEX)) return false;
         return allAirports.stream().map(Airport::getIata).collect(Collectors.toSet()).contains(airportCode);
     }
 
     @Override
     public Boolean isDeltaIataCode(String airportCode) {
-        if (StringUtils.isBlank(airportCode) || !airportCode.matches(IATA_CODE_REGEX)) return false;
+        if (StringUtils.isBlank(airportCode) || !airportCode.matches(ALPHA3_CODE_REGEX)) return false;
         return deltaAirports.stream().map(Airport::getIata).collect(Collectors.toSet()).contains(airportCode);
     }
 
@@ -194,25 +190,8 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
     @Override
-    public PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
-        return fetchPath(originList,destinationList, excludeAirportList,excludeRouteIdList);
-    }
-
-    @Override
     public Route getRoute(Integer id) {
         return fetchRoute(id);
-    }
-
-    @Override
-    public ResultSearchFull getResultSearchFull(String sourceId) {
-        return fetchResultSearchFull(sourceId);
-    }
-
-    @Override
-    public List<Airline> getAirlines(List<String> iataList) {
-        Either<ServiceError,List<Airline>> either = airportService.getAirlines(iataList);
-        if (either.isLeft()) resolveServiceError(either.getLeft());
-        return either.get();
     }
 
     @Override
@@ -243,6 +222,18 @@ public class VoyagerServiceImpl implements VoyagerService {
     public PathServiceAPI getPathServiceAPI() {
         if (pathServiceAPI == null) pathServiceAPI = new PathServiceAPI(voyager.getPathService());
         return pathServiceAPI;
+    }
+
+    @Override
+    public CurrencyServiceAPI getCurrencyServiceAPI() {
+        if (currencyServiceAPI == null) currencyServiceAPI = new CurrencyServiceAPI(voyager.getCurrencyService());
+        return currencyServiceAPI;
+    }
+
+    @Override
+    public LanguageServiceAPI getLanguageServiceAPI() {
+        if (languageServiceAPI == null) languageServiceAPI = new LanguageServiceAPI(voyager.getLanguageService());
+        return languageServiceAPI;
     }
 
     private List<Flight> fetchFlights(Integer routeId, boolean isActive) {
@@ -373,12 +364,6 @@ public class VoyagerServiceImpl implements VoyagerService {
         return either.get();
     }
 
-    private List<Airport> fetchNearbyAirports(double latitude, double longitude, int limit, Airline airline) {
-        Either<ServiceError,List<Airport>> either = airportService.getNearbyAirports(longitude,latitude,limit,airline);
-        if (either.isLeft()) resolveServiceError(either.getLeft());
-        return either.get();
-    }
-
     private List<Airport> fetchNearbyAirports(double latitude, double longitude, int limit, List<Airline> airlineList) {
         Either<ServiceError,List<Airport>> either = airportService.getNearbyAirports(longitude,latitude,limit,airlineList);
         if (either.isLeft()) resolveServiceError(either.getLeft());
@@ -386,8 +371,8 @@ public class VoyagerServiceImpl implements VoyagerService {
     }
 
 
-    private List<Airport> fetchNearbyAirports(double latitude, double longitude, int limit, AirportType type, Airline airline) {
-        Either<ServiceError, List<Airport>> either = airportService.getNearbyAirports(longitude, latitude, limit,type,airline);
+    private List<Airport> fetchNearbyAirports(double latitude, double longitude, int limit, List<AirportType> airportTypeList, List<Airline> airlineList) {
+        Either<ServiceError, List<Airport>> either = airportService.getNearbyAirports(longitude, latitude, limit,airportTypeList,airlineList);
         if (either.isLeft()) resolveServiceError(either.getLeft());
         return either.get();
     }

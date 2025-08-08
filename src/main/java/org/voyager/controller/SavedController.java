@@ -8,24 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.voyager.model.LocationDetails;
+import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.LocationFilter;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.country.Continent;
 import org.voyager.model.country.Country;
+import org.voyager.model.currency.Currency;
+import org.voyager.model.language.Language;
 import org.voyager.model.location.Location;
 import org.voyager.model.location.LocationPatch;
 import org.voyager.model.location.Source;
 import org.voyager.model.location.Status;
 import org.voyager.service.VoyagerService;
-import org.voyager.service.impl.CountryServiceAPI;
-import org.voyager.service.impl.LocationServiceAPI;
-import org.voyager.service.impl.SearchServiceAPI;
+import org.voyager.service.impl.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -34,35 +31,99 @@ public class SavedController {
     private static CountryServiceAPI countryServiceAPI;
     private static LocationServiceAPI locationServiceAPI;
     private static SearchServiceAPI searchServiceAPI;
+    private static CurrencyServiceAPI currencyServiceAPI;
+    private static LanguageServiceAPI languageServiceAPI;
+
+    private static String DEFAULT_BASE_CURRENCY = "USD";
     private Source source;
 
     @Autowired
     private VoyagerService voyagerService;
+
+    @Autowired
+    private TripsController tripsController;
 
     @PostConstruct
     public void init() {
         countryServiceAPI = voyagerService.getCountryServiceAPI();
         locationServiceAPI = voyagerService.getLocationServiceAPI();
         searchServiceAPI = voyagerService.getSearchServiceAPI();
+        currencyServiceAPI = voyagerService.getCurrencyServiceAPI();
+        languageServiceAPI = voyagerService.getLanguageServiceAPI();
         source = searchServiceAPI.getSource();
     }
 
-    void addDefaultAttributes(Model model) {
+    void addDefaultAttributes(Model model,LocationFilter locationFilter) {
         List<List<Country>> continentCountryList = new ArrayList<>();
         List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
         for (Continent continent : Continent.values()) {
             List<Country> countryList = new ArrayList<>();
             List<List<Location>> countryLocationsList = new ArrayList<>();
-            List<Location> continentLocations = locationServiceAPI.getLocations(source,continent,List.of(Status.SAVED));
+            List<Location> continentLocations = locationServiceAPI.getLocations(source,continent,
+                    locationFilter.getIncludeArchived()?List.of(Status.SAVED,Status.ARCHIVED):List.of(Status.SAVED));
+
             Map<String,List<Location>> locationListGroupedByCountryCode = continentLocations.stream()
                             .collect(Collectors.groupingBy(Location::getCountryCode));
             locationListGroupedByCountryCode.forEach((countryCode,countryLocations) -> {
                 Country country = countryServiceAPI.getCountry(countryCode);
+                Currency countryCurrency = currencyServiceAPI.getCurrency(country.getCurrencyCode());
+                List<String> languageNames = country.getLanguages().stream().map(languageCode -> {
+                    String[] tokens = languageCode.split("-");
+                    StringJoiner lang = new StringJoiner(" ");
+                    if (tokens.length > 1) {
+                        if (tokens[1].length() != 2) {
+                            LOGGER.error(String.format("Country %s includes a language with country code '%s'",
+                                    country.getName(),tokens[1]));
+                            lang.add(tokens[1]);
+                        } else {
+                            if (!(tokens[1].equals(tokens[0].toUpperCase()))) {
+                                Country langCountry = countryServiceAPI.getCountry(tokens[1]);
+                                lang.add(langCountry.getName());
+                            }
+                        }
+                    }
+                    if (tokens[0].length() == 2) {
+                        Language language = languageServiceAPI.getLanguageByIso3691(tokens[0]);
+                        lang.add(language.getName());
+                    } else if (tokens[0].length() == 3) {
+                        Language language;
+                        try {
+                            language = languageServiceAPI.getLanguageByIso3692(tokens[0]);
+                        } catch (ResponseStatusException e) {
+                            language = languageServiceAPI.getLanguageByIso3693(tokens[0]);
+                        }
+                        lang.add(language.getName());
+                    } else {
+                        LOGGER.error(String.format("Country %s includes a language code '%s'",
+                                country.getName(),tokens[0]));
+                        lang.add(tokens[0]);
+                    }
+                    return lang.toString();
+                }).toList();
+                country.setLanguages(languageNames);
+
+                String formattedCurrency;
+                if (country.getCurrencyCode().equals(DEFAULT_BASE_CURRENCY)) {
+                    formattedCurrency = String.format("%s (%s)",countryCurrency.getName(),countryCurrency.getCode());
+                } else {
+                    Currency baseCurrency = currencyServiceAPI.getCurrency(DEFAULT_BASE_CURRENCY);
+                    if (countryCurrency.getSymbol().equals(countryCurrency.getCode()))
+                        formattedCurrency = String.format("%s, Exchange Rate: %s %.2f to %s1.00",
+                            countryCurrency.getName(),countryCurrency.getSymbol(),
+                            countryCurrency.getUsdRate(),baseCurrency.getSymbol());
+                    else
+                        formattedCurrency = String.format("%s (%s), Exchange Rate: %s%.2f to %s1.00",
+                            countryCurrency.getName(),countryCurrency.getCode(),countryCurrency.getSymbol(),
+                            countryCurrency.getUsdRate(),baseCurrency.getSymbol());
+                }
+                country.setCurrencyCode(formattedCurrency);
                 countryList.add(country);
                 countryLocations.sort(Comparator.comparing(Location::getName));
-                countryLocationsList.add(countryLocations);
             });
+
             countryList.sort(Comparator.comparing(Country::getName));
+            for (Country country : countryList)
+                countryLocationsList.add(locationListGroupedByCountryCode.get(country.getCode()));
             continentCountryList.add(countryList);
             continentCountryLocationsList.add(countryLocationsList);
         }
@@ -74,41 +135,13 @@ public class SavedController {
 
     @GetMapping("/saved")
     public String getSaved(Model model) {
-        addDefaultAttributes(model);
-        model.addAttribute("locationFilter",new LocationFilter());
+        addDefaultAttributes(model,new LocationFilter());
         return "fragments/tab :: saved-tab";
     }
 
     @GetMapping("/saved-locations")
     public String getSavedLocations(Model model,@ModelAttribute LocationFilter locationFilter) {
-        List<List<Country>> continentCountryList = new ArrayList<>();
-        List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
-        for (Continent continent : Continent.values()) {
-            List<String> countryCodes = new ArrayList<>();
-            List<Country> countryList = new ArrayList<>();
-            List<List<Location>> countryLocationsList = new ArrayList<>();
-            List<Location> continentLocations = locationServiceAPI.getLocations(source,continent,
-                    locationFilter.getIncludeArchived()?List.of(Status.SAVED,Status.ARCHIVED):List.of(Status.SAVED));
-            continentLocations.forEach(location -> {
-                String countryCode = location.getCountryCode();
-                if (countryCodes.contains(countryCode)) {
-                    countryLocationsList.get(countryCodes.indexOf(countryCode)).add(location);
-                } else {
-                    Country country = countryServiceAPI.getCountry(countryCode);
-                    countryList.add(country);
-                    countryList.sort(Comparator.comparing(Country::getName));
-                    int insertIndex = countryList.indexOf(country);
-                    countryCodes.add(insertIndex,countryCode);
-                    countryLocationsList.add(insertIndex,new ArrayList<>(List.of(location)));
-                }
-            });
-            continentCountryList.add(countryList);
-            continentCountryLocationsList.add(countryLocationsList);
-        }
-        model.addAttribute("locationFilter",locationFilter);
-        model.addAttribute("continentList", Continent.values());
-        model.addAttribute("continentCountryList", continentCountryList);
-        model.addAttribute("continentCountryLocationsList", continentCountryLocationsList);
+        addDefaultAttributes(model, locationFilter);
         return "fragments/saved :: main-saved-page";
     }
 
@@ -162,8 +195,10 @@ public class SavedController {
                                        @NonNull LocationFilter locationFilter) {
         if (status.equals(Status.DELETE)) {
             Boolean deleted = locationServiceAPI.deleteLocation(locationId);
-            if (deleted)
-                LOGGER.info(String.format("successfully deleted location with id: %d",locationId));
+            if (deleted) {
+                LOGGER.info(String.format("successfully deleted location with id: %d", locationId));
+                tripsController.removeDeletedLocationFromRecents(locationId);
+            }
             else LOGGER.error(String.format("error deleting location with id: %d",locationId));
         } else {
             Location location = locationServiceAPI.getLocation(locationId);

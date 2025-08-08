@@ -56,6 +56,19 @@ function updateTabHxVals(tabElemId,isStart,locationId) {
     htmx.process(tabElem); // Re-process for HTMX
 }
 
+function updateTabHxValsLocationDelete(tabElemId,locationId) {
+    const tabElem = document.getElementById(tabElemId);
+    const currentVals = JSON.parse(tabElem.getAttribute('hx-vals') || '{}');
+    if (currentVals.startLocationId) {
+        if (locationId == currentVals.startLocationId) delete currentVals.startLocationId;
+    }
+    if (currentVals.endLocationId) {
+        if (locationId == currentVals.endLocationId) delete currentVals.endLocationId;
+    }
+    tabElem.setAttribute('hx-vals', JSON.stringify(currentVals));
+    htmx.process(tabElem); // Re-process for HTMX
+}
+
 function tripToEndLocation(tabElemId,locationId) {
     const tabElem = document.getElementById(tabElemId);
     const currentVals = JSON.parse(tabElem.getAttribute('hx-vals') || '{}');

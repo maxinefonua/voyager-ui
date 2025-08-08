@@ -111,6 +111,7 @@
         hx-get="/location-status"
         hx-include="#includeArchived"
         hx-swap="outerHTML transition:true"
+        th:hx-on::after-request="'updateTabHxValsLocationDelete(\'trips-tab-link\',' + ${locationId} + ')'"
         name="status"
         onclick="event.stopPropagation()"
         th:value="${locationStatusName == 'SAVED'?'ARCHIVED':(locationStatusName == 'ARCHIVED')?'SAVED':'DELETE'}"

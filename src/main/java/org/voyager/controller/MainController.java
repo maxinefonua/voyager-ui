@@ -52,7 +52,7 @@ public class MainController {
                 tripsController.addDefaultAttributes(model);
             }
             case SAVED -> {
-                savedController.addDefaultAttributes(model);
+                savedController.addDefaultAttributes(model, new LocationFilter());
             }
         }
         return "index";
@@ -105,7 +105,7 @@ public class MainController {
     @Cacheable("closerAirportsCache")
     public String closerAirports(Model model, @RequestParam Double latitude, @RequestParam Double longitude, @RequestParam Integer iterIndex) {
         LOGGER.debug("closerAirports called with latitude: " + latitude + ", longitude: " + longitude + ", iterIndex: " + iterIndex);
-        List<Airport> nearbyDeltaAirports = voyagerService.nearbyAirports(latitude,longitude,5,Airline.DELTA);
+        List<Airport> nearbyDeltaAirports = voyagerService.nearbyAirports(latitude,longitude,5,List.of(Airline.DELTA));
         List<Airport> civilList = new ArrayList<>(voyagerService.nearbyAirports(latitude,longitude,10,AirportType.CIVIL));
         Set<String> airlineCodes = nearbyDeltaAirports.stream().map(Airport::getIata).collect(Collectors.toSet());
         List<Airport> filtered = civilList.stream().filter(airport -> !airlineCodes.contains(airport.getIata())).toList();

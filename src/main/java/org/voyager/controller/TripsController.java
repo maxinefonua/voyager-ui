@@ -47,6 +47,7 @@ public class TripsController {
     private static PathServiceAPI pathServiceAPI;
     private Source source;
 
+    // TODO: handle delete location removal correctly - duplicates showing up in recent locations
     private Deque<Location> recentLocations = new ArrayDeque<>();
 
 
@@ -61,6 +62,12 @@ public class TripsController {
         airportServiceAPI = voyagerService.getAirportServiceAPI();
         pathServiceAPI = voyagerService.getPathServiceAPI();
         source = searchServiceAPI.getSource();
+    }
+
+    void removeDeletedLocationFromRecents(Integer deletedLocationId) {
+        Optional<Location> optionalLocation = recentLocations.stream()
+                .filter(location -> location.getId().equals(deletedLocationId)).findAny();
+        optionalLocation.ifPresent(location -> recentLocations.remove(location));
     }
 
     void addDefaultAttributes(Model model) {
@@ -108,8 +115,8 @@ public class TripsController {
             startAirportCodes = startLocation.getAirports();
             endAirportCodes = endLocation.getAirports();
             if (!startAirportCodes.isEmpty() && !endAirportCodes.isEmpty()) {
-                List<Airline> airlineListStart = voyagerService.getAirlines(startAirportCodes);
-                List<Airline> airlineListEnd = voyagerService.getAirlines(endAirportCodes);
+                List<Airline> airlineListStart = airportServiceAPI.getAirlines(startAirportCodes);
+                List<Airline> airlineListEnd = airportServiceAPI.getAirlines(endAirportCodes);
                 List<Option> airlineOptionList = Arrays.stream(Airline.values())
                         .sorted(Comparator.comparing(Airline::getDisplayText))
                         .map(airline -> buildAirlineOptionForSelectFiltered(airline,
@@ -163,6 +170,7 @@ public class TripsController {
 
     @GetMapping("/trips")
     public String getTrips(Model model, Integer endLocationId, Integer startLocationId, Boolean mapHidden) {
+        // TODO: when location deleted, how to update this recent locations?
         if (recentLocations.isEmpty()) recentLocations.addAll(locationServiceAPI.getLocations(10));
         Location startLocation = startLocationId == null ? null : locationServiceAPI.getLocation(startLocationId);
         Location endLocation = endLocationId == null ? null : locationServiceAPI.getLocation(endLocationId);
@@ -218,19 +226,15 @@ public class TripsController {
                 LocationForm locationForm = LocationMapperUtils.toLocationForm(resultSearchFull);
                 location = locationServiceAPI.addLocation(locationForm);
             }
-            if (recentLocations.contains(location)) {
-                recentLocations.remove(location);
-            } else {
-                recentLocations.removeLast();
-            }
-            recentLocations.push(location);
+            if (!recentLocations.contains(location))
+                recentLocations.push(location);
         }
         model.addAttribute("isStart",isStart);
         List<Option> nearbyAirportOptionList = resolveNearbyAirportOptionList(location);
         model.addAttribute("nearbyAirportOptionList",nearbyAirportOptionList);
-        AirportCodes airportCodes = new AirportCodes();
-        if (location!= null) airportCodes.setCodes(location.getAirports());
-        model.addAttribute("airportCodes",airportCodes);
+        AirportCodes newAirportCodes = new AirportCodes();
+        if (location!= null) newAirportCodes.setCodes(location.getAirports());
+        model.addAttribute("airportCodes",newAirportCodes);
         model.addAttribute("location",location);
         return "fragments/trips :: pin-airports";
     }
@@ -395,7 +399,7 @@ public class TripsController {
         if (location == null) return null;
         Double longitude = location.getLongitude();
         Double latitude = location.getLatitude();
-        List<Airport> nearbyAirportList = airportServiceAPI.nearbyAirports(latitude,longitude,5);
+        List<Airport> nearbyAirportList = airportServiceAPI.nearbyAirports(latitude,longitude,5,Arrays.asList(Airline.values()));
         return nearbyAirportList.stream().map(nearbyAirport -> {
             Option option = buildAirportOptionForInput(nearbyAirport);
             option.setDisabled(location.getAirports().contains(nearbyAirport.getIata()));

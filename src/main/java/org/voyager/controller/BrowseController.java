@@ -87,7 +87,7 @@ public class BrowseController {
         LOGGER.debug("nearbyAirports called with airportCodes: "+ airportCodes +" latitude: " + latitude + ", longitude: " + longitude);
         List<Airport> nearbyAirports = new ArrayList<>();
         switch (airportFilter) {
-            case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, Airline.DELTA));
+            case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, List.of(Airline.DELTA)));
             case CIVIL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, AirportType.CIVIL));
             case MILITARY -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.MILITARY));
             case ALL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.CIVIL));
@@ -109,7 +109,7 @@ public class BrowseController {
         double longitude = location.getLongitude();
         List<Airport> nearbyAirports = new ArrayList<>();
         switch (airportFilter) {
-            case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, Airline.DELTA));
+            case DELTA -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, List.of(Airline.DELTA)));
             case CIVIL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5, AirportType.CIVIL));
             case MILITARY -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.MILITARY));
             case ALL -> nearbyAirports.addAll(voyagerService.nearbyAirports(latitude,longitude,5,AirportType.CIVIL));

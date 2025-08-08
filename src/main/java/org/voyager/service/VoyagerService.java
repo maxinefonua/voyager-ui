@@ -8,7 +8,6 @@ import org.voyager.model.flight.Flight;
 import org.voyager.model.location.*;
 import org.voyager.model.response.SearchResult;
 import org.voyager.model.result.LookupAttribution;
-import org.voyager.model.result.ResultSearch;
 import org.voyager.model.result.ResultSearchFull;
 import org.voyager.model.route.PathAirline;
 import org.voyager.model.route.PathResponse;
@@ -21,8 +20,7 @@ public interface VoyagerService {
     SearchResult<ResultDetails> lookupWithDetails(String query, int skipRows, int limit);
     LookupAttribution lookupAttribution();
     List<Airport> nearbyAirports(double latitude, double longitude, int limit,AirportType type);
-    List<Airport> nearbyAirports(double latitude, double longitude, int limit,Airline airline);
-    List<Airport> nearbyAirportsAllActiveAirlines(double latitude, double longitude, int limit);
+    List<Airport> nearbyAirports(double latitude, double longitude, int limit,List<Airline> airlineList);
     List<Location> getLocations();
     List<Location> getLocations(Status status);
     Location getLocation(Integer id);
@@ -39,15 +37,12 @@ public interface VoyagerService {
     Airport getAirport(String iata);
     PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList);
     PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline);
-    PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList);
     Route getRoute(Integer id);
-    ResultSearchFull getResultSearchFull(String sourceId);
-
-    List<Airline> getAirlines(List<String> iataList);
-
     CountryServiceAPI getCountryServiceAPI();
     LocationServiceAPI getLocationServiceAPI();
     SearchServiceAPI getSearchServiceAPI();
     AirportServiceAPI getAirportServiceAPI();
     PathServiceAPI getPathServiceAPI();
+    CurrencyServiceAPI getCurrencyServiceAPI();
+    LanguageServiceAPI getLanguageServiceAPI();
 }
