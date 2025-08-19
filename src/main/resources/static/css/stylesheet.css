@@ -123,14 +123,6 @@ a.list-group-item-action.active .scroll-nav-icon {
     display: none !important;
 }
 
-#minRange {
-    transform: translateX(-5%);
-}
-
-#maxRange {
-    transform: translateX(5%);
-}
-
 .range-slider input[type="range"]::-moz-range-thumb {
     pointer-events: auto;
     -moz-appearance: none;
@@ -145,5 +137,5 @@ a.list-group-item-action.active .scroll-nav-icon {
 .range-slider {
     position: relative;
     height: auto;
-    width: 40px;
+    width: 2em;
 }

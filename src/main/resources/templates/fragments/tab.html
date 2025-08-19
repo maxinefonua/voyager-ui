@@ -56,9 +56,9 @@
     </li>
 </ul>
 <div th:fragment="saved-tab" class="container mt-2">
-    <div class="row justify-content-center">
+    <div class="d-grid gap-0 gap-lg-4 d-lg-flex mb-2 justify-content-start">
         <div class="col-auto">
-            <form class="form-check form-switch mb-2"
+            <form class="form-check form-switch"
                   th:object="${locationFilter}">
                 <label class="form-check-label" for="includeArchived">Include Archived</label>
                 <input hx-get="/saved-locations"
@@ -75,8 +75,8 @@
                        th:checked="${locationFilter.includeArchived}">
             </form>
         </div>
-        <div class="col">
-            <div class="row">
+        <div class="col-auto">
+            <div class="d-flex gap-2">
                 <div class="col-auto">
                     <div class="range-slider">
                         <div class="track"></div>
@@ -93,7 +93,7 @@
                                id="maxRange">
                     </div>
                 </div>
-                <span class="col-auto form-label ps-0">Currency Exchange Range</span>
+                <span class="col-auto">Currency Exchange Range</span>
             </div>
         </div>
     </div>

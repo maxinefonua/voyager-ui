@@ -6,7 +6,7 @@
 <div th:fragment="saved-locations"
      id="savedLocations"
      class="accordion list-group">
-    <form class="form-check form-switch mb-4 mt-2"
+    <form class="form-check form-switch mt-2"
          th:object="${locationFilter}">
         <input hx-get="/saved-locations"
                hx-target="#saved-locations-container"
