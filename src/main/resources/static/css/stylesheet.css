@@ -80,3 +80,70 @@ a.list-group-item-action.active .scroll-nav-icon {
 .btn-outline-danger svg path {
   fill: #dc3545;
 }
+
+.track {
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    background: #dee2e6;
+    top: 50%;
+    transform: translateY(195%);
+    border-radius: 3px;
+}
+
+.progress {
+    position: absolute;
+    height: 5px;
+    background: #0d6efd;
+    top: 50%;
+    transform: translateY(195%);
+    border-radius: 3px;
+}
+
+.range-slider input[type="range"] {
+    position: absolute;
+    width: 100%;
+    pointer-events: none;
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+.range-slider input[type="range"]::-webkit-slider-thumb {
+    pointer-events: auto;
+    -webkit-appearance: none;
+    background: #0d6efd;
+    height: 12px;
+    width: 12px;
+    transform: translateY(50%);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.tooltip-arrow {
+    display: none !important;
+}
+
+#minRange {
+    transform: translateX(-5%);
+}
+
+#maxRange {
+    transform: translateX(5%);
+}
+
+.range-slider input[type="range"]::-moz-range-thumb {
+    pointer-events: auto;
+    -moz-appearance: none;
+    background: #0d6efd;
+    height: 12px;
+    width: 12px;
+    transform: translateY(50%);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.range-slider {
+    position: relative;
+    height: auto;
+    width: 40px;
+}

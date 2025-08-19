@@ -56,6 +56,8 @@ public class SavedController {
     void addDefaultAttributes(Model model,LocationFilter locationFilter) {
         List<List<Country>> continentCountryList = new ArrayList<>();
         List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
+        Double minExchangeRateValue = Double.MAX_VALUE;
+        Double maxExchangeRateValue = Double.MIN_VALUE;
         for (Continent continent : Continent.values()) {
             List<Country> countryList = new ArrayList<>();
             List<List<Location>> countryLocationsList = new ArrayList<>();
@@ -64,7 +66,9 @@ public class SavedController {
 
             Map<String,List<Location>> locationListGroupedByCountryCode = continentLocations.stream()
                             .collect(Collectors.groupingBy(Location::getCountryCode));
-            locationListGroupedByCountryCode.forEach((countryCode,countryLocations) -> {
+            for (Map.Entry<String,List<Location>> entry : locationListGroupedByCountryCode.entrySet()) {
+                String countryCode = entry.getKey();
+                List<Location> countryLocations = entry.getValue();
                 Country country = countryServiceAPI.getCountry(countryCode);
                 Currency countryCurrency = currencyServiceAPI.getCurrency(country.getCurrencyCode());
                 List<String> languageNames = country.getLanguages().stream().map(languageCode -> {
@@ -103,10 +107,14 @@ public class SavedController {
                 country.setLanguages(languageNames);
 
                 String formattedCurrency;
+                Double exchangeRate;
+
                 if (country.getCurrencyCode().equals(DEFAULT_BASE_CURRENCY)) {
+                    exchangeRate = 1.0;
                     formattedCurrency = String.format("%s (%s)",countryCurrency.getName(),countryCurrency.getCode());
                 } else {
                     Currency baseCurrency = currencyServiceAPI.getCurrency(DEFAULT_BASE_CURRENCY);
+                    exchangeRate = countryCurrency.getUsdRate();
                     if (countryCurrency.getSymbol().equals(countryCurrency.getCode()))
                         formattedCurrency = String.format("%s, Exchange Rate: %s %.2f to %s1.00",
                             countryCurrency.getName(),countryCurrency.getSymbol(),
@@ -116,17 +124,24 @@ public class SavedController {
                             countryCurrency.getName(),countryCurrency.getCode(),countryCurrency.getSymbol(),
                             countryCurrency.getUsdRate(),baseCurrency.getSymbol());
                 }
+                minExchangeRateValue = Math.min(minExchangeRateValue,exchangeRate);
+                maxExchangeRateValue = Math.max(maxExchangeRateValue,exchangeRate);
+                LOGGER.info("minExchangeRateValue: " + minExchangeRateValue);
+                LOGGER.info("maxExchangeRateValue: " + maxExchangeRateValue);
                 country.setCurrencyCode(formattedCurrency);
                 countryList.add(country);
                 countryLocations.sort(Comparator.comparing(Location::getName));
-            });
+            }
 
             countryList.sort(Comparator.comparing(Country::getName));
+
             for (Country country : countryList)
                 countryLocationsList.add(locationListGroupedByCountryCode.get(country.getCode()));
             continentCountryList.add(countryList);
             continentCountryLocationsList.add(countryLocationsList);
         }
+        model.addAttribute("minExchangeRateValue",Math.min(minExchangeRateValue,1.0));
+        model.addAttribute("maxExchangeRateValue",Math.max(maxExchangeRateValue,0.0));
         model.addAttribute("continentList", Continent.values());
         model.addAttribute("continentCountryList", continentCountryList);
         model.addAttribute("continentCountryLocationsList", continentCountryLocationsList);

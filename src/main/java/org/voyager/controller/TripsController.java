@@ -323,16 +323,17 @@ public class TripsController {
     }
 
     private Option buildAirportOptionForInput(Airport airport) {
+        Country country = countryServiceAPI.getCountry(airport.getCountryCode());
         return Option.builder()
                 .elementName(airport.getIata())
                 .name(airport.getName())
                 .city(airport.getCity())
                 .subdivision(airport.getSubdivision())
-                .country(airport.getCountryCode())
+                .country(country.getName())
                 .longitude(airport.getLongitude())
                 .latitude(airport.getLatitude())
                 .display(String.format("%s | %s, %s of %s", airport.getName(), airport.getCity(),
-                        airport.getSubdivision(), airport.getCountryCode()))
+                        airport.getSubdivision(),country.getName()))
                 .value(airport.getIata()).build();
     }
 

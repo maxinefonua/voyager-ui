@@ -331,3 +331,139 @@ function addPlainAirportMarkerToMapOLD(airportOptionElem) {
         .addTo(map);
     return airportMarker;
 }
+
+document.addEventListener('DOMContentLoaded', sliderFunction());
+
+function sliderFunction() {
+    const minValue = parseFloat(minRange.min);
+    const maxValue = parseFloat(minRange.max);
+    let activeTooltip = null;
+    let isDragging = false;
+    const progress = document.querySelector('.progress');
+    const minGap = (maxValue - minValue) * .1; // Minimum gap between handles
+    const minExchRateTooltip = new bootstrap.Tooltip(minRange, {
+        trigger: 'hover focus touch',
+        placement: 'bottom',
+        offset: [0,15],
+        title: 'Minimum: ' + minRange.value,
+        template: '<div class="tooltip min-exchange-tooltip" role="tooltip">' +
+              '<div class="tooltip-arrow"></div>' +
+              '<div class="tooltip-inner"></div></div>'
+    });
+    const maxExchRateTooltip = new bootstrap.Tooltip(maxRange, {
+        trigger: 'hover focus touch',
+        placement: 'bottom',
+        offset: [0,15],
+        title: 'Maximum: ' + maxRange.value,
+        template: '<div class="tooltip max-exchange-tooltip" role="tooltip">' +
+              '<div class="tooltip-arrow"></div>' +
+              '<div class="tooltip-inner"></div></div>'
+    });
+
+    // Update tooltip text
+    function updateTooltip(isMinimum,newValue) {
+        // Set new title attribute
+        const minVal = parseFloat(newValue).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        // Update the tooltip instance
+        if (isMinimum) {
+            minExchRateTooltip.setContent({ '.tooltip-inner': 'Minimum ' + minVal });
+        } else {
+            maxExchRateTooltip.setContent({ '.tooltip-inner': 'Maximum ' + minVal });
+        }
+    }
+
+    function updateSlider() {
+        // Ensure min doesn't exceed max and vice versa
+        if (parseFloat(maxRange.value) < parseFloat(minRange.value)) {
+            maxRange.value = minRange.value;
+        }
+        if (parseFloat(minRange.value) > parseFloat(maxRange.value)) {
+            minRange.value = maxRange.value;
+        }
+
+        // Update progress bar
+        const max = parseFloat(minRange.max);
+        const minValNum = parseFloat(minRange.value);
+        const maxValNum = parseFloat(maxRange.value);
+
+        progress.style.left = (minValNum / (max+minGap)) * 100 + '%';
+        progress.style.right = 100 - ((maxValNum+minGap)/ (max+minGap)) * 100 + '%';
+    }
+
+    minRange.addEventListener('mouseleave',function() {
+        isDragging = false;
+    });
+
+    minRange.addEventListener('mouseenter',function() {
+        maxExchRateTooltip.hide();
+    });
+
+    maxRange.addEventListener('mouseenter',function() {
+        minExchRateTooltip.hide();
+    });
+
+    document.addEventListener('touchstart', (e) => {
+        const isMinRange = e.target === minRange || minRange.contains(e.target);
+        const isMaxRange = e.target === maxRange || maxRange.contains(e.target);
+
+        if (!isMinRange && !isMaxRange && activeTooltip) {
+            activeTooltip.hide();
+            activeTooltip = null;
+            isDragging = false;
+        }
+    }, { passive: true });
+
+    maxRange.addEventListener('touchstart', () => {
+        minExchRateTooltip.hide();
+        maxExchRateTooltip.show();
+        activeTooltip = maxExchRateTooltip;
+    }, { passive: true });
+
+    minRange.addEventListener('touchstart', () => {
+        maxExchRateTooltip.hide();
+        minExchRateTooltip.show();
+        activeTooltip = minExchRateTooltip;
+    }, { passive: true });
+
+    maxRange.addEventListener('touchend', () => {
+        isDragging = false;
+        activeTooltip.show();
+    }, { passive: true });
+
+    minRange.addEventListener('touchend', () => {
+        isDragging = false;
+        activeTooltip.show();
+    }, { passive: true });
+
+    minRange.addEventListener('input', function() {
+        isDragging = true;
+        const minVal = parseFloat(this.value);
+        const maxVal = parseFloat(maxRange.value);
+
+        if (minVal > maxVal - minGap) {
+            this.value = maxVal - minGap;
+        }
+        updateSlider();
+        updateTooltip(true,this.value);
+    });
+
+    maxRange.addEventListener('input', function() {
+        isDragging = true;
+        const minVal = parseFloat(minRange.value);
+        const maxVal = parseFloat(this.value);
+
+        if (maxVal < minVal + minGap) {
+            this.value = minVal + minGap;
+        }
+        updateSlider();
+        updateTooltip(false,this.value);
+    });
+    // Initialize
+    updateTooltip(true,minRange.value);
+    updateTooltip(false,maxRange.value);
+    updateSlider();
+}

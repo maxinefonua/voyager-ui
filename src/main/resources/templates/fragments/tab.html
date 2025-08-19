@@ -17,7 +17,7 @@
            hx-on::before-request="activate(this)"
            hx-on::after-request="reloadTrips('scrollable-content');dispatchInput();"
            hx-swap="innerHTML">
-            Trips
+            Fly To
         </a>
     </li>
     <li class="nav-item">
@@ -27,9 +27,9 @@
                 hx-get="/saved"
                 hx-target="#tabContent"
                 hx-on::before-request="activate(this)"
-                hx-on::after-request="recenterMap()"
+                hx-on::after-request="recenterMap();sliderFunction()"
                 hx-swap="innerHTML">
-            Saved
+            By Country
         </a>
     </li>
     <li class="nav-item">
@@ -41,7 +41,7 @@
                 hx-on::before-request="activate(this)"
                 hx-on::after-request="recenterMap()"
                 hx-swap="innerHTML">
-            Browse
+            By Location
         </a>
     </li>
     <li class="nav-item ms-3 row align-items-center">
@@ -57,7 +57,7 @@
 </ul>
 <div th:fragment="saved-tab" class="container mt-2">
     <div class="row justify-content-center">
-        <div class="col">
+        <div class="col-auto">
             <form class="form-check form-switch mb-2"
                   th:object="${locationFilter}">
                 <label class="form-check-label" for="includeArchived">Include Archived</label>
@@ -74,6 +74,27 @@
                        th:field="*{includeArchived}"
                        th:checked="${locationFilter.includeArchived}">
             </form>
+        </div>
+        <div class="col">
+            <div class="row">
+                <div class="col-auto">
+                    <div class="range-slider">
+                        <div class="track"></div>
+                        <div class="progress"></div>
+                        <input type="range"
+                               th:min="${minExchangeRateValue}" th:max="${maxExchangeRateValue}"
+                               th:value="${minExchangeRateValue}"
+                               th:step="${(maxExchangeRateValue-minExchangeRateValue) * 0.01}"
+                               id="minRange">
+                        <input type="range"
+                               th:min="${minExchangeRateValue}" th:max="${maxExchangeRateValue}"
+                               th:value="${maxExchangeRateValue}"
+                               th:step="${(maxExchangeRateValue-minExchangeRateValue) * 0.01}"
+                               id="maxRange">
+                    </div>
+                </div>
+                <span class="col-auto form-label ps-0">Currency Exchange Range</span>
+            </div>
         </div>
     </div>
     <div th:replace="~{fragments/saved :: main-saved-page}"></div>
