@@ -22,7 +22,7 @@ import static org.voyager.utils.ConstantsUI.*;
 
 @Controller
 public class MainController {
-    private static final DefaultPage DEFAULT_PAGE = DefaultPage.SAVED;
+    private static final DefaultPage DEFAULT_PAGE = DefaultPage.TRIPS;
 
     @Autowired
     private VoyagerService voyagerService;
@@ -52,7 +52,7 @@ public class MainController {
                 tripsController.addDefaultAttributes(model);
             }
             case SAVED -> {
-                savedController.addDefaultAttributes(model, new LocationFilter());
+                savedController.addDefaultAttributes(model, new LocationFilter(), null,null);
             }
         }
         return "index";
@@ -179,5 +179,10 @@ public class MainController {
     @GetMapping("/test")
     public String testPage() {
         return "test";
+    }
+
+    @GetMapping("/about")
+    public String aboutPage() {
+        return "about";
     }
 }

@@ -23,6 +23,7 @@ import org.voyager.service.VoyagerService;
 import org.voyager.service.impl.*;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Controller
@@ -53,11 +54,10 @@ public class SavedController {
         source = searchServiceAPI.getSource();
     }
 
-    void addDefaultAttributes(Model model,LocationFilter locationFilter) {
+    void addDefaultAttributes(Model model, LocationFilter locationFilter, Double minRange, Double maxRange) {
         List<List<Country>> continentCountryList = new ArrayList<>();
         List<List<List<Location>>> continentCountryLocationsList = new ArrayList<>();
-        Double minExchangeRateValue = Double.MAX_VALUE;
-        Double maxExchangeRateValue = Double.MIN_VALUE;
+        List<Double> rates = new ArrayList<>();
         for (Continent continent : Continent.values()) {
             List<Country> countryList = new ArrayList<>();
             List<List<Location>> countryLocationsList = new ArrayList<>();
@@ -124,13 +124,12 @@ public class SavedController {
                             countryCurrency.getName(),countryCurrency.getCode(),countryCurrency.getSymbol(),
                             countryCurrency.getUsdRate(),baseCurrency.getSymbol());
                 }
-                minExchangeRateValue = Math.min(minExchangeRateValue,exchangeRate);
-                maxExchangeRateValue = Math.max(maxExchangeRateValue,exchangeRate);
-                LOGGER.info("minExchangeRateValue: " + minExchangeRateValue);
-                LOGGER.info("maxExchangeRateValue: " + maxExchangeRateValue);
-                country.setCurrencyCode(formattedCurrency);
-                countryList.add(country);
-                countryLocations.sort(Comparator.comparing(Location::getName));
+                if ((minRange == null && maxRange == null) || (exchangeRate >= minRange && exchangeRate <= maxRange)) {
+                    rates.add(exchangeRate);
+                    country.setCurrencyCode(formattedCurrency);
+                    countryList.add(country);
+                    countryLocations.sort(Comparator.comparing(Location::getName));
+                }
             }
 
             countryList.sort(Comparator.comparing(Country::getName));
@@ -140,8 +139,12 @@ public class SavedController {
             continentCountryList.add(countryList);
             continentCountryLocationsList.add(countryLocationsList);
         }
-        model.addAttribute("minExchangeRateValue",Math.min(minExchangeRateValue,1.0));
-        model.addAttribute("maxExchangeRateValue",Math.max(maxExchangeRateValue,0.0));
+
+        model.addAttribute("minExchangeRateValue", Collections.min(rates));
+        model.addAttribute("maxExchangeRateValue",Collections.max(rates));
+        Collections.sort(rates);
+        model.addAttribute("medianExchangeRateValue",rates.get(rates.size()/2));
+        LOGGER.info("medianExchangeRateValue: " + rates.get(rates.size()/2));
         model.addAttribute("continentList", Continent.values());
         model.addAttribute("continentCountryList", continentCountryList);
         model.addAttribute("continentCountryLocationsList", continentCountryLocationsList);
@@ -150,13 +153,15 @@ public class SavedController {
 
     @GetMapping("/saved")
     public String getSaved(Model model) {
-        addDefaultAttributes(model,new LocationFilter());
+        addDefaultAttributes(model,new LocationFilter(), null, null);
         return "fragments/tab :: saved-tab";
     }
 
     @GetMapping("/saved-locations")
-    public String getSavedLocations(Model model,@ModelAttribute LocationFilter locationFilter) {
-        addDefaultAttributes(model, locationFilter);
+    public String getSavedLocations(Model model,@ModelAttribute LocationFilter locationFilter,
+                                    Double minRange, Double maxRange) {
+        // TODO: add minRange and maxRange, clarify order of values appearing, to calling this function
+        addDefaultAttributes(model, locationFilter,minRange,maxRange);
         return "fragments/saved :: main-saved-page";
     }
 

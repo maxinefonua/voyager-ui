@@ -7,7 +7,7 @@
 </head>
 <ul th:fragment="tab-list(defaultPage)"
     id="tabList"
-    class="nav nav-underline">
+    class="nav nav-underline align-items-center">
     <li class="nav-item">
         <a class="nav-link tab-btn"
            th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'TRIPS')} ? 'active' : ''"
@@ -20,31 +20,7 @@
             Fly To
         </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link tab-btn"
-           th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'SAVED')} ? 'active' : ''"
-           id="saved-tab-link"
-                hx-get="/saved"
-                hx-target="#tabContent"
-                hx-on::before-request="activate(this)"
-                hx-on::after-request="recenterMap();sliderFunction()"
-                hx-swap="innerHTML">
-            By Country
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link tab-btn"
-           th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'BROWSE')} ? 'active' : ''"
-           id="add-tab-link"
-                hx-get="/add"
-                hx-target="#tabContent"
-                hx-on::before-request="activate(this)"
-                hx-on::after-request="recenterMap()"
-                hx-swap="innerHTML">
-            By Location
-        </a>
-    </li>
-    <li class="nav-item ms-3 row align-items-center">
+    <li class="nav-item m-2 row align-items-center">
         <button class="btn btn-primary btn-sm"
                 id="toggle-map-button"
                 type="button"
@@ -65,7 +41,7 @@
                        hx-target="#main-saved-page"
                        hx-swap="outerHTML transition:true"
                        hx-trigger="change"
-                       hx-include="[name='includeArchived']"
+                       hx-include="[name='includeArchived'],[name='minRange'],[name='maxRange']"
                        class="form-check-input"
                        type="checkbox"
                        role="switch"
@@ -83,18 +59,30 @@
                         <div class="track"></div>
                         <div class="progress"></div>
                         <input type="range"
+                               hx-get="/saved-locations"
+                               name="minRange"
+                               hx-target="#main-saved-page"
+                               hx-swap="outerHTML transition:true"
+                               hx-trigger="change"
+                               hx-include="[name='includeArchived'],[name='minRange'],[name='maxRange']"
                                th:min="${minExchangeRateValue}" th:max="${maxExchangeRateValue}"
                                th:value="${minExchangeRateValue}"
                                th:step="${(maxExchangeRateValue-minExchangeRateValue) * 0.01}"
                                id="minRange">
                         <input type="range"
+                               hx-get="/saved-locations"
+                               name="maxRange"
+                               hx-target="#main-saved-page"
+                               hx-swap="outerHTML transition:true"
+                               hx-trigger="change"
+                               hx-include="[name='includeArchived'],[name='minRange'],[name='maxRange']"
                                th:min="${minExchangeRateValue}" th:max="${maxExchangeRateValue}"
                                th:value="${maxExchangeRateValue}"
                                th:step="${(maxExchangeRateValue-minExchangeRateValue) * 0.01}"
                                id="maxRange">
                     </div>
                 </div>
-                <span class="col-auto">Currency Exchange Range</span>
+                <span class="col-auto">Currency Exchange</span>
             </div>
         </div>
     </div>
@@ -103,7 +91,7 @@
 <div th:fragment="add-tab">
     <div th:replace="~{fragments/search :: lookupContainer}"></div>
 </div>
-<div th:fragment="trips-tab" class="container mt-2">
+<div th:fragment="trips-tab">
     <div th:replace="~{fragments/trips :: trips(startOptionList=${startOptionList},startInputText=${startInputText},startInputValue=${startInputValue},endOptionList=${endOptionList},endInputText=${endInputText},endInputValue=${endInputValue})}"></div>
 </div>
 </html>

@@ -73,7 +73,7 @@
 <div th:fragment="trips(startOptionList,startInputText,startInputValue,endOptionList,endInputText,endInputValue)" class="container"
      hx-on::after-request="dispatchInput()">
     <div class="row justify-content-center">
-        <div class="col-1 col-md-auto p-0" style="width:40px"
+        <div class="d-lg-none col-1 col-md-auto p-0" style="width:40px"
              th:classappend="${mapHidden != null && mapHidden}?'d-none':''">
             <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
         </div>
@@ -336,39 +336,41 @@
                              class="carousel-item"
                              th:classappend="${routeIter.first}?'active':''">
                             <div class="row justify-content-center m-1">
-                                <div class="card col-auto col-md-9 pt-3 p-0"
+                                <div class="card col-auto col-md-11 pt-3 p-0"
                                      th:classappend="${pathAirline.routeList?.size > 1}?'mb-4':''"
                                      th:id="'path-airline-values-'+${iter.index}+'-route-'+${route.id}">
-                                    <div class="row align-items-center d-flex gap-2 justify-content-center m-0 m-lg-3 mb-3">
-                                        <div class="input-group col-10 col-md-5">
+                                    <div class="row justify-content-center">
+                                        <div class="col-10 row align-items-center d-flex gap-2 justify-content-center m-0 m-lg-3 mb-3">
+                                            <div class="input-group col-10 col-md-5">
                                             <span style="width:105px"
-                                                    class="d-none d-md-block input-group-text">Origin</span>
-                                            <button class="btn-airport-code col input-group-text text-truncate"
-                                                    type="button"
-                                                    onclick="mapToAirportPopup(this)"
-                                                    th:data-airport-name="${pathAirportsList[iter.index][routeIter.index].name}"
-                                                    th:data-airport-city="${pathAirportsList[iter.index][routeIter.index].city}"
-                                                    th:data-airport-subd="${pathAirportsList[iter.index][routeIter.index].subdivision}"
-                                                    th:data-airport-code="${route.origin}"
-                                                    th:data-airport-country="${pathAirportsList[iter.index][routeIter.index].countryCode}"
-                                                    th:data-airport-lat="${pathAirportsList[iter.index][routeIter.index].latitude}"
-                                                    th:data-airport-lng="${pathAirportsList[iter.index][routeIter.index].longitude}"
-                                                    th:utext="'<strong>' + ${route.origin} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index].subdivision} + ' of ' + ${pathAirportsList[iter.index][routeIter.index].countryCode}"></button>
-                                        </div>
-                                        <div class="input-group col-10 col-sm-5">
+                                                  class="d-none d-md-block input-group-text">Origin</span>
+                                                <button class="btn-airport-code col input-group-text text-truncate"
+                                                        type="button"
+                                                        onclick="mapToAirportPopup(this)"
+                                                        th:data-airport-name="${pathAirportsList[iter.index][routeIter.index].name}"
+                                                        th:data-airport-city="${pathAirportsList[iter.index][routeIter.index].city}"
+                                                        th:data-airport-subd="${pathAirportsList[iter.index][routeIter.index].subdivision}"
+                                                        th:data-airport-code="${route.origin}"
+                                                        th:data-airport-country="${pathAirportsList[iter.index][routeIter.index].countryCode}"
+                                                        th:data-airport-lat="${pathAirportsList[iter.index][routeIter.index].latitude}"
+                                                        th:data-airport-lng="${pathAirportsList[iter.index][routeIter.index].longitude}"
+                                                        th:utext="'<strong>' + ${route.origin} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index].subdivision} + ' of ' + ${pathAirportsList[iter.index][routeIter.index].countryCode}"></button>
+                                            </div>
+                                            <div class="input-group col-10 col-sm-5">
                                             <span style="width:105px"
-                                                    class="d-none d-md-block input-group-text">Destination</span>
-                                            <button class="btn-airport-code col input-group-text text-truncate"
-                                                    type="button"
-                                                    onclick="mapToAirportPopup(this)"
-                                                    th:data-airport-code="${route.destination}"
-                                                    th:data-airport-name="${pathAirportsList[iter.index][routeIter.index+1].name}"
-                                                  th:data-airport-city="${pathAirportsList[iter.index][routeIter.index+1].city}"
-                                                  th:data-airport-subd="${pathAirportsList[iter.index][routeIter.index+1].subdivision}"
-                                                  th:data-airport-country="${pathAirportsList[iter.index][routeIter.index+1].countryCode}"
-                                                  th:data-airport-lat="${pathAirportsList[iter.index][routeIter.index+1].latitude}"
-                                                  th:data-airport-lng="${pathAirportsList[iter.index][routeIter.index+1].longitude}"
-                                                  th:utext="'<strong>' + ${route.destination} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index+1].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index+1].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index+1].subdivision} + ' of ' + ${pathAirportsList[iter.index][routeIter.index+1].countryCode}"></button>
+                                                  class="d-none d-md-block input-group-text">Destination</span>
+                                                <button class="btn-airport-code col input-group-text text-truncate"
+                                                        type="button"
+                                                        onclick="mapToAirportPopup(this)"
+                                                        th:data-airport-code="${route.destination}"
+                                                        th:data-airport-name="${pathAirportsList[iter.index][routeIter.index+1].name}"
+                                                        th:data-airport-city="${pathAirportsList[iter.index][routeIter.index+1].city}"
+                                                        th:data-airport-subd="${pathAirportsList[iter.index][routeIter.index+1].subdivision}"
+                                                        th:data-airport-country="${pathAirportsList[iter.index][routeIter.index+1].countryCode}"
+                                                        th:data-airport-lat="${pathAirportsList[iter.index][routeIter.index+1].latitude}"
+                                                        th:data-airport-lng="${pathAirportsList[iter.index][routeIter.index+1].longitude}"
+                                                        th:utext="'<strong>' + ${route.destination} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index+1].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index+1].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index+1].subdivision} + ' of ' + ${pathAirportsList[iter.index][routeIter.index+1].countryCode}"></button>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="input-group">
@@ -394,7 +396,7 @@
                                                hx-swap="outerHTML transition:true" />
                                     </div>
                                     <div class="container-fluid overflow-auto p-0">
-                                        <table class="table table-hover mb-3">
+                                        <table class="table table-hover mb-3 small-screen-small-font">
                                             <thead class="table-light">
                                             <tr>
                                                 <th scope="col">Flight Number</th>

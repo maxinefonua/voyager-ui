@@ -69,6 +69,10 @@ a.list-group-item-action.active .scroll-nav-icon {
   fill: #fd0d6e;
 }
 
+.logo path {
+    fill: #000000;
+}
+
 .btn:hover svg path {
   fill: #ffffff;
 }
@@ -138,4 +142,19 @@ a.list-group-item-action.active .scroll-nav-icon {
     position: relative;
     height: auto;
     width: 2em;
+}
+.basic-shadow {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+.carousel-control-next, .carousel-control-prev {
+    position: absolute;
+    top: 40px;
+    height: 60px;
+    width:20%;
+}
+
+@media (max-width: 575.98px) {
+    .small-screen-small-font {
+        font-size: 0.8rem;
+    }
 }

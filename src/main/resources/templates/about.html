@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>About Page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+  <link rel="stylesheet" type="text/css" href="../css/stylesheet.css"  />
+</head>
+<body class="page-wrapper" style="display:flex;flex-direction:column;">
+  <div th:replace="~{fragments/topnav :: navbar}">
+  </div>
+  <div class="container">
+    <h1 class="mt-4">About</h1>
+    <div class="container text-body-secondary">
+      <div class="row justify-content-center">
+        <div class="col col-lg-10 m-3">
+          <div class="d-inline-flex align-items-center mb-2 text-body-emphasis text-decoration-none" href="/" aria-label="Voyager">
+            <span class="fs-7"><p>This site was born out of a personal project I took on to relearn full-cycle development, and to better organize my travel plans.
+              It is built entirely with open-sourced data, in alignment with the following personal belief.
+              <blockquote class="blockquote">As developers, our greatest contribution to the digital age is to seamlessly and sustainably increase access to information exchange.</blockquote>The globalization of society via the internet offers developers the unique opportunity to collaborate, build, and enhance tools within the global digital commons. Such work encourages efficiency, sustainability, and accessibility, all of which reinforce positive feedback loops of improved development.</p>
+              <p>Below are the technologies and frameworks I used to create this site. To learn more about the Voyager project, feel free to visit my linked GitHub repos. To learn more about myself and other work, feel free to visit my personal site.</p>
+              <span class="m-2 fs-7 fw-lighter float-end">Maxine Fonua, <span class="fst-italic">Voyager developer</span></span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col mb-4">
+      <div class="card credit-card h-100">
+        <div class="card-header bg-secondary text-light">
+          <h3 class="h5 mb-0">Technologies Used</h3>
+        </div>
+        <div class="card-body">
+          <div class="example-box">
+            <h5>Geolocation Data</h5>
+            <ul>
+              <li>GeoNames - <a href="https://www.geonames.org/" target="_blank" rel="license noopener noreferrer">https://www.geonames.org.com/</a></li>
+              <li>OpenStreetMap - <a href="https://www.openstreetmap.org/" target="_blank" rel="license noopener noreferrer">https://www.openstreetmap.org/</a></li>
+            </ul>
+          </div>
+          <div class="example-box">
+            <h5>Flight/Airport Data</h5>
+            <ul>
+              <li>AirportsData - <a href="https://github.com/mborsetti/airportsdata/blob/main/airportsdata/airports.csv" target="_blank" rel="license noopener noreferrer">https://github.com/mborsetti/airportsdata/blob/main/airportsdata/airports.csv</a></li>
+              <li>FlightRadar24 - <a href="https://www.flightradar24.com/about" target="_blank" rel="license noopener noreferrer">https://www.flightradar24.com/about</a></li>
+              <li>OpenStreetMap - <a href="https://www.openstreetmap.org/" target="_blank" rel="license noopener noreferrer">https://www.openstreetmap.org/</a></li>
+            </ul>
+          </div>
+          <div class="example-box">
+            <h5>Web App Styling</h5>
+            <ul>
+              <li>Bootstrap v5.3.0 - <a target="_blank" rel="license noopener noreferrer" href="https://getbootstrap.com/">https://getbootstrap.com/</a></li>
+              <li>SVG Path Editor - <a target="_blank" rel="license noopener noreferrer" href="https://yqnn.github.io/svg-path-editor/">https://yqnn.github.io/svg-path-editor/</a></li>
+              <li>Thymeleaf - <a target="_blank" rel="license noopener noreferrer" href="https://www.thymeleaf.org/">https://www.thymeleaf.org/</a></li>
+            </ul>
+          </div>
+          <div class="example-box">
+            <h5>Development</h5>
+            <ul>
+              <li>GitHub - <a target="_blank" rel="license noopener noreferrer" href="https://github.com/">https://github.com/</a></li>
+              <li>IntelliJ - <a target="_blank" rel="license noopener noreferrer" href="https://www.jetbrains.com/idea/download/?section=mac">https://www.jetbrains.com/idea/download/?section=mac</a></li>
+              <li>Spring - <a target="_blank" rel="license noopener noreferrer" href="https://spring.io/">https://spring.io/</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    </div>
+</body>
+</html>
