@@ -68,46 +68,6 @@ function zoomToLocation(isStart,targetElemId,reviewElem) {
     scrollElemToTarget(targetElemId);
 }
 
-function mapToCountry(aElem) {
-    event.preventDefault(); // prevents url mod
-    clearMarkers();
-    const stringofBoundsArray = aElem.dataset.countryBounds;
-    if (stringofBoundsArray) {
-        const bounds = stringofBoundsArray.split(',').map(Number);
-        map.fitBounds(bounds);
-    } else recenterMap();
-    scrollElemToHref(aElem);
-}
-
-function mapToLocation(aElem) {
-    event.preventDefault(); // prevents url mod
-    clearMarkers();
-    const stringofBoundsArray = aElem.dataset.countryBounds;
-    if (stringofBoundsArray) {
-        const bounds = stringofBoundsArray.split(',').map(Number);
-        map.fitBounds(bounds);
-    } else recenterMap();
-    const longitude = aElem.dataset.lng;
-    const latitude = aElem.dataset.lat;
-    if (lookupMarker) lookupMarker.remove();
-    lookupMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
-}
-
-function scrollElemToHref(aElem) {
-    event.preventDefault();
-    const targetElemId = aElem.getAttribute('href');
-    const target = document.querySelector(targetElemId);
-    const contentContainer = document.getElementById('scrollable-content');
-
-    if (target && contentContainer) {
-        const offset = target.offsetTop - contentContainer.offsetTop;
-        contentContainer.scrollTo({
-            top: offset,
-            behavior: 'smooth'
-        });
-    }
-}
-
 function removeLocationFromMap(isStart) {
     if (isStart) clearStartMarkers();
     else clearEndMarkers();
@@ -123,7 +83,6 @@ function mapFitTripScrollTo(targetElemId) {
     scrollElemToTarget(targetElemId);
 }
 
-
 function addLocationToMap(divElem,locationId,isStart,longitude,latitude,bounds,stringOfCodesArray) {
     const trimmedArray = stringOfCodesArray.replace(/[\[\]]/g, '');
     const airportCodes = trimmedArray.split(', '); // Split by comma and space
@@ -135,7 +94,6 @@ function addLocationToMap(divElem,locationId,isStart,longitude,latitude,bounds,s
         if (endMarker) endMarker.remove();
         endMarker = new mapboxgl.Marker().setLngLat([longitude,latitude]).addTo(map);
     }
-
     targetMarkers.forEach(marker => marker.remove());
     targetMarkers.length = 0;
     const datalistElem = isStart ? document.getElementById('nearby-airports-start') : document.getElementById('nearby-airports-end');
