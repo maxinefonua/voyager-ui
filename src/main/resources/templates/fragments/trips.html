@@ -114,7 +114,7 @@
                         </div>
                     </div>
                 </div>
-                <h4 id="review">Review</h4>
+                <h4 id="review">Flight Paths</h4>
                 <div id="review-summary"
                      style="min-height:315px"
                      class="overflow-auto p-2">
@@ -240,11 +240,6 @@
 <div th:fragment="display-path(airlineOptionList,startLocation,endLocation,startAirportCodes,endAirportCodes)"
      th:id="display-path"
      class="list-group">
-    <div th:if="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
-         class="list-group-item list-group-item-secondary">
-        <span th:if="${startLocation == null or endLocation == null}">Both Locations Required</span>
-        <span th:if="${(startLocation != null and endLocation != null) and (#lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes))}">Airports Required for Both Locations</span>
-    </div>
     <div th:unless="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
          class="list-group">
         <div class="row justify-content-center">
@@ -267,10 +262,25 @@
             </select>
         </div>
     </div>
-    <form th:unless="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
-          class="accordion list-group mt-4"
+    <div th:if="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+         class="list-group">
+        <div class="row justify-content-center">
+            <select style="max-width:130px"
+                    class="form-select"
+                    disabled>
+                <option selected value="ALL">All Airlines</option>
+            </select>
+        </div>
+    </div>
+    <form class="accordion list-group mt-4"
           id="path-airline-list">
-        <div class="list-group-item">
+        <div th:if="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+             class="list-group-item list-group-item-secondary">
+            <span th:if="${startLocation == null or endLocation == null}">Both Locations Required</span>
+            <span th:if="${(startLocation != null and endLocation != null) and (#lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes))}">Airports Required for Both Locations</span>
+        </div>
+        <div th:unless="${startLocation == null or endLocation == null or #lists.isEmpty(startAirportCodes) or #lists.isEmpty(endAirportCodes)}"
+             class="list-group-item">
             <i role="status">Loading...</i>
             <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
         </div>

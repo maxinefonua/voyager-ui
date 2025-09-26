@@ -17,32 +17,10 @@ import org.voyager.service.impl.*;
 import java.util.List;
 
 public interface VoyagerService {
-    SearchResult<ResultDetails> lookupWithDetails(String query, int skipRows, int limit);
-    LookupAttribution lookupAttribution();
-    List<Airport> nearbyAirports(double latitude, double longitude, int limit,AirportType type);
-    List<Airport> nearbyAirports(double latitude, double longitude, int limit,List<Airline> airlineList);
-    List<Location> getLocations();
-    List<Location> getLocations(Status status);
-    Location getLocation(Integer id);
-    Location addLocation(LocationForm locationForm);
-    List<Airport> airports(AirportType type, Airline airline);
-    List<Airport> airports(AirportType type);
-    List<Airport> airports(List<AirportType> type);
-    List<Airport> airports(Airline airline);
-    List<Airport> airports();
-    List<Flight> getFlights(Integer routeId,boolean isActive);
-    List<Flight> getFlights(Integer routeId,boolean isActive,Airline airline);
-    Boolean isValidIataCode(String airportCode);
-    Boolean isDeltaIataCode(String airportCode);
-    Airport getAirport(String iata);
-    PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList);
-    PathResponse<PathAirline> getPath(List<String> originList, List<String> destinationList, List<String> excludeAirportList, List<Integer> excludeRouteIdList, Airline airline);
-    Route getRoute(Integer id);
+    FlightServiceAPI getFlightServiceAPI();
     CountryServiceAPI getCountryServiceAPI();
     LocationServiceAPI getLocationServiceAPI();
     SearchServiceAPI getSearchServiceAPI();
     AirportServiceAPI getAirportServiceAPI();
     PathServiceAPI getPathServiceAPI();
-    CurrencyServiceAPI getCurrencyServiceAPI();
-    LanguageServiceAPI getLanguageServiceAPI();
 }

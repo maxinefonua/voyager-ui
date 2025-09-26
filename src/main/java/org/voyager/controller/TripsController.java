@@ -33,6 +33,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static org.voyager.utils.ConstantsUtils.ALPHA2_CODE_REGEX;
 import static org.voyager.utils.ConstantsUtils.SOURCE_ID_PARAM_NAME;
 
 @Controller
@@ -42,6 +43,7 @@ public class TripsController {
     private static final AirportFilter DEFAULT_CLOSER_FILTER = AirportFilter.CIVIL;
     private static final Logger LOGGER = LoggerFactory.getLogger(TripsController.class);
     private static LocationServiceAPI locationServiceAPI;
+    private static FlightServiceAPI flightServiceAPI;
     private static CountryServiceAPI countryServiceAPI;
     private static SearchServiceAPI searchServiceAPI;
     private static AirportServiceAPI airportServiceAPI;
@@ -56,6 +58,7 @@ public class TripsController {
 
     @PostConstruct
     public void init() {
+        flightServiceAPI = voyagerService.getFlightServiceAPI();
         locationServiceAPI = voyagerService.getLocationServiceAPI();
         countryServiceAPI = voyagerService.getCountryServiceAPI();
         searchServiceAPI = voyagerService.getSearchServiceAPI();
@@ -70,6 +73,7 @@ public class TripsController {
     }
 
     void addDefaultAttributes(Model model) {
+        model.addAttribute("lookupAttribution", searchServiceAPI.getLookupAttribution());
         if (recentLocations.isEmpty())
             recentLocations.addAll(locationServiceAPI.getLocations(10));
         List<Option> optionList = recentLocations.stream()
@@ -77,28 +81,6 @@ public class TripsController {
                 .toList();
         model.addAttribute("startOptionList", optionList);
         model.addAttribute("endOptionList", optionList);
-    }
-
-    @GetMapping("/exclude-route")
-    public String excludeRoute(Model model, String startAirport, String endAirport,
-                               String closerStartAirport, String closerEndAirport,
-                               Integer routeId, PathExclusions pathExclusions) {
-        Map<String, Object> routeAttributes = new HashMap<>();
-        pathExclusions.getRouteIds().add(routeId);
-        populateDeltaRoute(routeAttributes, startAirport, endAirport, closerStartAirport, closerEndAirport, pathExclusions);
-        model.addAllAttributes(routeAttributes);
-        return "fragments/trips :: delta-route";
-    }
-
-    @GetMapping("/enable-route")
-    public String enableRoute(Model model, String startAirport, String endAirport,
-                              String closerStartAirport, String closerEndAirport,
-                              Integer routeId, PathExclusions pathExclusions) {
-        Map<String, Object> routeAttributes = new HashMap<>();
-        pathExclusions.getRouteIds().remove(routeId);
-        populateDeltaRoute(routeAttributes, startAirport, endAirport, closerStartAirport,closerEndAirport, pathExclusions);
-        model.addAllAttributes(routeAttributes);
-        return "fragments/trips :: delta-route";
     }
 
     @GetMapping("/build-path")
@@ -151,11 +133,11 @@ public class TripsController {
                 for (PathAirline pathAirline : pathAirlineList) {
                     List<Airport> pathAirports = new ArrayList<>();
                     Airport toAdd = airportServiceAPI.getAirport(pathAirline.getRouteList().get(0).getOrigin());
-                    toAdd.setCountryCode(countryServiceAPI.getCountry(toAdd.getCountryCode()).getName());
                     pathAirports.add(toAdd);
                     for (Route route : pathAirline.getRouteList()) {
                         toAdd = airportServiceAPI.getAirport(route.getDestination());
-                        toAdd.setCountryCode(countryServiceAPI.getCountry(toAdd.getCountryCode()).getName());
+                        if (toAdd.getCountryCode().matches(ALPHA2_CODE_REGEX))
+                            toAdd.setCountryCode(countryServiceAPI.getCountry(toAdd.getCountryCode()).getName());
                         pathAirports.add(toAdd);
                     }
                     pathAirportsList.add(pathAirports);
@@ -249,7 +231,7 @@ public class TripsController {
     @GetMapping("/add-airport-code")
     public String addAirportCode(Model model, Boolean isStart, @ModelAttribute AirportCodes airportCodes,
                                  String airportCode,String sourceId) {
-        if (voyagerService.isValidIataCode(airportCode) && !airportCodes.getCodes().contains(airportCode))
+        if (airportServiceAPI.isValidIataCode(airportCode) && !airportCodes.getCodes().contains(airportCode))
             airportCodes.getCodes().add(airportCode);
         Location location = locationServiceAPI.getLocation(source,sourceId);
         LocationPatch locationPatch = LocationPatch.builder().airports(airportCodes.getCodes()).build();
@@ -275,7 +257,7 @@ public class TripsController {
     public String getFlights(Model model,Integer routeId,
                              String startZoneId, String endZoneId,
                              Airline airline, Integer pathIterIndex) {
-        List<Flight> flightList = voyagerService.getFlights(routeId,true,airline);
+        List<Flight> flightList = flightServiceAPI.getFlights(routeId,airline);
         flightList.forEach(flight -> {
             while (flight.getZonedDateTimeArrival().isBefore(flight.getZonedDateTimeDeparture())) {
                 flight.setZonedDateTimeArrival(flight.getZonedDateTimeArrival().plusDays(1));
@@ -337,21 +319,6 @@ public class TripsController {
                 .value(airport.getIata()).build();
     }
 
-    private Option buildAirportOption(Airport airport) {
-        return Option.builder()
-                .elementName(airport.getIata())
-                .display(String.format("%s | %s, %s of %s", airport.getName(), airport.getCity(),
-                        airport.getSubdivision(), airport.getCountryCode()))
-                .value(airport.getIata()).build();
-    }
-
-    private Option buildAirportOptionForSelect(Airport airport) {
-        return Option.builder()
-                .elementName(airport.getIata())
-                .display(String.format("%s | %s", airport.getIata(), airport.getName()))
-                .value(airport.getIata()).build();
-    }
-
     private Option buildAirlineOptionForSelect(Airline airline) {
         return Option.builder()
                 .display(airline.getDisplayText())
@@ -365,37 +332,6 @@ public class TripsController {
                 .value(airline.name()).build();
     }
 
-    private List<Option> getLocationOptionsList(Status status) {
-        return voyagerService.getLocations(status).stream().map(location -> Option.builder()
-                        .elementName(String.format("%s-%s", location.getName(), location.getId()))
-                        .display(String.format("%s, %s in %s", location.getName(),
-                                location.getSubdivision(), location.getCountryCode()))
-                        .value(String.valueOf(location.getId().intValue())).build())
-                .toList();
-    }
-
-    private List<Option> getDefaultAirportOptionListForInput() {
-        List<Airport> airportList = new ArrayList<>();
-        switch (DEFAULT_AIRPORT_FILTER) {
-            case DELTA -> {
-                airportList.addAll(voyagerService.airports(Airline.DELTA));
-            }
-            case ALL -> {
-                airportList.addAll(voyagerService.airports(List.of(AirportType.CIVIL,
-                        AirportType.MILITARY)));
-            }
-            case MILITARY -> {
-                airportList.addAll(voyagerService.airports(AirportType.MILITARY));
-            }
-            case CIVIL -> {
-                airportList.addAll(voyagerService.airports(AirportType.CIVIL));
-            }
-        }
-        return airportList.stream()
-                .map(this::buildAirportOption)
-                .toList();
-    }
-
     private List<Option> resolveNearbyAirportOptionList(Location location) {
         if (location == null) return null;
         Double longitude = location.getLongitude();
@@ -406,143 +342,5 @@ public class TripsController {
             option.setDisabled(location.getAirports().contains(nearbyAirport.getIata()));
             return option;
         }).toList();
-    }
-
-    private void populateDeltaRoute(Map<String, Object> mavAttributes,
-                                    String startAirport, String endAirport,
-                                    String closerStartAirport, String closerEndAirport,
-                                    PathExclusions pathExclusions) {
-        String deltaStart = null;
-        String deltaEnd = null;
-        if (voyagerService.isDeltaIataCode(startAirport)) {
-            deltaStart = startAirport;
-            mavAttributes.put("startAirport", voyagerService.getAirport(startAirport));
-        }
-        if (voyagerService.isDeltaIataCode(endAirport)) {
-            deltaEnd = endAirport;
-            mavAttributes.put("endAirport", voyagerService.getAirport(endAirport));
-        }
-
-        if (deltaStart != null && deltaEnd != null) {
-            if (voyagerService.isDeltaIataCode(deltaStart) && voyagerService.isValidIataCode(closerStartAirport)) {
-                PathResponse<PathAirline> pathResponse = voyagerService.getPath(List.of(closerStartAirport),List.of(deltaStart));
-                List<PathAirline> pathAirlineList = pathResponse.getResponseList();
-                List<Route> closerStartRouteList = pathAirlineList.get(0).getRouteList();
-                List<Airport[]> closerStartRouteAirportList = new ArrayList<>();
-                List<List<Flight>> closerStartRouteFlightList = new ArrayList<>();
-                for (Route route : closerStartRouteList)
-                    addAirportFlightsFromRoute(route,closerStartRouteAirportList,closerStartRouteFlightList);
-                mavAttributes.put("closerStartRouteList",closerStartRouteList);
-                mavAttributes.put("closerStartRouteAirportList",closerStartRouteAirportList);
-                mavAttributes.put("closerStartRouteFlightList",closerStartRouteFlightList);
-            }
-
-            if (voyagerService.isDeltaIataCode(deltaEnd) && voyagerService.isValidIataCode(closerEndAirport)) {
-                PathResponse<PathAirline> pathResponse = voyagerService.getPath(List.of(deltaEnd),List.of(closerEndAirport));
-                List<PathAirline> pathAirlineList = pathResponse.getResponseList();
-                List<Route> closerEndRouteList = pathAirlineList.get(0).getRouteList();
-                List<Airport[]> closerEndRouteAirportList = new ArrayList<>();
-                List<List<Flight>> closerEndRouteFlightList = new ArrayList<>();
-                for (Route route : closerEndRouteList)
-                    addAirportFlightsFromRoute(route,closerEndRouteAirportList,closerEndRouteFlightList);
-                mavAttributes.put("closerEndRouteList",closerEndRouteList);
-                mavAttributes.put("closerEndRouteAirportList",closerEndRouteAirportList);
-                mavAttributes.put("closerEndRouteFlightList",closerEndRouteFlightList);
-            }
-
-            List<Route> routeList = new ArrayList<>();
-            List<Airport[]> routeAirportList = new ArrayList<>();
-            List<List<Flight>> routeFlightList = new ArrayList<>();
-
-            List<Route> excludedRouteList = new ArrayList<>();
-            List<Airport[]> excludedRouteAirportList = new ArrayList<>();
-            List<List<Flight>> excludedRouteFlightList = new ArrayList<>();
-            fillLists(deltaStart,deltaEnd,routeList,routeAirportList,routeFlightList,
-                    excludedRouteList,excludedRouteAirportList,excludedRouteFlightList,pathExclusions);
-            if (excludedRouteList.isEmpty()) excludedRouteList = null;
-            mavAttributes.put("routeAirportList", routeAirportList);
-            mavAttributes.put("routeList", routeList);
-            mavAttributes.put("routeFlightList", routeFlightList);
-            mavAttributes.put("excludedRouteList", excludedRouteList);
-            mavAttributes.put("excludedRouteAirportList", excludedRouteAirportList);
-            mavAttributes.put("excludedRouteFlightList", excludedRouteFlightList);
-            mavAttributes.put("pathExclusions", pathExclusions);
-        }
-    }
-
-    private void addAirportFlightsFromRoute(Route route, List<Airport[]> routeAirportList, List<List<Flight>> routeFlightList) {
-        Airport origin = voyagerService.getAirport(route.getOrigin());
-        Airport destination = voyagerService.getAirport(route.getDestination());
-        routeAirportList.add(new Airport[]{origin, destination});
-        List<Flight> flightList = voyagerService.getFlights(route.getId(),true);
-        flightList.forEach(flight -> {
-            if (flight.getZonedDateTimeArrival().toInstant().isBefore(flight.getZonedDateTimeDeparture().toInstant())) {
-                flight.setZonedDateTimeArrival(flight.getZonedDateTimeArrival().plusDays(1));
-            }
-            flight.setDuration(Duration.between(
-                    flight.getZonedDateTimeDeparture().toInstant(), flight.getZonedDateTimeArrival().toInstant()));
-            flight.setZonedDateTimeDeparture(
-                    flight.getZonedDateTimeDeparture().withZoneSameInstant(origin.getZoneId()));
-            flight.setZonedDateTimeArrival(
-                    flight.getZonedDateTimeArrival().withZoneSameInstant(destination.getZoneId()));
-        });
-        flightList.sort(Comparator.comparing((flight -> flight.getZonedDateTimeDeparture().toLocalTime())));
-        routeFlightList.add(flightList);
-    }
-
-    private void fillLists(String deltaStart, String deltaEnd, List<Route> routeList, List<Airport[]> routeAirportList,
-                           List<List<Flight>> routeFlightList,
-                           List<Route> excludedRouteList, List<Airport[]> excludedRouteAirportList,
-                           List<List<Flight>> excludedRouteFlightList, PathExclusions pathExclusions) {
-        if (!voyagerService.isValidIataCode(deltaStart) || !voyagerService.isValidIataCode(deltaEnd)) return;
-        List<PathAirline> pathAirlineList = null;
-        List<String> excludeAirports = List.of();
-        List<Integer> excludeRouteIds = List.of();
-        if (pathExclusions != null && pathExclusions.getHasExclusions()) {
-            List<Integer> excludedRouteIds = pathExclusions.getRouteIds();
-            for (Integer routeId : excludedRouteIds) {
-                Route route = voyagerService.getRoute(routeId);
-                Airport origin = voyagerService.getAirport(route.getOrigin());
-                Airport destination = voyagerService.getAirport(route.getDestination());
-                excludedRouteAirportList.add(new Airport[]{origin, destination});
-                excludedRouteList.add(route);
-                List<Flight> flightList = voyagerService.getFlights(route.getId(),true,Airline.DELTA);
-                flightList.forEach(flight -> {
-                    if (flight.getZonedDateTimeArrival().toInstant().isBefore(flight.getZonedDateTimeDeparture().toInstant())) {
-                        flight.setZonedDateTimeArrival(flight.getZonedDateTimeArrival().plusDays(1));
-                    }
-                    flight.setDuration(Duration.between(
-                            flight.getZonedDateTimeDeparture().toInstant(), flight.getZonedDateTimeArrival().toInstant()));
-                    flight.setZonedDateTimeDeparture(
-                            flight.getZonedDateTimeDeparture().withZoneSameInstant(origin.getZoneId()));
-                    flight.setZonedDateTimeArrival(
-                            flight.getZonedDateTimeArrival().withZoneSameInstant(destination.getZoneId()));
-                });
-                flightList.sort(Comparator.comparing((flight -> flight.getZonedDateTimeDeparture().toLocalTime())));
-                excludedRouteFlightList.add(flightList);
-            }
-        }
-        pathAirlineList = voyagerService.getPath(List.of(deltaStart), List.of(deltaEnd), excludeAirports, excludeRouteIds,Airline.DELTA).getResponseList();
-
-        for (Route route : pathAirlineList.get(0).getRouteList()) {
-            Airport origin = voyagerService.getAirport(route.getOrigin());
-            Airport destination = voyagerService.getAirport(route.getDestination());
-            routeAirportList.add(new Airport[]{origin, destination});
-            routeList.add(route);
-            List<Flight> flightList = voyagerService.getFlights(route.getId(),true,Airline.DELTA);
-            flightList.forEach(flight -> {
-                if (flight.getZonedDateTimeArrival().toInstant().isBefore(flight.getZonedDateTimeDeparture().toInstant())) {
-                    flight.setZonedDateTimeArrival(flight.getZonedDateTimeArrival().plusDays(1));
-                }
-                flight.setDuration(Duration.between(
-                        flight.getZonedDateTimeDeparture().toInstant(), flight.getZonedDateTimeArrival().toInstant()));
-                flight.setZonedDateTimeDeparture(
-                        flight.getZonedDateTimeDeparture().withZoneSameInstant(origin.getZoneId()));
-                flight.setZonedDateTimeArrival(
-                        flight.getZonedDateTimeArrival().withZoneSameInstant(destination.getZoneId()));
-            });
-            flightList.sort(Comparator.comparing((flight -> flight.getZonedDateTimeDeparture().toLocalTime())));
-            routeFlightList.add(flightList);
-        }
     }
 }
