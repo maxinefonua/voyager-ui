@@ -1,5 +1,3 @@
-// TODO: implement loading data into the DOM https://docs.mapbox.com/help/tutorials/custom-markers-gl-js/?step=4
-
 var lookupMarker = null;
 var airportMarker = null;
 var startMarker = null;
@@ -8,16 +6,6 @@ var nonDeltaStartMarker = null;
 var endMarker = null;
 var airportEndMarker = null;
 var nonDeltaEndMarker = null;
-
-function setAirportPlaceHolder(iterIndex) {
-    if (airportMarker) airportMarker.remove();
-    const airportInput = document.getElementById("airport-code-"+iterIndex);
-    const airportList = document.getElementById("filtered-list-"+iterIndex);
-    if (airportInput && airportList && airportList.options && airportList.options[0]) {
-        airportInput.placeholder = airportList.options[0].value;
-        airportInput.value = '';
-    }
-}
 
 function mapFitBothMarkers(marker1,marker2) {
     const container = map.getContainer();
@@ -60,61 +48,6 @@ function mapFitThreeMarkers(marker1,marker2,marker3) {
     map.fitBounds(bounds, {padding: {top: 60, bottom: 30, left: 80, right: 80}});
 }
 
-function addAirportToMap(airportInputElem,isStart) {
-    if (airportInputElem && airportInputElem.value && regexIata.test(airportInputElem.value)) {
-        const allAirports = document.getElementById('all-airports');
-        const deltaAirports = document.getElementById('delta-airports');
-        if (allAirports && allAirports.options && allAirports.options.namedItem(airportInputElem.value.toUpperCase())) {
-            airportInputElem.classList.remove('is-invalid');
-            const airportMatch = allAirports.options.namedItem(airportInputElem.value.toUpperCase());
-            const deltaMatch = deltaAirports.options.namedItem(airportInputElem.value.toUpperCase());
-            const isDelta = (deltaMatch != null);
-            if (isStart) {
-                if (isDelta) {
-                    if (airportStartMarker) airportStartMarker.remove();
-                    airportStartMarker = addAirportMarker(airportMatch,isDelta);
-                    if (startMarker) mapFitBothMarkers(startMarker,airportStartMarker);
-                    else if (nonDeltaStartMarker) mapFitBothMarkers(nonDeltaStartMarker,airportStartMarker);
-                    else centerMapOnMarker(airportStartMarker);
-                } else {
-                    if (nonDeltaStartMarker) nonDeltaStartMarker.remove();
-                    nonDeltaStartMarker = addAirportMarker(airportMatch,isDelta);
-                    if (startMarker) mapFitBothMarkers(startMarker,nonDeltaStartMarker);
-                    else if (airportStartMarker) mapFitBothMarkers(nonDeltaStartMarker,airportStartMarker);
-                    else centerMapOnMarker(nonDeltaStartMarker);
-                }
-            } else {
-                if (isDelta) {
-                    if (airportEndMarker) airportEndMarker.remove();
-                    airportEndMarker = addAirportMarker(airportMatch,isDelta);
-                    if (endMarker) mapFitBothMarkers(endMarker,airportEndMarker);
-                    else if (nonDeltaEndMarker) mapFitBothMarkers(nonDeltaEndMarker,airportEndMarker);
-                    else centerMapOnMarker(airportEndMarker);
-                } else {
-                    if (nonDeltaEndMarker) nonDeltaEndMarker.remove();
-                    nonDeltaEndMarker = addAirportMarker(airportMatch,isDelta);
-                    if (endMarker) mapFitBothMarkers(endMarker,nonDeltaEndMarker);
-                    else if (airportEndMarker) mapFitBothMarkers(nonDeltaEndMarker,airportEndMarker);
-                    else centerMapOnMarker(nonDeltaEndMarker);
-                }
-            }
-        }
-    } else {
-        airportInputElem.classList.add('is-invalid');
-        if (isStart && airportStartMarker) {
-            airportStartMarker.remove();
-            airportStartMarker = null;
-            nonDeltaStartMarker.remove();
-            nonDeltaStartMarker = null;
-        } else if (!isStart && airportEndMarker) {
-            airportEndMarker.remove();
-            airportEndMarker = null;
-            nonDeltaEndMarker.remove();
-            nonDeltaEndMarker = null;
-        }
-    }
-};
-
 function addAirportMarker(airportOptionElem,isDelta) {
     var airportPopup =  new mapboxgl.Popup({ offset: 16 }) // add popups
               .setHTML(`<strong data-name='${airportOptionElem.value}'>${airportOptionElem.value}</strong> <i>${airportOptionElem.dataset.airport}</i>
@@ -153,96 +86,6 @@ function addAirportMarker(airportOptionElem,isDelta) {
         .addTo(map);
     airportMarker.togglePopup();
     return airportMarker;
-}
-
-function addLookupMarker(locationOptionElem,isSaved) {
-    const nameAttribute = 'name';
-    var locationPopup =  new mapboxgl.Popup({ offset:
-            {
-                'top': [0, 10],    // When popup appears below marker (anchor: 'top')
-                'top-left': [0, 10],
-                'top-right': [0, 10],
-                'bottom': [0, -42],  // When popup appears above marker (anchor: 'bottom')
-                'bottom-left': [0, -42],
-                'bottom-right': [0, -42],
-                'left': [13, 0],    // When popup appears to the right of marker (anchor: 'left')
-                'right': [-13, 0],    // When popup appears to the left of marker (anchor: 'right')
-                // Add other anchor positions as needed
-              }
-        }) // add popups
-              .setHTML(`<strong data-name='${locationOptionElem.getAttribute(nameAttribute)}'>${locationOptionElem.dataset.location}</strong>,
-               <i>${locationOptionElem.dataset.subdivision}</i>
-               of ${locationOptionElem.dataset.country}`);
-
-    const el = document.createElement('div');
-    if (isSaved) el.className = 'lookup-marker';
-    else el.className = 'lookup-marker-from-results';
-    var locationMarker = new mapboxgl.Marker()
-        .setLngLat([locationOptionElem.dataset.longitude,locationOptionElem.dataset.latitude])
-        .setPopup(locationPopup)
-        .addTo(map);
-    locationMarker.togglePopup();
-    return locationMarker;
-}
-
-function addLookupMarkerFromSearch(searchButtonElem) {
-    var locationPopup =  new mapboxgl.Popup({ offset:
-            {
-                'top': [0, 10],    // When popup appears below marker (anchor: 'top')
-                'top-left': [0, 10],
-                'top-right': [0, 10],
-                'bottom': [0, -42],  // When popup appears above marker (anchor: 'bottom')
-                'bottom-left': [0, -42],
-                'bottom-right': [0, -42],
-                'left': [13, 0],    // When popup appears to the right of marker (anchor: 'left')
-                'right': [-13, 0],    // When popup appears to the left of marker (anchor: 'right')
-                // Add other anchor positions as needed
-              }
-        }) // add popups
-              .setHTML(`<strong data-name='${searchButtonElem.id}'>${searchButtonElem.dataset.name}</strong>,
-               <i>${searchButtonElem.dataset.subdivision}</i> |
-                of ${searchButtonElem.dataset.country}`);
-    const el = document.createElement('div');
-    var locationMarker = new mapboxgl.Marker()
-        .setLngLat([searchButtonElem.dataset.lng,searchButtonElem.dataset.lat])
-        .setPopup(locationPopup)
-        .addTo(map);
-    locationMarker.togglePopup();
-    return locationMarker;
-}
-
-function clearMarkers() {
-    if (lookupMarker) {
-        lookupMarker.remove();
-        lookupMarker = null;
-    }
-    if (airportMarker) {
-        airportMarker.remove();
-        airportMarker = null;
-    }
-    clearStartMarkers();
-    clearEndMarkers();
-}
-
-function clearAirportMarkerFitToElemId(marker,elemIdWithBounds) {
-    if (marker) {
-        marker.remove();
-        marker = null;
-        const elem = document.getElementById(elemIdWithBounds);
-        if (elem) fitMapToElemWithBounds(elem);
-    }
-}
-
-
-function resetTripMap(isStart) {
-    if (isStart) {
-        clearStartMarkers();
-        recenterMap();
-    } else {
-        clearEndMarkers();
-        recenterMap();
-    }
-    closeTripMarkerPopups();
 }
 
 function clearStartMarkers() {
@@ -288,23 +131,5 @@ function clearEndMarkers() {
     if (routeAirportMarker) {
         routeAirportMarker.remove();
         routeAirportMarker = null;
-    }
-}
-
-function clearAirportMarkerMapFitToLocation(isStart) {
-    if (isStart && airportStartMarker) {
-        airportStartMarker.remove();
-        airportStartMarker = null;
-        const startSelect = document.getElementById('select-start-location');
-        if (startSelect && startSelect.options && startSelect.options[startSelect.selectedIndex]) {
-            fitMapToElemWithBounds(startSelect.options[startSelect.selectedIndex]);
-        }
-    } else if (!isStart && airportEndMarker) {
-        airportEndMarker.remove();
-        airportEndMarker = null;
-        const endSelect = document.getElementById('select-end-location');
-        if (endSelect && endSelect.options && endSelect.options[endSelect.selectedIndex]) {
-            fitMapToElemWithBounds(endSelect.options[endSelect.selectedIndex]);
-        }
     }
 }

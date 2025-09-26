@@ -72,7 +72,6 @@ function removeLocationFromMap(isStart) {
     if (isStart) clearStartMarkers();
     else clearEndMarkers();
     checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'));
-    updateTabHxVals('trips-tab-link',isStart,null);
 }
 
 function mapFitTripScrollTo(targetElemId) {
@@ -117,17 +116,13 @@ function addLocationToMap(divElem,locationId,isStart,longitude,latitude,bounds,s
     divElem.removeAttribute('hx-on::after-settle');
     htmx.process(divElem);
     checkReverse(document.getElementById('reverse-button'),document.getElementById('start-input-value'),document.getElementById('end-input-value'));
-
-    updateTabHxVals('trips-tab-link',isStart,locationId);
 }
 
 function toggleMap(buttonElem) {
     if (buttonElem.getAttribute('aria-expanded') == 'false') {
         buttonElem.innerHTML = 'Show Map';
-        updateTabShowMap('trips-tab-link',true);
     } else {
         buttonElem.innerHTML = 'Hide Map';
-        updateTabShowMap('trips-tab-link',false);
     }
 }
 
