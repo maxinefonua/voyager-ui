@@ -122,10 +122,6 @@ function addAirportMarker(airportOptionElem,isDelta) {
                  of ${airportOptionElem.dataset.country}`);
 
     const el = document.createElement('div');
-    if (isDelta) {
-        el.className = 'airport-marker';
-    }
-    else {
         el.innerHTML = `<svg display="block" height="41" width="27" viewBox="0 0 27 41" xmlns="http://www.w3.org/2000/svg">
                              <!-- Shadow effect -->
                              <g transform="translate(3.0, 29.0)" fill="#000000">
@@ -150,7 +146,7 @@ function addAirportMarker(airportOptionElem,isDelta) {
                                    transform="scale(0.15) translate(93,35) rotate(45)"
                                    d="m34.228 12.148c1.368-15.768 10.112-16.112 11.312 0v16.428l34.36 17.136v5.78l-34.368-6.156v17.672l11.596 11.224v5.772l-17.12-5.708-17.12 5.732v-5.756l11.424-11.424v-17.512L.004 51.408v-5.692l34.228-17.048V12.176" />
                          </svg>`;
-    }
+
     var airportMarker = new mapboxgl.Marker(el)
         .setLngLat([airportOptionElem.dataset.longitude,airportOptionElem.dataset.latitude])
         .setPopup(airportPopup)

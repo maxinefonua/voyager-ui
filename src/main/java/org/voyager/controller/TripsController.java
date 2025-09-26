@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -50,7 +51,6 @@ public class TripsController {
     // TODO: handle delete location removal correctly - duplicates showing up in recent locations
     private Deque<Location> recentLocations = new ArrayDeque<>();
 
-
     @Autowired
     private VoyagerService voyagerService;
 
@@ -61,7 +61,6 @@ public class TripsController {
         searchServiceAPI = voyagerService.getSearchServiceAPI();
         airportServiceAPI = voyagerService.getAirportServiceAPI();
         pathServiceAPI = voyagerService.getPathServiceAPI();
-        source = searchServiceAPI.getSource();
     }
 
     void removeDeletedLocationFromRecents(Integer deletedLocationId) {
@@ -217,6 +216,7 @@ public class TripsController {
         Location location = null;
         if (StringUtils.isNotBlank(sourceId)) {
             try {
+                if (source == null) source = searchServiceAPI.getSource();
                 location = locationServiceAPI.getLocation(source, sourceId);
             } catch (ResponseStatusException e) {
                 ResultSearchFull resultSearchFull = searchServiceAPI.fetchResultSearchFull(sourceId);

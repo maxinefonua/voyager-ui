@@ -72,13 +72,7 @@
 <!--TRIPS MAIN PAGE-->
 <div th:fragment="trips(startOptionList,startInputText,startInputValue,endOptionList,endInputText,endInputValue)" class="container"
      hx-on::after-request="dispatchInput()">
-    <div class="row justify-content-center">
-        <div class="d-lg-none col-1 col-md-auto p-0" style="width:40px"
-             th:classappend="${mapHidden != null && mapHidden}?'d-none':''">
-            <div th:replace="~{fragments/trips :: trips-scroll-nav}"></div>
-        </div>
-        <div class="col-10 col-md p-0">
-            <div id="scrollable-content"
+    <div id="scrollable-content"
                  data-bs-spy="scroll"
                  data-bs-target="#trips-scroll-nav"
                  data-bs-smooth-scroll="true"
@@ -122,7 +116,7 @@
                 </div>
                 <h4 id="review">Review</h4>
                 <div id="review-summary"
-                     style="height:auto;max-height:315px"
+                     style="min-height:315px"
                      class="overflow-auto p-2">
                     <div id="review-path"
                          class="container text-center">
@@ -130,8 +124,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 </div>
 
 <!--replacing LOCATION INPUT from/to-->

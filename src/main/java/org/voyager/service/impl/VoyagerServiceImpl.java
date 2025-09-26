@@ -71,10 +71,10 @@ public class VoyagerServiceImpl implements VoyagerService {
         this.flightService = voyager.getFlightService();
         this.pathService = voyager.getPathService();
 
-        this.allAirports = fetchAirports();
-        this.deltaAirports = fetchAirports(Airline.DELTA);
+//        this.allAirports = fetchAirports();
+//        this.deltaAirports = fetchAirports(Airline.DELTA);
         this.airportMap = new HashMap<>();
-        allAirports.forEach(airport -> airportMap.put(airport.getIata(),airport));
+//        allAirports.forEach(airport -> airportMap.put(airport.getIata(),airport));
     }
 
     private Protocol resolveProtocol(String value) {

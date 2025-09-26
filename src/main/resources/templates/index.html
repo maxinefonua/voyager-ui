@@ -14,8 +14,8 @@
 <body>
         <div th:replace="~{fragments/topnav :: navbar}">
         </div>
-        <div class="collapse show" id="collapseExample">
-            <div id="map" style="min-height:200px;width:100%;"></div>
+        <div class="collapse show" id="collapse-map-div">
+            <div id="map" style="height:30vh;width:100%;"></div>
         </div>
         <div class="container" id="tabMenu">
             <ul th:replace="~{fragments/tab :: tab-list(defaultPage=${defaultPage})}"></ul>

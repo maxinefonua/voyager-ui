@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.voyager.model.*;
 import org.voyager.model.airport.Airport;
 import org.voyager.model.airport.AirportType;
@@ -30,9 +31,6 @@ public class MainController {
     @Autowired
     private TripsController tripsController;
 
-    @Autowired
-    private SavedController savedController;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
     @GetMapping("/hello-world")
@@ -43,19 +41,20 @@ public class MainController {
 
     @GetMapping("/")
     public String homepage(Model model) {
-        List<Location> locations = voyagerService.getLocations();
-        model.addAttribute("locations",locations);
-        model.addAttribute("defaultPage",DEFAULT_PAGE);
-        model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
-        switch (DEFAULT_PAGE) {
-            case TRIPS -> {
-                tripsController.addDefaultAttributes(model);
+        try {
+            model.addAttribute("defaultPage", DEFAULT_PAGE);
+            model.addAttribute("lookupAttribution", voyagerService.lookupAttribution());
+            switch (DEFAULT_PAGE) {
+                case TRIPS -> {
+                    tripsController.addDefaultAttributes(model);
+                }
             }
-            case SAVED -> {
-                savedController.addDefaultAttributes(model, new LocationFilter(), null,null);
-            }
+            return "index";
+        } catch (ResponseStatusException e) {
+            LOGGER.error("APIs are down");
+            // TODO: add alerting
+            return "down";
         }
-        return "index";
     }
 
     @GetMapping("/general")

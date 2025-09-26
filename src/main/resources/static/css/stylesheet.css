@@ -1,3 +1,7 @@
+body,html {
+    height: 100%;
+}
+
 .btn-reverse:hover:enabled {
     opacity: 1.0;
 }
@@ -42,14 +46,10 @@
 
 
 .airport-marker {
-  background-image: url(../images/delta-marker.svg);
-  background-size: cover;
-  width: 30px;
-  height: 30px;
 }
 
 .delta-marker {
-  background-image: url(../images/airport-marker.svg);
+  background-image: url(../images/delta-marker.svg);
   background-size: cover;
   width: 30px;
   height: 30px;
