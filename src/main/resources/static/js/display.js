@@ -37,6 +37,10 @@ function reverseMarkers() {
 
 function mapFitToMarkerToggleAirport(isStart,airportMarkerIndex) {
     event.preventDefault(); // prevents url mod
+    const toggleMapButton = document.getElementById('toggle-map-button');
+    if (toggleMapButton && toggleMapButton.innerHTML == 'Show Map') {
+        toggleMapButton.click();
+    }
     closeMarkerPopups();
     if (isStart) {
         mapFit(airportStartMarkers,startMarker);
@@ -119,10 +123,13 @@ function addLocationToMap(divElem,locationId,isStart,longitude,latitude,bounds,s
 }
 
 function toggleMap(buttonElem) {
+    const scrollableContent = document.getElementById('scrollable-content');
     if (buttonElem.getAttribute('aria-expanded') == 'false') {
         buttonElem.innerHTML = 'Show Map';
+        scrollableContent.style = 'height:85vh';
     } else {
         buttonElem.innerHTML = 'Hide Map';
+        scrollableContent.style = 'height:55vh';
     }
 }
 
@@ -238,3 +245,38 @@ function addRouteAirportMarkerToMap(buttonElem) {
         .addTo(map);
     return airportMarker;
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const scrollableDiv = document.getElementById('scrollable-content');
+    const collapseButton = document.getElementById('toggle-map-button');
+    const collapseElement = document.getElementById('collapse-map-div');
+
+    if (!scrollableDiv || !collapseButton) return;
+
+    // Store scroll position before collapse
+    collapseButton.addEventListener('click', function() {
+        event.preventDefault();
+        // Save current scroll position
+        const currentScrollPos = scrollableDiv.scrollTop;
+
+        // Store it in a data attribute or variable
+        scrollableDiv.setAttribute('data-last-scroll', currentScrollPos);
+    });
+
+    // Restore scroll position after collapse animation
+    if (collapseElement) {
+        collapseElement.addEventListener('hidden.bs.collapse', function() {
+            const savedScroll = scrollableDiv.getAttribute('data-last-scroll');
+            if (savedScroll) {
+                scrollableDiv.scrollTop = parseInt(savedScroll);
+            }
+        });
+
+        collapseElement.addEventListener('shown.bs.collapse', function() {
+            const savedScroll = scrollableDiv.getAttribute('data-last-scroll');
+            if (savedScroll) {
+                scrollableDiv.scrollTop = parseInt(savedScroll);
+            }
+        });
+    }
+});

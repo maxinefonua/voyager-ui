@@ -70,60 +70,59 @@
 </nav>
 
 <!--TRIPS MAIN PAGE-->
-<div th:fragment="trips(startOptionList,startInputText,startInputValue,endOptionList,endInputText,endInputValue)" class="container"
-     hx-on::after-request="dispatchInput()">
-    <div id="scrollable-content"
-                 data-bs-spy="scroll"
-                 data-bs-target="#trips-scroll-nav"
-                 data-bs-smooth-scroll="true"
-                 class="container scrollspy-example overflow-y-scroll"
-                 style="height:350px;"
-                 tabindex="0">
-                <div class="row mb-4 d-block d-lg-flex justify-content-between">
-                    <div class="col-auto col-lg-5">
-                        <h4 id="from-city">Origin</h4>
-                        <div style="height:auto"
-                             class="container">
-                            <div id="trip-input-start" class="d-grid gap-2">
-                                <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${startOptionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
-                                <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-auto d-flex p-3 align-items-center">
-                        <button class="vr btn-reverse container"
-                                onclick="reverseTrip('start-input-text','start-input-value','end-input-text','end-input-value')"
-                                id="reverse-button"
-                                hx-on::after-request="reverseTripMarkers()"
-                                th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
-                            <svg viewBox="-10 0 150 150"
-                                 transform="translate(-15,0)"
-                                 width="30">
-                                <path d="M 59.87 16.15 C 59.87 0.57 58.86 0.32 72.46 10.4 L 97.15 28.53 C 107.48 34.83 109.12 34.05 97.91 43.4 L 69.36 66.17 C 60.75 73.02 60.3 73.76 60.43 62.13 V 46.74 C 40.31 47.99 24.23 51.55 6.19 62.77 C 0.9 67.22 0.5 67.62 1.7 62.38 C 15.6 26.92 51.23 24.79 60.02 25.86 Z M 64 107.2 V 89.08 C 63.75 83.25 62 84.98 58.68 87.29 L 21.37 113.03 C 15.5 117.86 15.5 117.86 21.46 122.11 L 60.51 151.03 C 63.09 152.84 64.02 152.49 64.02 148.67 V 129.26 C 97.53 130.95 112.47 113.44 123.37 94.06 C 124.66 89.3 124.55 89.41 116.75 93.42 C 94.19 105.92 76.32 107.31 64 107.32 Z"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="col-auto col-lg-5">
-                        <h4 id="to-city">Destination</h4>
-                        <div style="height:auto"
-                             class="container">
-                            <div id="trip-input-start" class="d-grid gap-2">
-                                <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${endOptionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
-                                <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=false)}"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <h4 id="review">Flight Paths</h4>
-                <div id="review-summary"
-                     style="min-height:315px"
-                     class="overflow-auto p-2">
-                    <div id="review-path"
-                         class="container text-center">
-                        <div th:replace="~{fragments/trips :: display-path(airlineOptionList=null,pathExclusions=null,pathAirlineList=null,pathAirportsList=null,startLocation=null,endLocation=null,startAirportCodes=null,endAirportCodes=null)}"></div>
+<div th:fragment="trips(startOptionList,startInputText,startInputValue,endOptionList,endInputText,endInputValue)"
+     hx-on::after-request="dispatchInput()"
+     id="scrollable-content"
+     data-bs-spy="scroll"
+     data-bs-target="#trips-scroll-nav"
+     data-bs-smooth-scroll="true"
+     class="container scrollspy-example overflow-y-scroll pb-2"
+     style="height:55vh"
+     tabindex="0">
+        <div class="row mb-4 d-block d-lg-flex justify-content-between">
+            <div class="col-auto col-lg-5">
+                <h4 id="from-city">Origin</h4>
+                <div style="height:auto"
+                     class="container">
+                    <div id="trip-input-start" class="d-grid gap-2">
+                        <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${startOptionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
+                        <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=true)}"></div>
                     </div>
                 </div>
             </div>
+            <div class="col-auto d-flex p-3 align-items-center">
+                <button class="vr btn-reverse container"
+                        onclick="reverseTrip('start-input-text','start-input-value','end-input-text','end-input-value')"
+                        id="reverse-button"
+                        hx-on::after-request="reverseTripMarkers()"
+                        th:disabled="${startAirport == null and endAirport == null and endLocation == null and startLocation == null and nonDeltaStartAirport == null and nonDeltaEndAirport == null}">
+                    <svg viewBox="-10 0 150 150"
+                         transform="translate(-15,0)"
+                         width="30">
+                        <path d="M 59.87 16.15 C 59.87 0.57 58.86 0.32 72.46 10.4 L 97.15 28.53 C 107.48 34.83 109.12 34.05 97.91 43.4 L 69.36 66.17 C 60.75 73.02 60.3 73.76 60.43 62.13 V 46.74 C 40.31 47.99 24.23 51.55 6.19 62.77 C 0.9 67.22 0.5 67.62 1.7 62.38 C 15.6 26.92 51.23 24.79 60.02 25.86 Z M 64 107.2 V 89.08 C 63.75 83.25 62 84.98 58.68 87.29 L 21.37 113.03 C 15.5 117.86 15.5 117.86 21.46 122.11 L 60.51 151.03 C 63.09 152.84 64.02 152.49 64.02 148.67 V 129.26 C 97.53 130.95 112.47 113.44 123.37 94.06 C 124.66 89.3 124.55 89.41 116.75 93.42 C 94.19 105.92 76.32 107.31 64 107.32 Z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="col-auto col-lg-5">
+                <h4 id="to-city">Destination</h4>
+                <div style="height:auto"
+                     class="container">
+                    <div id="trip-input-start" class="d-grid gap-2">
+                        <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${endOptionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
+                        <div th:replace="~{fragments/trips :: pin-airports-initial(isStart=false)}"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h4 id="review">Flight Paths</h4>
+        <div id="review-summary"
+             class="overflow-auto p-2">
+            <div id="review-path"
+                 class="container text-center">
+                <div th:replace="~{fragments/trips :: display-path(airlineOptionList=null,pathExclusions=null,pathAirlineList=null,pathAirportsList=null,startLocation=null,endLocation=null,startAirportCodes=null,endAirportCodes=null)}"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!--replacing LOCATION INPUT from/to-->
@@ -344,9 +343,11 @@
                                     <div class="row justify-content-center">
                                         <div class="col-10 row align-items-center d-flex gap-2 justify-content-center m-0 m-lg-3 mb-3">
                                             <div class="input-group col-10 col-md-5">
-                                            <span style="width:105px"
-                                                  class="d-none d-md-block input-group-text">Origin</span>
-                                                <button class="btn-airport-code col input-group-text text-truncate"
+                                                <span class="input-group-text">
+                                                    <span class="d-none d-sm-block" style="width:105px" >Origin</span>
+                                                    <span class="d-block d-sm-none small-screen-small-font" style="width:70px">Origin</span>
+                                                </span>
+                                                <button class="btn-airport-code around-shadow col input-group-text text-truncate"
                                                         type="button"
                                                         onclick="mapToAirportPopup(this)"
                                                         th:data-airport-name="${pathAirportsList[iter.index][routeIter.index].name}"
@@ -359,9 +360,11 @@
                                                         th:utext="'<strong>' + ${route.origin} + '</strong>&nbsp;|&nbsp;<i>' + ${pathAirportsList[iter.index][routeIter.index].name} + '</i>&nbsp;in ' + ${pathAirportsList[iter.index][routeIter.index].city} + ', ' + ${pathAirportsList[iter.index][routeIter.index].subdivision} + ' of ' + ${pathAirportsList[iter.index][routeIter.index].countryCode}"></button>
                                             </div>
                                             <div class="input-group col-10 col-sm-5">
-                                            <span style="width:105px"
-                                                  class="d-none d-md-block input-group-text">Destination</span>
-                                                <button class="btn-airport-code col input-group-text text-truncate"
+                                                <span class="input-group-text">
+                                                    <span style="width:105px" class="d-none d-sm-block">Destination</span>
+                                                    <span style="width:70px" class="d-block d-sm-none small-screen-small-font">Destination</span>
+                                                </span>
+                                                <button class="btn-airport-code around-shadow col input-group-text text-truncate"
                                                         type="button"
                                                         onclick="mapToAirportPopup(this)"
                                                         th:data-airport-code="${route.destination}"

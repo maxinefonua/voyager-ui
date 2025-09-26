@@ -66,14 +66,9 @@ public class TripsController {
         pathServiceAPI = voyagerService.getPathServiceAPI();
     }
 
-    void removeDeletedLocationFromRecents(Integer deletedLocationId) {
-        Optional<Location> optionalLocation = recentLocations.stream()
-                .filter(location -> location.getId().equals(deletedLocationId)).findAny();
-        optionalLocation.ifPresent(location -> recentLocations.remove(location));
-    }
-
     void addDefaultAttributes(Model model) {
-        model.addAttribute("lookupAttribution", searchServiceAPI.getLookupAttribution());
+        model.addAttribute("sourceName", searchServiceAPI.getLookupAttribution().getName());
+        model.addAttribute("sourceLink", searchServiceAPI.getLookupAttribution().getLink());
         if (recentLocations.isEmpty())
             recentLocations.addAll(locationServiceAPI.getLocations(10));
         List<Option> optionList = recentLocations.stream()
@@ -149,34 +144,6 @@ public class TripsController {
         return "fragments/trips :: path-airline";
     }
 
-    @GetMapping("/trips")
-    public String getTrips(Model model, Integer endLocationId, Integer startLocationId, Boolean mapHidden) {
-        // TODO: when location deleted, how to update this recent locations?
-        if (recentLocations.isEmpty()) recentLocations.addAll(locationServiceAPI.getLocations(10));
-        Location startLocation = startLocationId == null ? null : locationServiceAPI.getLocation(startLocationId);
-        Location endLocation = endLocationId == null ? null : locationServiceAPI.getLocation(endLocationId);
-        if (startLocation != null) {
-            if (recentLocations.contains(startLocation)) recentLocations.remove(startLocation);
-            else recentLocations.removeLast();
-            recentLocations.push(startLocation);
-            Option startOption = buildLocationOptionForInput(startLocation);
-            model.addAttribute("startInputText", startOption.getDisplay());
-        }
-        if (endLocation != null) {
-            if (recentLocations.contains(endLocation)) recentLocations.remove(endLocation);
-            else recentLocations.removeLast();
-            recentLocations.push(endLocation);
-            Option endOption = buildLocationOptionForInput(endLocation);
-            model.addAttribute("endInputText", endOption.getDisplay());
-        }
-        List<Option> optionList = recentLocations.stream()
-                .map(this::buildLocationOptionForInput).toList();
-        model.addAttribute("startOptionList", optionList);
-        model.addAttribute("endOptionList", optionList);
-        model.addAttribute("mapHidden",mapHidden);
-        return "fragments/tab :: trips-tab";
-    }
-
     @GetMapping("/lookup")
     public String lookup(Model model, String inputText, String excludeSourceId)  {
         SearchResult<ResultSearch> searchResult = searchServiceAPI.search(inputText,10);
@@ -208,9 +175,23 @@ public class TripsController {
                 LocationForm locationForm = LocationMapperUtils.toLocationForm(resultSearchFull);
                 location = locationServiceAPI.addLocation(locationForm);
             }
-            if (!recentLocations.contains(location))
-                recentLocations.push(location);
+            if (recentLocations.contains(location))
+                recentLocations.remove(location);
+            recentLocations.push(location);
+
+            while (recentLocations.size() > 10) {
+                Location last = recentLocations.removeLast();
+                if (last == location)
+                    recentLocations.push(last);
+            }
         }
+
+        List<Option> optionList = recentLocations.stream()
+                .map(this::buildLocationOptionForInput)
+                .toList();
+        model.addAttribute("startOptionList", optionList);
+        model.addAttribute("endOptionList", optionList);
+
         model.addAttribute("isStart",isStart);
         List<Option> nearbyAirportOptionList = resolveNearbyAirportOptionList(location);
         model.addAttribute("nearbyAirportOptionList",nearbyAirportOptionList);

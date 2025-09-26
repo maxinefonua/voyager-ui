@@ -19,8 +19,8 @@ var map = new mapboxgl.Map({
     attributionControl: false
 }).addControl(new mapboxgl.AttributionControl({
     customAttribution: [
-        '&copy; <a href="https://www.mapbox.com/about/maps">Mapbox</a>',
-        '&copy; <a href="https://osm.org/copyright" target=”_blank" rel="noopener noreferrer nofollow">OpenStreetMap</a>'],
+        '&copy; <a target="_blank" rel="license noopener noreferrer" href="https://www.mapbox.com/about/maps">Mapbox</a>',
+        '&copy; <a target="_blank" rel="license noopener noreferrer" href="https://osm.org/copyright">OpenStreetMap</a>'],
     compact: false
 }));
 

@@ -17,18 +17,10 @@
         <div class="collapse show" id="collapse-map-div">
             <div id="map" style="height:30vh;width:100%;"></div>
         </div>
-        <div class="container" id="tabMenu">
+        <div class="container mb-1" id="tabMenu">
             <ul th:replace="~{fragments/tab :: tab-list(defaultPage=${defaultPage})}"></ul>
         </div>
-        <div th:if="${#strings.equalsIgnoreCase(defaultPage, 'TRIPS')}" class="container" id="tabContent">
-            <div th:replace="~{fragments/tab :: trips-tab}"></div>
-        </div>
-        <div th:if="${#strings.equalsIgnoreCase(defaultPage, 'SAVED')}" class="container" id="tabContent">
-            <div th:replace="~{fragments/tab :: saved-tab}"></div>
-        </div>
-        <div th:if="${#strings.equalsIgnoreCase(defaultPage, 'BROWSE')}" class="container" id="tabContent">
-            <div th:replace="~{fragments/tab :: add-tab}"></div>
-        </div>
+        <div th:replace="~{fragments/trips :: trips(startOptionList=${startOptionList},startInputText=${startInputText},startInputValue=${startInputValue},endOptionList=${endOptionList},endInputText=${endInputText},endInputValue=${endInputValue})}"></div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
     <script src="../js/map.js"></script>

@@ -7,7 +7,7 @@
 </head>
 <ul th:fragment="tab-list(defaultPage)"
     id="tabList"
-    class="nav nav-underline align-items-center">
+    class="nav nav-underline align-items-center gap-1">
     <li class="nav-item">
         <a class="nav-link tab-btn"
            th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'TRIPS')} ? 'active' : ''"
@@ -30,8 +30,13 @@
                 onclick="toggleMap(this)"
                 aria-controls="collapse-map-div">Hide Map</button>
     </li>
+    <li th:if="${sourceName != null and sourceLink != null}"
+        class="nav-item fw-lighter small-screen-small-font">
+        Geolocation Data sourced from
+        <a target="_blank"
+           rel="license noopener noreferrer"
+           th:href="${sourceLink}"
+           th:text="${sourceName}"></a>
+    </li>
 </ul>
-<div th:fragment="trips-tab">
-    <div th:replace="~{fragments/trips :: trips(startOptionList=${startOptionList},startInputText=${startInputText},startInputValue=${startInputValue},endOptionList=${endOptionList},endInputText=${endInputText},endInputValue=${endInputValue})}"></div>
-</div>
 </html>

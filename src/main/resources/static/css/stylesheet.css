@@ -44,10 +44,6 @@ body,html {
     pointer-events: auto; /* Allows clicks on the child elements */
 }
 
-
-.airport-marker {
-}
-
 .delta-marker {
   background-image: url(../images/delta-marker.svg);
   background-size: cover;
@@ -85,67 +81,18 @@ a.list-group-item-action.active .scroll-nav-icon {
   fill: #dc3545;
 }
 
-.track {
-    position: absolute;
-    width: 100%;
-    height: 5px;
-    background: #dee2e6;
-    top: 50%;
-    transform: translateY(195%);
-    border-radius: 3px;
-}
-
-.progress {
-    position: absolute;
-    height: 5px;
-    background: #0d6efd;
-    top: 50%;
-    transform: translateY(195%);
-    border-radius: 3px;
-}
-
-.range-slider input[type="range"] {
-    position: absolute;
-    width: 100%;
-    pointer-events: none;
-    -webkit-appearance: none;
-    background: transparent;
-}
-
-.range-slider input[type="range"]::-webkit-slider-thumb {
-    pointer-events: auto;
-    -webkit-appearance: none;
-    background: #0d6efd;
-    height: 12px;
-    width: 12px;
-    transform: translateY(50%);
-    border-radius: 50%;
-    cursor: pointer;
-}
-
 .tooltip-arrow {
     display: none !important;
 }
 
-.range-slider input[type="range"]::-moz-range-thumb {
-    pointer-events: auto;
-    -moz-appearance: none;
-    background: #0d6efd;
-    height: 12px;
-    width: 12px;
-    transform: translateY(50%);
-    border-radius: 50%;
-    cursor: pointer;
-}
-
-.range-slider {
-    position: relative;
-    height: auto;
-    width: 2em;
-}
 .basic-shadow {
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
+
+.around-shadow {
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
 .carousel-control-next, .carousel-control-prev {
     position: absolute;
     top: 40px;
