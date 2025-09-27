@@ -1,3 +1,7 @@
+body,html {
+    height: 100%;
+}
+
 .btn-reverse:hover:enabled {
     opacity: 1.0;
 }
@@ -16,9 +20,6 @@
 }
 
 .btn-reverse svg {
-    transform:translate(-17px,-10px);
-    width:30px;
-    height:30px;
     filter: drop-shadow( 1px 1px 1px rgba(0, 0, 0, .3));
 }
 
@@ -32,24 +33,19 @@
     cursor: pointer;
 }
 
-.btn-airport-code:has(.btn-close:hover) {
+.btn-airport-code:has(.btn-close:hover),
+.btn-airport-code:has(.btn:hover),.btn-airport-code:has(a:hover) {
     background-color: var(--bs-tertiary-bg);
-    pointer-events: none; /* This prevents clicks on the parent */
+    pointer-events: none; /* Prevents clicks on the parent */
 }
 
-.btn-close {
-    pointer-events: auto; /* But allows clicks on the child */
-}
-
-.airport-marker {
-  background-image: url(../images/delta-marker.svg);
-  background-size: cover;
-  width: 30px;
-  height: 30px;
+.btn-close,
+.btn,a {
+    pointer-events: auto; /* Allows clicks on the child elements */
 }
 
 .delta-marker {
-  background-image: url(../images/airport-marker.svg);
+  background-image: url(../images/delta-marker.svg);
   background-size: cover;
   width: 30px;
   height: 30px;
@@ -67,4 +63,55 @@ a.list-group-item-action.active .scroll-nav-icon {
 
 .airport-marker path {
   fill: #fd0d6e;
+}
+
+.logo path {
+    fill: #000000;
+}
+
+.btn:hover svg path {
+  fill: #ffffff;
+}
+
+.btn-primary svg path {
+  fill: #ffffff;
+}
+
+.btn-outline-danger svg path {
+  fill: #dc3545;
+}
+
+.tooltip-arrow {
+    display: none !important;
+}
+
+.basic-shadow {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.around-shadow {
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-control-next, .carousel-control-prev {
+    position: absolute;
+    top: 40px;
+    height: 60px;
+    width:20%;
+}
+
+@media (max-width: 575.98px) {
+    .small-screen-small-font {
+        font-size: 0.8rem;
+    }
+}
+
+.btn-clear {
+    position: absolute;
+    justify-self: end;
+    margin: 7px;
+}
+
+.pe-clear {
+    padding-inline-end: 36px;
 }

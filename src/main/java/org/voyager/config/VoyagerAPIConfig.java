@@ -1,23 +1,9 @@
 package org.voyager.config;
 
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.voyager.model.Airline;
-import org.voyager.model.airport.AirportType;
-import org.voyager.utils.ConstantsUtils;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.voyager.utils.ConstantsUtils.*;
 
 @Component
 @ConfigurationProperties(prefix = "voyager-api")

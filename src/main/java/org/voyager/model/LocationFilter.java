@@ -6,5 +6,5 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class LocationFilter {
-    Boolean filterArchive = true;
+    Boolean includeArchived = false;
 }

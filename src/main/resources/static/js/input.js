@@ -1,25 +1,33 @@
-function processLocationInput(inputElem,inputValueElemId,datalistElemId) {
+function processLocationInput(inputElem,inputValueElemId,datalistElemId,oppositeInputValueElemId) {
     const inputValueElem = document.getElementById(inputValueElemId);
     if (inputElem.value.trim().length == 0) {
-        inputValueElem.value = '';
-        inputValueElem.dispatchEvent(new Event('input'));
+        if (inputValueElem.value.trim().length > 0) {
+            inputValueElem.value = '';
+            inputValueElem.dispatchEvent(new Event('input'));
+        }
         return;
     }
+    if (inputElem.value.trim().length < 5) return;
     const selectedOption = Array.from(inputElem.list.options)
         .find(option => option.value === inputElem.value);
     if (selectedOption && inputValueElem) {
-        inputValueElem.value = selectedOption.dataset.value;
-        inputValueElem.dispatchEvent(new Event('input'));
+        if (inputValueElem.value != selectedOption.dataset.value) {
+            inputValueElem.value = selectedOption.dataset.value;
+            inputValueElem.dispatchEvent(new Event('input'));
+        }
         return;
     }
     const datalistElem = document.getElementById(datalistElemId);
+    const oppositeInputValueElem = document.getElementById(oppositeInputValueElemId);
     // update datalist
-    fetch(`/lookup?inputText=${encodeURIComponent(inputElem.value)}`)
+    fetch(`/lookup?inputText=${encodeURIComponent(inputElem.value)}&excludeSourceId=${oppositeInputValueElem.value}`)
             .then(response => response.text())
             .then(html => {
                 // Create temporary container to parse the fragment
                 const temp = document.createElement('div');
                 temp.innerHTML = html;
+
+                // TODO: disable or send opposite location to disable already selected option
 
                 // Replace datalist contents
                 if (temp.querySelectorAll('option').length > 0) {
@@ -33,13 +41,15 @@ function processLocationInput(inputElem,inputValueElemId,datalistElemId) {
                             inputValueElem.value = datalistElem.options[0].dataset.value;
                             inputValueElem.dispatchEvent(new Event('input'));
                         }
-                    } else {
+                    } else if (inputValueElem.value.trim().length > 0) {
                         inputValueElem.value = '';
                         inputValueElem.dispatchEvent(new Event('input'));
                     }
                 } else {
-                    inputValueElem.value = '';
-                    inputValueElem.dispatchEvent(new Event('input'));
+                    if (inputValueElem.value.trim().length > 0) {
+                        inputValueElem.value = '';
+                        inputValueElem.dispatchEvent(new Event('input'));
+                    }
                 }
             })
             .catch(error => console.error('Error:', error));
@@ -60,11 +70,7 @@ function airportIncluded(includeButtonElem,inputElemId) {
 }
 
 function checkReverse(reverseButtonElem,startInputValueElem,endInputValueElem) {
-    if (startInputValueElem.value.length > 0 && endInputValueElem.value.length > 0) {
-        reverseButtonElem.disabled = false;
-    } else {
-        reverseButtonElem.disabled = true;
-    }
+    reverseButtonElem.disabled = startInputValueElem.value.length == 0 && endInputValueElem.value.length == 0;
 }
 
 function processAirportInput(isStart,inputElem,includeButtonElemId,locationMarker) {
@@ -90,35 +96,40 @@ function processAirportInput(isStart,inputElem,includeButtonElemId,locationMarke
 function reverseTrip(startTextElemId,startValueElemId,endTextElemId,endValueElemId) {
     const startTextElem = document.getElementById(startTextElemId);
     const startValueElem = document.getElementById(startValueElemId);
+    const startDatalistElem = document.getElementById('input-start-options');
+
     const endTextElem = document.getElementById(endTextElemId);
     const endValueElem = document.getElementById(endValueElemId);
+    const endDatalistElem = document.getElementById('input-end-options');
 
     const tempText = startTextElem.value;
     const tempValue = startValueElem.value;
+    const tempDatalist = startDatalistElem.innerHTML;
+
     startTextElem.value = endTextElem.value;
     startValueElem.value = endValueElem.value;
     startValueElem.dispatchEvent(new Event('input'));
+    startDatalistElem.innerHTML = endDatalistElem.innerHTML;
+
     endTextElem.value = tempText;
     endValueElem.value = tempValue;
     endValueElem.dispatchEvent(new Event('input'));
+    endDatalistElem.innerHTML = tempDatalist;
+
     reverseMarkers();
 }
 
-function includeAirport(includeButtonElem,inputElemId) {
-    const inputElem = document.getElementById(inputElemId);
-    const selectedOption = Array.from(inputElem.list.options)
-        .find(option => option.value === inputElem.value);
-    if (selectedOption) {
-        const airportCode = selectedOption.dataset.value;
-        const parentElem = inputElem.parentElement;
-        const newDiv = document.createElement('div');
-        newDiv.innerHTML = `<div class="input-group-text pe-2 me-2">${airportCode}<button class="btn-close" style="transform: scale(0.7); transform-origin: center;" onclick="removeIncludedAirport(this.parentElement,\'${inputElemId}\')"></button></div>`;
-        parentElem.insertBefore(newDiv,inputElem);
-        inputElem.value = '';
-        inputElem.placeholder = 'Enter Additional Airport';
-        selectedOption.disabled = true;
-    }
-    includeButtonElem.disabled = true;
+function filterLocationOption(isStart,excludeSourceId) {
+    var oppositeDatalistElem;
+    if (isStart) oppositeDatalistElem = document.getElementById('input-end-options');
+    else oppositeDatalistElem = document.getElementById('input-start-options');
+    var excludeOption = null;
+    Array.from(oppositeDatalistElem.options)
+        .forEach(option => {
+            if (option.dataset.value === excludeSourceId) excludeOption = option;
+            else option.disabled = false;
+        });
+    if (excludeOption) excludeOption.disabled = true;
 }
 
 function airportRemoved(isStart,iterIndex,airportCode,datalistElemId) {
@@ -132,82 +143,13 @@ function airportRemoved(isStart,iterIndex,airportCode,datalistElemId) {
     }
 }
 
-function removeIncludedAirport(includedAirportElem,inputElemId) {
-    const inputElem = document.getElementById(inputElemId);
-    const airportCode = includedAirportElem.textContent;
-    const selectedOption = Array.from(inputElem.list.options)
-        .find(option => option.dataset.value === airportCode);
-    if (selectedOption) {
-        selectedOption.disabled = false;
-    }
-    includedAirportElem.remove();
-}
-
-function processTripInput(inputElem,inputValueElemId,tripFilterElemId,datalistElemId) {
-    const inputValueElem = document.getElementById(inputValueElemId);
-    if (inputElem.value == null || inputElem.value.trim().length == 0) {
-        if (inputValueElem) {
-            inputValueElem.value = '';
-            inputValueElem.dispatchEvent(new Event('input'));
+function clearInputElem(clearButtonElem) {
+    const inputTargetAttr = clearButtonElem.dataset.target;
+    if (inputTargetAttr) {
+        const inputTargetElem = document.getElementById(inputTargetAttr);
+        if (inputTargetElem) {
+            inputTargetElem.value = '';
+            inputTargetElem.dispatchEvent(new Event('input'));
         }
-    } else {
-        const selectedOption = Array.from(inputElem.list.options)
-            .find(option => option.value === inputElem.value);
-        const tripFilterElem = document.getElementById(tripFilterElemId);
-        if (selectedOption && inputValueElem) {
-            inputValueElem.value = selectedOption.dataset.value;
-            inputValueElem.dispatchEvent(new Event('input'));
-        }
-        else if (tripFilterElem && tripFilterElem.value == 'LOCATION') {
-            const datalistElem = document.getElementById(datalistElemId);
-            // update datalist
-            fetch(`/lookup?inputText=${encodeURIComponent(inputElem.value)}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        // Create temporary container to parse the fragment
-                        const temp = document.createElement('div');
-                        temp.innerHTML = html;
-
-                        // Replace datalist contents
-                        if (temp.querySelectorAll('option').length > 0) {
-                            datalistElem.innerHTML = '';
-                            temp.querySelectorAll('option').forEach(opt => {
-                                datalistElem.appendChild(opt.cloneNode(true));
-                            });
-                            if (datalistElem.options.length == 1) {
-                                if (inputValueElem.value !== datalistElem.options[0].dataset.value) {
-                                    inputElem.value = datalistElem.options[0].value;
-                                    inputValueElem.value = datalistElem.options[0].dataset.value;
-                                    inputValueElem.dispatchEvent(new Event('input'));
-                                }
-                            } else {
-                                inputValueElem.value = '';
-                                inputValueElem.dispatchEvent(new Event('input'));
-                            }
-                        } else {
-                            inputValueElem.value = '';
-                            inputValueElem.dispatchEvent(new Event('input'));
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            inputElem.focus();
-            inputElem.click();
-        } else {
-            inputValueElem.value = '';
-            inputValueElem.dispatchEvent(new Event('input'));
-        }
-    }
-}
-
-function resetTripInputElements(isStart,tripFilter,inputTextElemId,inputValueElemId) {
-    const inputTextElem = document.getElementById(inputTextElemId);
-    const inputValueElem = document.getElementById(inputValueElemId);
-    inputTextElem.value = '';
-    inputValueElem.value = '';
-    if (tripFilter == 'AIRPORT') {
-        inputTextElem.placeholder = 'Enter Airport'
-    }
-    if (tripFilter == 'LOCATION') {
-        inputTextElem.placeholder = 'Search Location'
     }
 }

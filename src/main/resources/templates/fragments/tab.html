@@ -7,7 +7,7 @@
 </head>
 <ul th:fragment="tab-list(defaultPage)"
     id="tabList"
-    class="nav nav-underline">
+    class="nav nav-underline align-items-center gap-1">
     <li class="nav-item">
         <a class="nav-link tab-btn"
            th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'TRIPS')} ? 'active' : ''"
@@ -15,43 +15,28 @@
            hx-get="/trips"
            hx-target="#tabContent"
            hx-on::before-request="activate(this)"
-           hx-on::after-request="reloadTrips('scrollable-content')"
+           hx-on::after-request="reloadTrips('scrollable-content');dispatchInput();"
            hx-swap="innerHTML">
-            Trips
+            Fly To
         </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link tab-btn"
-           th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'SAVED')} ? 'active' : ''"
-           id="saved-tab-link"
-                hx-get="/saved"
-                hx-target="#tabContent"
-                hx-on::before-request="activate(this)"
-                hx-on::after-request="mapToFirstLocation(false)"
-                hx-swap="innerHTML">
-            Saved
-        </a>
+    <li class="nav-item m-2 row align-items-center">
+        <button class="btn btn-primary btn-sm"
+                id="toggle-map-button"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse-map-div"
+                aria-expanded="false"
+                onclick="toggleMap(this)"
+                aria-controls="collapse-map-div">Hide Map</button>
     </li>
-    <li class="nav-item">
-        <a class="nav-link tab-btn"
-           th:classappend="${#strings.equalsIgnoreCase(defaultPage, 'BROWSE')} ? 'active' : ''"
-           id="add-tab-link"
-                hx-get="/add"
-                hx-target="#tabContent"
-                hx-on::before-request="activate(this)"
-                hx-on::after-request="recenterMap()"
-                hx-swap="innerHTML">
-            Browse
-        </a>
+    <li th:if="${sourceName != null and sourceLink != null}"
+        class="nav-item fw-lighter small-screen-small-font">
+        Geolocation Data sourced from
+        <a target="_blank"
+           rel="license noopener noreferrer"
+           th:href="${sourceLink}"
+           th:text="${sourceName}"></a>
     </li>
 </ul>
-<div th:fragment="saved-tab" class="container mt-2">
-    <div th:replace="~{fragments/locations :: saved-locations}"></div>
-</div>
-<div th:fragment="add-tab">
-    <div th:replace="~{fragments/search :: lookupContainer}"></div>
-</div>
-<div th:fragment="trips-tab" class="container mt-2">
-    <div th:replace="~{fragments/trips :: trips}"></div>
-</div>
 </html>
