@@ -11,16 +11,28 @@
 <body>
 <div th:replace="~{fragments/topnav :: navbar}">
 </div>
-  <div class="container">
+  <div class="container col-md-8">
     <h3 class="mt-4">About</h3>
     <div class="container text-body-secondary">
       <div class="row justify-content-center">
         <div class="col col-lg-10 m-3">
           <div class="d-inline-flex align-items-center mb-2 text-body-emphasis text-decoration-none" href="/" aria-label="Voyager">
-            <span class="fs-7"><p>This site was born out of a personal project I took on to relearn full-cycle development, and to better organize my travel plans.
-              It is built entirely with open-sourced data, in alignment with the following personal belief.
-              <blockquote class="blockquote">As developers, our greatest contribution to the digital age is to seamlessly and sustainably increase access to information exchange.</blockquote>The globalization of society via the internet offers developers the unique opportunity to collaborate, build, and enhance tools within the global digital commons. Such work encourages efficiency, sustainability, and accessibility, all of which reinforce positive feedback loops of improved development.</p>
-              <p>Below are the technologies and frameworks I used to create this site. To learn more about the Voyager project, feel free to visit my linked GitHub repos. To learn more about myself and other work, feel free to visit my personal site.</p>
+            <span class="fs-7">
+              <p>As airline employees, our standby travel booking experience is far from optimal. We constantly switch to and from a separate search engine for existing flight itineraries, and our internal employee platform where we must purchase the seat.</p>
+              <p>Voyager seeks to enhance that experience by offering a search tool where:
+              <ul>
+              <li>flight data consists only of participating airlines</li>
+              <li>results can be filtered by airline preference</li>
+              <li>nearby airports are recommended for widened search results</li>
+              <li>itineraries are fully operated by one airline in case of checked bags</li>
+              <li>departure times for each leg are shown in case of rollovers</li>
+            </ul></p>
+              <p>I took on this project as a refresher of full-cycle development, and to optimize my own airline employee benefits.</p>
+              <p>To learn more about the development process, you can visit my linked
+                <a target="_blank" rel="license noopener noreferrer"
+                   href="https://github.com/maxinefonua/voyager-ui">GitHub repos</a>. To learn more about myself and other work, you can visit my
+                <a target="_blank" rel="license noopener noreferrer"
+                   href="https://maxinefonua.com/">personal site</a>.</p>
               <span class="m-2 fs-7 fw-lighter float-end">Maxine Fonua, <span class="fst-italic">Voyager developer</span></span>
             </span>
           </div>
@@ -42,15 +54,16 @@
           <div class="example-box">
             <h5>Flight/Airport Data</h5>
             <ul>
-              <li>AirportsData - <a href="https://github.com/mborsetti/airportsdata/blob/main/airportsdata/airports.csv" target="_blank" rel="license noopener noreferrer">https://github.com/mborsetti/airportsdata/blob/main/airportsdata/airports.csv</a></li>
+              <li>AirportsData - <a href="https://github.com/mborsetti/airportsdata/blob/main/airportsdata/airports.csv" target="_blank" rel="license noopener noreferrer">https://github.com/mborsetti/airportsdata/</a></li>
               <li>FlightRadar24 - <a href="https://www.flightradar24.com/about" target="_blank" rel="license noopener noreferrer">https://www.flightradar24.com/about</a></li>
               <li>OpenStreetMap - <a href="https://www.openstreetmap.org/" target="_blank" rel="license noopener noreferrer">https://www.openstreetmap.org/</a></li>
             </ul>
           </div>
           <div class="example-box">
-            <h5>Web App Styling</h5>
+            <h5>Styling and Interaction</h5>
             <ul>
               <li>Bootstrap v5.3.0 - <a target="_blank" rel="license noopener noreferrer" href="https://getbootstrap.com/">https://getbootstrap.com/</a></li>
+              <li>Mapbox v1.13.3 - <a target="_blank" rel="license noopener noreferrer" href="https://github.com/mapbox/mapbox-gl-js/tree/v1.13.3">https://github.com/mapbox/mapbox-gl-js/</a></li>
               <li>SVG Path Editor - <a target="_blank" rel="license noopener noreferrer" href="https://yqnn.github.io/svg-path-editor/">https://yqnn.github.io/svg-path-editor/</a></li>
               <li>Thymeleaf - <a target="_blank" rel="license noopener noreferrer" href="https://www.thymeleaf.org/">https://www.thymeleaf.org/</a></li>
             </ul>
@@ -61,6 +74,9 @@
               <li>GitHub - <a target="_blank" rel="license noopener noreferrer" href="https://github.com/">https://github.com/</a></li>
               <li>IntelliJ - <a target="_blank" rel="license noopener noreferrer" href="https://www.jetbrains.com/idea/download/?section=mac">https://www.jetbrains.com/idea/download/?section=mac</a></li>
               <li>Spring - <a target="_blank" rel="license noopener noreferrer" href="https://spring.io/">https://spring.io/</a></li>
+              <li>HTMX - <a target="_blank" rel="license noopener noreferrer" href="https://htmx.org/">https://htmx.org/</a></li>
+              <li>PostgreSQL - <a target="_blank" rel="license noopener noreferrer" href="https://www.postgresql.org/about/">https://www.postgresql.org/</a></li>
+              <li>pgAdmin - <a target="_blank" rel="license noopener noreferrer" href="https://www.pgadmin.org/">https://www.pgadmin.org/</a></li>
             </ul>
           </div>
         </div>

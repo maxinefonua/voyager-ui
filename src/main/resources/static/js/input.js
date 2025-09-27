@@ -142,3 +142,14 @@ function airportRemoved(isStart,iterIndex,airportCode,datalistElemId) {
         else removeMarkerAtIndex(airportEndMarkers,iterIndex);
     }
 }
+
+function clearInputElem(clearButtonElem) {
+    const inputTargetAttr = clearButtonElem.dataset.target;
+    if (inputTargetAttr) {
+        const inputTargetElem = document.getElementById(inputTargetAttr);
+        if (inputTargetElem) {
+            inputTargetElem.value = '';
+            inputTargetElem.dispatchEvent(new Event('input'));
+        }
+    }
+}

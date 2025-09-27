@@ -105,3 +105,13 @@ a.list-group-item-action.active .scroll-nav-icon {
         font-size: 0.8rem;
     }
 }
+
+.btn-clear {
+    position: absolute;
+    justify-self: end;
+    margin: 7px;
+}
+
+.pe-clear {
+    padding-inline-end: 36px;
+}

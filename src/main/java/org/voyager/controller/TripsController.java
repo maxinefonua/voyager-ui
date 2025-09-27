@@ -50,9 +50,6 @@ public class TripsController {
     private static PathServiceAPI pathServiceAPI;
     private Source source;
 
-    // TODO: handle delete location removal correctly - duplicates showing up in recent locations
-    private Deque<Location> recentLocations = new ArrayDeque<>();
-
     @Autowired
     private VoyagerService voyagerService;
 
@@ -69,13 +66,6 @@ public class TripsController {
     void addDefaultAttributes(Model model) {
         model.addAttribute("sourceName", searchServiceAPI.getLookupAttribution().getName());
         model.addAttribute("sourceLink", searchServiceAPI.getLookupAttribution().getLink());
-        if (recentLocations.isEmpty())
-            recentLocations.addAll(locationServiceAPI.getLocations(10));
-        List<Option> optionList = recentLocations.stream()
-                .map(this::buildLocationOptionForInput)
-                .toList();
-        model.addAttribute("startOptionList", optionList);
-        model.addAttribute("endOptionList", optionList);
     }
 
     @GetMapping("/build-path")
@@ -175,22 +165,7 @@ public class TripsController {
                 LocationForm locationForm = LocationMapperUtils.toLocationForm(resultSearchFull);
                 location = locationServiceAPI.addLocation(locationForm);
             }
-            if (recentLocations.contains(location))
-                recentLocations.remove(location);
-            recentLocations.push(location);
-
-            while (recentLocations.size() > 10) {
-                Location last = recentLocations.removeLast();
-                if (last == location)
-                    recentLocations.push(last);
-            }
         }
-
-        List<Option> optionList = recentLocations.stream()
-                .map(this::buildLocationOptionForInput)
-                .toList();
-        model.addAttribute("startOptionList", optionList);
-        model.addAttribute("endOptionList", optionList);
 
         model.addAttribute("isStart",isStart);
         List<Option> nearbyAirportOptionList = resolveNearbyAirportOptionList(location);
@@ -214,6 +189,7 @@ public class TripsController {
                                  String airportCode,String sourceId) {
         if (airportServiceAPI.isValidIataCode(airportCode) && !airportCodes.getCodes().contains(airportCode))
             airportCodes.getCodes().add(airportCode);
+        if (source == null) source = searchServiceAPI.getSource();
         Location location = locationServiceAPI.getLocation(source,sourceId);
         LocationPatch locationPatch = LocationPatch.builder().airports(airportCodes.getCodes()).build();
         locationServiceAPI.patchLocation(location.getId(),locationPatch);
@@ -226,6 +202,7 @@ public class TripsController {
     public String removeAirportCode(Model model, Boolean isStart, @ModelAttribute AirportCodes airportCodes,
                                     String airportCode, String sourceId) {
         airportCodes.getCodes().remove(airportCode);
+        if (source == null) source = searchServiceAPI.getSource();
         Location location = locationServiceAPI.getLocation(source,sourceId);
         LocationPatch locationPatch = LocationPatch.builder().airports(airportCodes.getCodes()).build();
         locationServiceAPI.patchLocation(location.getId(),locationPatch);

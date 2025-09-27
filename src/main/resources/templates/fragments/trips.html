@@ -79,10 +79,10 @@
      class="container scrollspy-example overflow-y-scroll pb-2"
      style="height:55vh"
      tabindex="0">
-        <div class="row mb-4 d-block d-lg-flex justify-content-between">
-            <div class="col-auto col-lg-5">
+    <div class="row mb-4 d-block d-lg-flex justify-content-center">
+        <div class="col-auto col-lg-5">
                 <h4 id="from-city">Origin</h4>
-                <div style="height:auto"
+                <div style="min-height:140px"
                      class="container">
                     <div id="trip-input-start" class="d-grid gap-2">
                         <div th:replace="~{fragments/trips :: location-input(isStart=true,optionList=${startOptionList},inputText=${startInputText},inputValue=${startInputValue})}"></div>
@@ -90,7 +90,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-auto d-flex p-3 align-items-center">
+        <div class="col-auto d-flex align-items-center">
                 <button class="vr btn-reverse container"
                         onclick="reverseTrip('start-input-text','start-input-value','end-input-text','end-input-value')"
                         id="reverse-button"
@@ -103,9 +103,9 @@
                     </svg>
                 </button>
             </div>
-            <div class="col-auto col-lg-5">
+        <div class="col-auto col-lg-5">
                 <h4 id="to-city">Destination</h4>
-                <div style="height:auto"
+                <div style="min-height:140px"
                      class="container">
                     <div id="trip-input-start" class="d-grid gap-2">
                         <div th:replace="~{fragments/trips :: location-input(isStart=false,optionList=${endOptionList},inputText=${endInputText},inputValue=${endInputValue})}"></div>
@@ -113,10 +113,11 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <h4 id="review">Flight Paths</h4>
+    </div>
+    <div class="row justify-content-center">
+        <h4 id="review" class="col-12 col-lg-10">Flight Paths</h4>
         <div id="review-summary"
-             class="overflow-auto p-2">
+             class="overflow-auto p-2 col-12 col-lg-10">
             <div id="review-path"
                  class="container text-center">
                 <div th:replace="~{fragments/trips :: display-path(airlineOptionList=null,pathExclusions=null,pathAirlineList=null,pathAirportsList=null,startLocation=null,endLocation=null,startAirportCodes=null,endAirportCodes=null)}"></div>
@@ -128,37 +129,38 @@
 <!--replacing LOCATION INPUT from/to-->
 <div th:fragment="location-input(isStart,optionList)"
      th:id="${isStart}?'location-input-start':'location-input-end'"
-     class="input-group">
-    <span class="input-group-text col-auto"
-          th:text="${isStart}?'From':'To'"></span>
-    <input th:id="${isStart}?'start-input-value':'end-input-value'"
-           th:value="${inputValue}"
-           type="hidden"
-           hx-get="/update-review"
-           hx-swap="outerHTML transition:true"
-           name="sourceId"
-           th:hx-on::after-request="'filterLocationOption('+${isStart}+',this.value)'"
-           th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
-           hx-trigger="input changed"
-           th:hx-target="${isStart}?'#include-airports-start':'#include-airports-end'"
-           class="input-group-text">
-    <datalist th:id="${isStart}?'input-start-options':'input-end-options'">
-        <option th:replace="~{fragments/options :: location-input-options(optionList=${optionList})}"></option>
-    </datalist>
-    <input th:id="${isStart}?'start-input-text':'end-input-text'"
-           class="form-control"
-           name="inputText"
-           placeholder="Lookup location"
-           th:list="${isStart}?'input-start-options':'input-end-options'"
-           th:oninput="${isStart}?
+     class="position-relative">
+        <input th:id="${isStart}?'start-input-text':'end-input-text'"
+               class="form-control pe-clear"
+               name="inputText"
+               th:placeholder="${isStart}?'From City':'To City'"
+               th:list="${isStart}?'input-start-options':'input-end-options'"
+               th:oninput="${isStart}?
            'debouncedProcessLocationInput(this,\'start-input-value\',\'input-start-options\',\'end-input-value\')'
            :
            'debouncedProcessLocationInput(this,\'end-input-value\',\'input-end-options\',\'start-input-value\')'"
-           th:onkeydown="${isStart}?
+               th:onkeydown="${isStart}?
            'if(event.key === \'Enter\') processLocationInput(this,\'start-input-value\',\'input-start-options\',\'end-input-value\')'
            :
            'if(event.key === \'Enter\') processLocationInput(this,\'end-input-value\',\'input-end-options\',\'start-input-value\')'"
-           th:value="${inputText}">
+               th:value="${inputText}">
+        <input th:id="${isStart}?'start-input-value':'end-input-value'"
+               th:value="${inputValue}"
+               type="hidden"
+               hx-get="/update-review"
+               hx-swap="outerHTML transition:true"
+               name="sourceId"
+               th:hx-on::after-request="'filterLocationOption('+${isStart}+',this.value)'"
+               th:hx-vals="'{&quot;isStart&quot;:' + ${isStart} + '}'"
+               hx-trigger="input changed"
+               th:hx-target="${isStart}?'#include-airports-start':'#include-airports-end'"
+               class="input-group-text">
+        <datalist th:id="${isStart}?'input-start-options':'input-end-options'">
+            <option th:replace="~{fragments/options :: location-input-options(optionList=${optionList})}"></option>
+        </datalist>
+        <button class="btn-close btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted me-2 ms-2"
+                th:data-target="${isStart}?'start-input-text':'end-input-text'"
+                onclick="clearInputElem(this)"></button>
 </div>
 
 <!--replace INITIAL PIN AIRPORTS start/end-->
@@ -347,7 +349,7 @@
                                                     <span class="d-none d-sm-block" style="width:105px" >Origin</span>
                                                     <span class="d-block d-sm-none small-screen-small-font" style="width:70px">Origin</span>
                                                 </span>
-                                                <button class="btn-airport-code around-shadow col input-group-text text-truncate"
+                                                <button class="btn-airport-code around-shadow col input-group-text text-truncate overflow-x-scroll"
                                                         type="button"
                                                         onclick="mapToAirportPopup(this)"
                                                         th:data-airport-name="${pathAirportsList[iter.index][routeIter.index].name}"
@@ -364,7 +366,7 @@
                                                     <span style="width:105px" class="d-none d-sm-block">Destination</span>
                                                     <span style="width:70px" class="d-block d-sm-none small-screen-small-font">Destination</span>
                                                 </span>
-                                                <button class="btn-airport-code around-shadow col input-group-text text-truncate"
+                                                <button class="btn-airport-code around-shadow col input-group-text text-truncate overflow-x-scroll"
                                                         type="button"
                                                         onclick="mapToAirportPopup(this)"
                                                         th:data-airport-code="${route.destination}"
