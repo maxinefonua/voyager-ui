@@ -10,10 +10,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.voyager</groupId>
-    <artifactId>VoyagerUI</artifactId>
+    <artifactId>voyager-ui</artifactId>
     <version>0.1.0</version>
+    <packaging>jar</packaging>
     <name>VoyagerUI</name>
-    <description>Thymeleaf Project on Spring Boot</description>
+    <description>Web app service for Voyager project</description>
     <properties>
         <java.version>17</java.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
@@ -80,6 +81,16 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal> <!-- This makes it executable -->
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <mainClass>org.voyager.app.Application</mainClass> <!-- Your main class -->
+                    </configuration>
                 </plugin>
 
                 <plugin>

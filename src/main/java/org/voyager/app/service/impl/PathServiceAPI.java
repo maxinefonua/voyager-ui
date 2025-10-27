@@ -1,13 +1,11 @@
-package org.voyager.service.impl;
+package org.voyager.app.service.impl;
 
 import org.voyager.sdk.model.AirlinePathQuery;
 import org.voyager.commons.model.route.AirlinePath;
 import org.voyager.commons.model.route.PathResponse;
 import org.voyager.sdk.service.PathService;
 
-import java.util.List;
-
-import static org.voyager.service.impl.VoyagerServiceImpl.unwrapEither;
+import static org.voyager.app.service.impl.VoyagerServiceImpl.unwrapEither;
 
 public class PathServiceAPI {
     private final PathService pathService;

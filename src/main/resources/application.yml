@@ -1,9 +1,12 @@
 voyager-api:
   protocol: http
-  host: localhost
+  host: ${VOYAGER_HOST}
   port: 3000
   authToken: ${VOYAGER_API_KEY}
-
+server:
+  port: 8080
+  error:
+    include-message: always
 spring:
   profiles:
     active: local

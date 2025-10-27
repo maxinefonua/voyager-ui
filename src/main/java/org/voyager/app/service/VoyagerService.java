@@ -1,6 +1,6 @@
-package org.voyager.service;
+package org.voyager.app.service;
 
-import org.voyager.service.impl.*;
+import org.voyager.app.service.impl.*;
 
 public interface VoyagerService {
     FlightServiceAPI getFlightServiceAPI();

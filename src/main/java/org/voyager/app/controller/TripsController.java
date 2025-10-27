@@ -1,4 +1,4 @@
-package org.voyager.controller;
+package org.voyager.app.controller;
 
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.voyager.commons.constants.ParameterNames;
 import org.voyager.commons.constants.Regex;
-import org.voyager.commons.model.*;
 import org.voyager.commons.model.AirportCodes;
 import org.voyager.commons.model.FlightDetails;
 import org.voyager.commons.model.Option;
@@ -32,9 +31,9 @@ import org.voyager.commons.model.route.PathResponse;
 import org.voyager.commons.model.route.Route;
 import org.voyager.commons.model.PathExclusions;
 import org.voyager.sdk.model.*;
-import org.voyager.service.*;
-import org.voyager.service.impl.*;
-import org.voyager.utils.LocationMapperUtils;
+import org.voyager.app.service.*;
+import org.voyager.app.service.impl.*;
+import org.voyager.app.utils.LocationMapperUtils;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;

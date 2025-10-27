@@ -1,4 +1,4 @@
-package org.voyager.service.impl;
+package org.voyager.app.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.voyager.commons.constants.Regex;
@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.voyager.service.impl.VoyagerServiceImpl.unwrapEither;
+import static org.voyager.app.service.impl.VoyagerServiceImpl.unwrapEither;
 
 public class AirportServiceAPI {
     private final AirportService airportService;

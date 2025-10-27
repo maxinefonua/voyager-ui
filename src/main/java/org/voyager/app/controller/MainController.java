@@ -1,27 +1,13 @@
-package org.voyager.controller;
-import jakarta.annotation.PostConstruct;
-import org.apache.commons.lang3.StringUtils;
+package org.voyager.app.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.voyager.commons.model.*;
-import org.voyager.commons.model.airport.Airport;
-import org.voyager.commons.model.airport.AirportType;
-import org.voyager.commons.model.location.Location;
-import org.voyager.commons.model.response.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.servlet.ModelAndView;
-import org.voyager.service.VoyagerService;
-import org.voyager.service.impl.SearchServiceAPI;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.voyager.utils.ConstantsUI.*;
+import org.voyager.app.service.VoyagerService;
 
 @Controller
 public class MainController {

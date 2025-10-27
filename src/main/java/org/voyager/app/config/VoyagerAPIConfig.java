@@ -1,4 +1,4 @@
-package org.voyager.config;
+package org.voyager.app.config;
 
 import lombok.Getter;
 import lombok.Setter;

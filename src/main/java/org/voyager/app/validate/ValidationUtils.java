@@ -1,4 +1,4 @@
-package org.voyager.validate;
+package org.voyager.app.validate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

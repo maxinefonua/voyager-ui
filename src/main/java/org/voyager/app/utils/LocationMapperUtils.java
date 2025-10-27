@@ -1,4 +1,4 @@
-package org.voyager.utils;
+package org.voyager.app.utils;
 
 import lombok.NonNull;
 import org.voyager.commons.model.location.LocationForm;

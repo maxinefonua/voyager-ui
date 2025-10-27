@@ -1,4 +1,4 @@
-package org.voyager.service.impl;
+package org.voyager.app.service.impl;
 
 import io.vavr.control.Either;
 import jakarta.annotation.PostConstruct;
@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.voyager.config.VoyagerAPIConfig;
+import org.voyager.app.config.VoyagerAPIConfig;
 import org.voyager.commons.error.ServiceError;
 import org.voyager.sdk.service.AirlineService;
 import org.voyager.sdk.service.CountryService;
@@ -17,7 +17,7 @@ import org.voyager.sdk.service.LocationService;
 import org.voyager.sdk.service.SearchService;
 import org.voyager.sdk.service.PathService;
 import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
-import org.voyager.service.*;
+import org.voyager.app.service.*;
 
 @Service
 public class VoyagerServiceImpl implements VoyagerService {

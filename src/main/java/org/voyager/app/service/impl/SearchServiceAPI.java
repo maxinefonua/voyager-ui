@@ -1,4 +1,4 @@
-package org.voyager.service.impl;
+package org.voyager.app.service.impl;
 
 import org.voyager.sdk.model.SearchQuery;
 import org.voyager.commons.model.location.Source;
@@ -9,7 +9,7 @@ import org.voyager.commons.model.result.ResultSearchFull;
 import org.voyager.sdk.service.SearchService;
 
 
-import static org.voyager.service.impl.VoyagerServiceImpl.unwrapEither;
+import static org.voyager.app.service.impl.VoyagerServiceImpl.unwrapEither;
 
 public class SearchServiceAPI {
     private final SearchService searchService;
