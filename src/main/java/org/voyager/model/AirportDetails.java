@@ -1,6 +1,6 @@
-package org.voyager.model;
+package org.voyager.commons.model;
 
-import org.voyager.model.airport.Airport;
+import org.voyager.commons.model.airport.Airport;
 
 public class AirportDetails {
     Airport airport;

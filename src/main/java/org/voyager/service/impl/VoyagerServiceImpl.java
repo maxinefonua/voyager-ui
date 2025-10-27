@@ -2,37 +2,22 @@ package org.voyager.service.impl;
 
 import io.vavr.control.Either;
 import jakarta.annotation.PostConstruct;
-import lombok.NonNull;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.voyager.config.Protocol;
 import org.voyager.config.VoyagerAPIConfig;
-import org.voyager.error.HttpStatus;
-import org.voyager.error.ServiceError;
-import org.voyager.model.Airline;
-import org.voyager.model.ResultDetails;
-import org.voyager.model.airport.Airport;
-import org.voyager.model.airport.AirportType;
-import org.voyager.model.flight.Flight;
-import org.voyager.model.location.*;
-import org.voyager.model.response.SearchResult;
-import org.voyager.model.result.LookupAttribution;
-import org.voyager.model.result.ResultSearch;
-import org.voyager.model.result.ResultSearchFull;
-import org.voyager.model.route.PathAirline;
-import org.voyager.model.route.PathResponse;
-import org.voyager.model.route.Route;
+import org.voyager.commons.error.ServiceError;
+import org.voyager.sdk.service.AirlineService;
+import org.voyager.sdk.service.CountryService;
+import org.voyager.sdk.service.FlightService;
+import org.voyager.sdk.service.AirportService;
+import org.voyager.sdk.service.LocationService;
+import org.voyager.sdk.service.SearchService;
+import org.voyager.sdk.service.PathService;
+import org.voyager.sdk.service.impl.VoyagerServiceRegistry;
 import org.voyager.service.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.voyager.utils.ConstantsUtils.ALPHA3_CODE_REGEX;
 
 @Service
 public class VoyagerServiceImpl implements VoyagerService {
@@ -41,54 +26,76 @@ public class VoyagerServiceImpl implements VoyagerService {
     @Autowired
     VoyagerAPIConfig voyagerAPIConfig;
 
-    private Voyager voyager;
+    private VoyagerServiceRegistry voyagerServiceRegistry;
 
     private FlightServiceAPI flightServiceAPI;
     private CountryServiceAPI countryServiceAPI;
     private LocationServiceAPI locationServiceAPI;
     private SearchServiceAPI searchServiceAPI;
     private AirportServiceAPI airportServiceAPI;
+    private AirlineServiceAPI airlineServiceAPI;
     private PathServiceAPI pathServiceAPI;
 
     @PostConstruct
     public void init() {
-        this.voyager = new Voyager(voyagerAPIConfig.getVoyagerConfig());
+        VoyagerServiceRegistry.initialize(voyagerAPIConfig.getVoyagerConfig());
+        this.voyagerServiceRegistry = VoyagerServiceRegistry.getInstance();
     }
 
     @Override
     public FlightServiceAPI getFlightServiceAPI() {
-        if (flightServiceAPI == null) flightServiceAPI = new FlightServiceAPI(voyager.getFlightService());
+        if (flightServiceAPI == null) {
+            flightServiceAPI = new FlightServiceAPI(voyagerServiceRegistry.get(FlightService.class));
+        }
         return flightServiceAPI;
     }
 
     @Override
     public CountryServiceAPI getCountryServiceAPI() {
-        if (countryServiceAPI == null) countryServiceAPI = new CountryServiceAPI(voyager.getCountryService());
+        if (countryServiceAPI == null) {
+            countryServiceAPI = new CountryServiceAPI(voyagerServiceRegistry.get(CountryService.class));
+        }
         return countryServiceAPI;
     }
 
     @Override
     public LocationServiceAPI getLocationServiceAPI() {
-        if (locationServiceAPI == null) locationServiceAPI = new LocationServiceAPI(voyager.getLocationService());
+        if (locationServiceAPI == null) {
+            locationServiceAPI = new LocationServiceAPI(voyagerServiceRegistry.get(LocationService.class));
+        }
         return locationServiceAPI;
     }
 
     @Override
     public SearchServiceAPI getSearchServiceAPI() {
-        if (searchServiceAPI == null) searchServiceAPI = new SearchServiceAPI(voyager.getSearchService());
+        if (searchServiceAPI == null) {
+            searchServiceAPI = new SearchServiceAPI(voyagerServiceRegistry.get(SearchService.class));
+        }
         return searchServiceAPI;
     }
 
     @Override
     public AirportServiceAPI getAirportServiceAPI() {
-        if (airportServiceAPI == null) airportServiceAPI = new AirportServiceAPI(voyager.getAirportService());
+        if (airportServiceAPI == null) {
+            airportServiceAPI = new AirportServiceAPI(voyagerServiceRegistry.get(AirportService.class));
+        }
         return airportServiceAPI;
     }
 
     @Override
     public PathServiceAPI getPathServiceAPI() {
-        if (pathServiceAPI == null) pathServiceAPI = new PathServiceAPI(voyager.getPathService());
+        if (pathServiceAPI == null) {
+            pathServiceAPI = new PathServiceAPI(voyagerServiceRegistry.get(PathService.class));
+        }
         return pathServiceAPI;
+    }
+
+    @Override
+    public AirlineServiceAPI getAirlineServiceAPI() {
+        if (airlineServiceAPI == null) {
+            airlineServiceAPI = new AirlineServiceAPI(voyagerServiceRegistry.get(AirlineService.class));
+        }
+        return airlineServiceAPI;
     }
 
     static <T> T unwrapEither(Either<ServiceError, T> either) {

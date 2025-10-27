@@ -1,7 +1,7 @@
-package org.voyager.model;
+package org.voyager.commons.model;
 
 import lombok.*;
-import org.voyager.model.route.Route;
+import org.voyager.commons.model.route.Route;
 
 import java.util.ArrayList;
 import java.util.List;

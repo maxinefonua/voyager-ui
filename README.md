@@ -24,6 +24,11 @@ Employees can benefit from this search tool where:
 - Voyager Commons: https://github.com/maxinefonua/voyager-commons
     - an SDK for API services
     - scripts and jars for data syncing
+- Voyager Tests: https://github.com/maxinefonua/voyager-tests
+  - functional tests built with JUnit 5
+  - an uber jar deployed and used for application deployments
+
+
 ### Tech Stack:
 - Geolocation Data
   - GeoNames - https://www.geonames.org.com/

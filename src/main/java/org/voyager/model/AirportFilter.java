@@ -1,4 +1,4 @@
-package org.voyager.model;
+package org.voyager.commons.model;
 
 public enum AirportFilter {
     ALL,

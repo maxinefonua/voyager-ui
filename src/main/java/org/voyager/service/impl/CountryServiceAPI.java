@@ -1,8 +1,8 @@
 package org.voyager.service.impl;
 
 import lombok.NonNull;
-import org.voyager.model.country.Country;
-import org.voyager.service.CountryService;
+import org.voyager.commons.model.country.Country;
+import org.voyager.sdk.service.CountryService;
 
 import java.util.List;
 import java.util.Optional;

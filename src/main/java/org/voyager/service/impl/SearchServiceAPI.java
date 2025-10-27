@@ -1,11 +1,12 @@
 package org.voyager.service.impl;
 
-import org.voyager.model.location.Source;
-import org.voyager.model.response.SearchResult;
-import org.voyager.model.result.LookupAttribution;
-import org.voyager.model.result.ResultSearch;
-import org.voyager.model.result.ResultSearchFull;
-import org.voyager.service.SearchService;
+import org.voyager.sdk.model.SearchQuery;
+import org.voyager.commons.model.location.Source;
+import org.voyager.commons.model.response.SearchResult;
+import org.voyager.commons.model.result.LookupAttribution;
+import org.voyager.commons.model.result.ResultSearch;
+import org.voyager.commons.model.result.ResultSearchFull;
+import org.voyager.sdk.service.SearchService;
 
 
 import static org.voyager.service.impl.VoyagerServiceImpl.unwrapEither;
@@ -16,8 +17,8 @@ public class SearchServiceAPI {
         this.searchService = searchService;
     }
 
-    public SearchResult<ResultSearch> search(String query,int limit) {
-        return unwrapEither(searchService.search(query,limit));
+    public SearchResult<ResultSearch> search(SearchQuery searchQuery) {
+        return unwrapEither(searchService.search(searchQuery));
     }
 
     public ResultSearchFull fetchResultSearchFull(String sourceId) {

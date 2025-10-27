@@ -1,9 +1,9 @@
 package org.voyager.utils;
 
 import lombok.NonNull;
-import org.voyager.model.location.LocationForm;
-import org.voyager.model.result.ResultSearch;
-import org.voyager.model.result.ResultSearchFull;
+import org.voyager.commons.model.location.LocationForm;
+import org.voyager.commons.model.result.ResultSearch;
+import org.voyager.commons.model.result.ResultSearchFull;
 
 public class LocationMapperUtils {
     public static LocationForm toLocationForm(@NonNull ResultSearchFull resultSearchFull) {

@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -13,18 +12,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
-import org.voyager.model.*;
-import org.voyager.model.airport.Airport;
-import org.voyager.model.airport.AirportType;
-import org.voyager.model.country.Country;
-import org.voyager.model.flight.Flight;
-import org.voyager.model.location.*;
-import org.voyager.model.response.SearchResult;
-import org.voyager.model.result.ResultSearch;
-import org.voyager.model.result.ResultSearchFull;
-import org.voyager.model.route.PathAirline;
-import org.voyager.model.route.PathResponse;
-import org.voyager.model.route.Route;
+import org.voyager.commons.constants.ParameterNames;
+import org.voyager.commons.constants.Regex;
+import org.voyager.commons.model.*;
+import org.voyager.commons.model.AirportCodes;
+import org.voyager.commons.model.FlightDetails;
+import org.voyager.commons.model.Option;
+import org.voyager.commons.model.TripFilter;
+import org.voyager.commons.model.airline.Airline;
+import org.voyager.commons.model.airport.Airport;
+import org.voyager.commons.model.country.Country;
+import org.voyager.commons.model.flight.Flight;
+import org.voyager.commons.model.location.*;
+import org.voyager.commons.model.response.SearchResult;
+import org.voyager.commons.model.result.ResultSearch;
+import org.voyager.commons.model.result.ResultSearchFull;
+import org.voyager.commons.model.route.AirlinePath;
+import org.voyager.commons.model.route.PathResponse;
+import org.voyager.commons.model.route.Route;
+import org.voyager.commons.model.PathExclusions;
+import org.voyager.sdk.model.*;
 import org.voyager.service.*;
 import org.voyager.service.impl.*;
 import org.voyager.utils.LocationMapperUtils;
@@ -33,20 +40,15 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import static org.voyager.utils.ConstantsUtils.ALPHA2_CODE_REGEX;
-import static org.voyager.utils.ConstantsUtils.SOURCE_ID_PARAM_NAME;
-
 @Controller
 public class TripsController {
-    private static final TripFilter DEFAULT_TRIP_FILTER = TripFilter.AIRPORT;
-    private static final AirportFilter DEFAULT_AIRPORT_FILTER = AirportFilter.CIVIL;
-    private static final AirportFilter DEFAULT_CLOSER_FILTER = AirportFilter.CIVIL;
     private static final Logger LOGGER = LoggerFactory.getLogger(TripsController.class);
     private static LocationServiceAPI locationServiceAPI;
     private static FlightServiceAPI flightServiceAPI;
     private static CountryServiceAPI countryServiceAPI;
     private static SearchServiceAPI searchServiceAPI;
     private static AirportServiceAPI airportServiceAPI;
+    private static AirlineServiceAPI airlineServiceAPI;
     private static PathServiceAPI pathServiceAPI;
     private Source source;
 
@@ -60,6 +62,7 @@ public class TripsController {
         countryServiceAPI = voyagerService.getCountryServiceAPI();
         searchServiceAPI = voyagerService.getSearchServiceAPI();
         airportServiceAPI = voyagerService.getAirportServiceAPI();
+        airlineServiceAPI = voyagerService.getAirlineServiceAPI();
         pathServiceAPI = voyagerService.getPathServiceAPI();
     }
 
@@ -69,7 +72,7 @@ public class TripsController {
     }
 
     @GetMapping("/build-path")
-    public String buildPath(Model model, @RequestParam(name = SOURCE_ID_PARAM_NAME) String[] sourceIds,
+    public String buildPath(Model model, @RequestParam(name = ParameterNames.SOURCE_ID_PARAM_NAME) String[] sourceIds,
                             PathExclusions pathExclusions) {
         Location startLocation = null;
         Location endLocation = null;
@@ -81,8 +84,10 @@ public class TripsController {
             startAirportCodes = startLocation.getAirports();
             endAirportCodes = endLocation.getAirports();
             if (!startAirportCodes.isEmpty() && !endAirportCodes.isEmpty()) {
-                List<Airline> airlineListStart = airportServiceAPI.getAirlines(startAirportCodes);
-                List<Airline> airlineListEnd = airportServiceAPI.getAirlines(endAirportCodes);
+                List<Airline> airlineListStart = airlineServiceAPI.getAirlines(AirlineQuery.builder()
+                        .withIATAList(startAirportCodes).build());
+                List<Airline> airlineListEnd = airlineServiceAPI.getAirlines(AirlineQuery.builder()
+                        .withIATAList(endAirportCodes).build());
                 List<Option> airlineOptionList = Arrays.stream(Airline.values())
                         .sorted(Comparator.comparing(Airline::getDisplayText))
                         .map(airline -> buildAirlineOptionForSelectFiltered(airline,
@@ -99,36 +104,40 @@ public class TripsController {
     }
 
     @GetMapping("/path")
-    public String path(Model model, Integer startLocationId, Integer endLocationId,
-                       PathExclusions pathExclusions, String airlineSelection) {
+    public String path(Model model, Integer startLocationId, Integer endLocationId, String airlineSelection) {
         Location startLocation = locationServiceAPI.getLocation(startLocationId);
         Location endLocation = locationServiceAPI.getLocation(endLocationId);
         List<String> originList = startLocation.getAirports();
         List<String> destinationList = endLocation.getAirports();
         if (!originList.isEmpty() && !destinationList.isEmpty()) {
-            PathResponse<PathAirline> pathResponse;
-            if (airlineSelection.equals("ALL"))
-                pathResponse = pathServiceAPI.getPathAirlineList(originList, destinationList,
-                        pathExclusions.getAirports(), pathExclusions.getRouteIds());
-            else pathResponse = pathServiceAPI.getPathAirlineList(originList, destinationList,
-                    pathExclusions.getAirports(), pathExclusions.getRouteIds(), Airline.valueOf(airlineSelection));
-            List<PathAirline> pathAirlineList = pathResponse.getResponseList();
+            PathResponse<AirlinePath> pathResponse;
+            if (airlineSelection.equals("ALL")) {
+                AirlinePathQuery airlinePathQuery = AirlinePathQuery.builder().withOriginIATAList(originList)
+                        .withDestinationIATAList(destinationList).build();
+                pathResponse = pathServiceAPI.getPathAirlineList(airlinePathQuery);
+            } else {
+                AirlinePathQuery airlinePathQuery = AirlinePathQuery.builder().withOriginIATAList(originList)
+                        .withDestinationIATAList(destinationList)
+                        .withAirline(Airline.valueOf(airlineSelection)).build();
+                pathResponse = pathServiceAPI.getPathAirlineList(airlinePathQuery);
+            }
+            List<AirlinePath> airlinePathList = pathResponse.getResponseList();
             List<List<Airport>> pathAirportsList = new ArrayList<>();
-            if (!pathAirlineList.isEmpty()) {
-                for (PathAirline pathAirline : pathAirlineList) {
+            if (!airlinePathList.isEmpty()) {
+                for (AirlinePath airlinePath : airlinePathList) {
                     List<Airport> pathAirports = new ArrayList<>();
-                    Airport toAdd = airportServiceAPI.getAirport(pathAirline.getRouteList().get(0).getOrigin());
+                    Airport toAdd = airportServiceAPI.getAirport(airlinePath.getRouteList().get(0).getOrigin());
                     pathAirports.add(toAdd);
-                    for (Route route : pathAirline.getRouteList()) {
+                    for (Route route : airlinePath.getRouteList()) {
                         toAdd = airportServiceAPI.getAirport(route.getDestination());
-                        if (toAdd.getCountryCode().matches(ALPHA2_CODE_REGEX))
+                        if (toAdd.getCountryCode().matches(Regex.COUNTRY_CODE))
                             toAdd.setCountryCode(countryServiceAPI.getCountry(toAdd.getCountryCode()).getName());
                         pathAirports.add(toAdd);
                     }
                     pathAirportsList.add(pathAirports);
                 }
             }
-            model.addAttribute("pathAirlineList",pathAirlineList);
+            model.addAttribute("pathAirlineList",airlinePathList);
             model.addAttribute("pathAirportsList",pathAirportsList);
         }
         return "fragments/trips :: path-airline";
@@ -136,7 +145,8 @@ public class TripsController {
 
     @GetMapping("/lookup")
     public String lookup(Model model, String inputText, String excludeSourceId)  {
-        SearchResult<ResultSearch> searchResult = searchServiceAPI.search(inputText,10);
+        SearchQuery searchQuery = SearchQuery.builder().withQuery(inputText).withLimit(10).build();
+        SearchResult<ResultSearch> searchResult = searchServiceAPI.search(searchQuery);
         List<ResultSearch> lookupResults = searchResult.getResults();
         List<Option> optionList = new ArrayList<>(lookupResults.stream().map(resultSearch -> {
             String displayText = String.format("%s, %s | %s", resultSearch.getName(),
@@ -146,7 +156,7 @@ public class TripsController {
             return Option.builder().display(displayText).value(valueText).disabled(disabled).build();
         }).toList());
         model.addAttribute("optionList",optionList);
-        model.addAttribute("tripFilter",TripFilter.LOCATION);
+        model.addAttribute("tripFilter", TripFilter.LOCATION);
         return "fragments/options :: trip-input-options";
     }
 
@@ -215,7 +225,9 @@ public class TripsController {
     public String getFlights(Model model,Integer routeId,
                              String startZoneId, String endZoneId,
                              Airline airline, Integer pathIterIndex) {
-        List<Flight> flightList = flightServiceAPI.getFlights(routeId,airline);
+        FlightQuery flightQuery = FlightQuery.builder().withRouteIdList(List.of(routeId)).withActive(true)
+                .withAirline(airline).build();
+        List<Flight> flightList = flightServiceAPI.getFlights(flightQuery);
         flightList.forEach(flight -> {
             while (flight.getZonedDateTimeArrival().isBefore(flight.getZonedDateTimeDeparture())) {
                 flight.setZonedDateTimeArrival(flight.getZonedDateTimeArrival().plusDays(1));
@@ -294,7 +306,10 @@ public class TripsController {
         if (location == null) return null;
         Double longitude = location.getLongitude();
         Double latitude = location.getLatitude();
-        List<Airport> nearbyAirportList = airportServiceAPI.nearbyAirports(latitude,longitude,5,Arrays.asList(Airline.values()));
+        NearbyAirportQuery nearbyAirportQuery = NearbyAirportQuery.builder()
+                .withAirlineList(Arrays.asList(Airline.values()))
+                .withLongitude(longitude).withLatitude(latitude).withLimit(5).build();
+        List<Airport> nearbyAirportList = airportServiceAPI.nearbyAirports(nearbyAirportQuery);
         return nearbyAirportList.stream().map(nearbyAirport -> {
             Option option = buildAirportOptionForInput(nearbyAirport);
             option.setDisabled(location.getAirports().contains(nearbyAirport.getIata()));

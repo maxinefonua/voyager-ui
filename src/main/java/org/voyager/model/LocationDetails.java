@@ -1,9 +1,9 @@
-package org.voyager.model;
+package org.voyager.commons.model;
 
 import lombok.Builder;
 import lombok.Data;
-import org.voyager.model.airport.Airport;
-import org.voyager.model.location.Location;
+import org.voyager.commons.model.airport.Airport;
+import org.voyager.commons.model.location.Location;
 
 import java.util.List;
 

@@ -5,10 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import org.voyager.model.Airline;
-import org.voyager.model.AirportFilter;
-import org.voyager.model.airport.AirportType;
-import org.voyager.model.location.Status;
+import org.voyager.commons.model.airline.Airline;
+import org.voyager.commons.model.AirportFilter;
+import org.voyager.commons.model.airport.AirportType;
+import org.voyager.commons.model.location.Status;
 
 import java.util.Optional;
 

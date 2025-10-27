@@ -1,4 +1,4 @@
-package org.voyager.model.response;
+package org.voyager.commons.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

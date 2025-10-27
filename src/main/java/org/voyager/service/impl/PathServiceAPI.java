@@ -1,11 +1,9 @@
 package org.voyager.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.voyager.model.Airline;
-import org.voyager.model.route.PathAirline;
-import org.voyager.model.route.PathResponse;
-import org.voyager.service.PathService;
+import org.voyager.sdk.model.AirlinePathQuery;
+import org.voyager.commons.model.route.AirlinePath;
+import org.voyager.commons.model.route.PathResponse;
+import org.voyager.sdk.service.PathService;
 
 import java.util.List;
 
@@ -18,14 +16,7 @@ public class PathServiceAPI {
         this.pathService = pathService;
     }
 
-    public PathResponse<PathAirline> getPathAirlineList(List<String> originList, List<String> destinationList,
-                                                        List<String> excludeAirportList, List<Integer> excludeRouteIdList) {
-        return unwrapEither(this.pathService.getPathAirlineList(originList,destinationList,excludeAirportList,excludeRouteIdList));
-    }
-
-    public PathResponse<PathAirline> getPathAirlineList(List<String> originList, List<String> destinationList,
-                                                        List<String> excludeAirportList, List<Integer> excludeRouteIdList,
-                                                        Airline airline) {
-        return unwrapEither(this.pathService.getPathAirlineList(originList,destinationList,excludeAirportList,excludeRouteIdList,airline));
+    public PathResponse<AirlinePath> getPathAirlineList(AirlinePathQuery airlinePathQuery) {
+        return unwrapEither(this.pathService.getAirlinePathResponse(airlinePathQuery));
     }
 }

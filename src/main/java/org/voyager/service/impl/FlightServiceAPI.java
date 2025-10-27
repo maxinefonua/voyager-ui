@@ -1,8 +1,8 @@
 package org.voyager.service.impl;
 
-import org.voyager.model.Airline;
-import org.voyager.model.flight.Flight;
-import org.voyager.service.FlightService;
+import org.voyager.sdk.model.FlightQuery;
+import org.voyager.commons.model.flight.Flight;
+import org.voyager.sdk.service.FlightService;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class FlightServiceAPI {
         this.flightService = flightService;
     }
 
-    public List<Flight> getFlights(Integer routeId, Airline airline) {
-        return unwrapEither(flightService.getFlights(routeId,true,airline));
+    public List<Flight> getFlights(FlightQuery flightQuery) {
+        return unwrapEither(flightService.getFlights(flightQuery));
     }
 }
