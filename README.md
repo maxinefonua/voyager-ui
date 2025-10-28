@@ -1,6 +1,6 @@
 # <img src="/src/main/resources/static/images/logo.svg" width="30"> Voyager Web Application
 
-### https://voyagerapp.org
+### https://demo.voyagerapp.org
 A personal project I took on as a referesher of full-cycle development, and to optimize my flying benefits as an airline employee. Built entirely on open-sourced data and frameworks.
 
 ### The Problem
