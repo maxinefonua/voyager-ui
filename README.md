@@ -1,4 +1,6 @@
 # <img src="/src/main/resources/static/images/logo.svg" width="30"> Voyager Web Application
+
+### https://voyagerapp.org
 A personal project I took on as a referesher of full-cycle development, and to optimize my flying benefits as an airline employee. Built entirely on open-sourced data and frameworks.
 
 ### The Problem
@@ -24,6 +26,11 @@ Employees can benefit from this search tool where:
 - Voyager Commons: https://github.com/maxinefonua/voyager-commons
     - an SDK for API services
     - scripts and jars for data syncing
+- Voyager Tests: https://github.com/maxinefonua/voyager-tests
+  - functional tests built with JUnit 5
+  - an uber jar deployed and used for application deployments
+
+
 ### Tech Stack:
 - Geolocation Data
   - GeoNames - https://www.geonames.org.com/

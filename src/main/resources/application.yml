@@ -1,10 +1,13 @@
 voyager-api:
   protocol: http
-  host: localhost
-  port: 3000
-  maxThreads: 100
+  host: ${VOYAGER_HOST}
+  port: ${VOYAGER_API_PORT}
   authToken: ${VOYAGER_API_KEY}
-
+server:
+  port: ${VOYAGER_UI_PORT}
+  address: 0.0.0.0
+  error:
+    include-message: always
 spring:
   profiles:
     active: local
