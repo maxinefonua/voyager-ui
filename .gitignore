@@ -20,3 +20,6 @@ target/
 ##
 *.log
 .env_dev_ui
+
+# keystore for SSL
+src/main/resources/keystore.p12

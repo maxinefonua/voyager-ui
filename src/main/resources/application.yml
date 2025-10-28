@@ -1,10 +1,11 @@
 voyager-api:
   protocol: http
   host: ${VOYAGER_HOST}
-  port: 3000
+  port: ${VOYAGER_API_PORT}
   authToken: ${VOYAGER_API_KEY}
 server:
-  port: 8080
+  port: ${VOYAGER_UI_PORT}
+  address: 0.0.0.0
   error:
     include-message: always
 spring:
